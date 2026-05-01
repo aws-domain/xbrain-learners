@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Networking Basics — Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 999px;
+      padding: 0.25rem 0.9rem;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 1rem;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: #1e293b;
+      border-radius: 999px;
+      height: 6px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* Question card */
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .card.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .q-number {
+      font-size: 0.78rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .q-tag {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .tag-vpc    { background: #1d4ed820; color: #60a5fa; border: 1px solid #1d4ed840; }
+    .tag-gw     { background: #7c3aed20; color: #a78bfa; border: 1px solid #7c3aed40; }
+    .tag-sg     { background: #065f4620; color: #34d399; border: 1px solid #065f4640; }
+    .tag-route  { background: #92400e20; color: #fbbf24; border: 1px solid #92400e40; }
+    .tag-svc    { background: #83184320; color: #f472b6; border: 1px solid #83184340; }
+
+    .q-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1.6;
+      margin-bottom: 1.4rem;
+      color: #f1f5f9;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0f1117;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .option:hover:not(.disabled) {
+      border-color: #3b82f6;
+      background: #1e3a5f20;
+    }
+    .option .letter {
+      min-width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .option.correct {
+      border-color: #22c55e;
+      background: #14532d20;
+    }
+    .option.correct .letter { background: #22c55e; color: #fff; }
+    .option.wrong {
+      border-color: #ef4444;
+      background: #7f1d1d20;
+    }
+    .option.wrong .letter { background: #ef4444; color: #fff; }
+    .option.disabled { cursor: default; }
+
+    /* Explanation */
+    .explanation {
+      display: none;
+      margin-top: 1.2rem;
+      padding: 1rem;
+      border-radius: 10px;
+      background: #0f172a;
+      border-left: 3px solid #3b82f6;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .explanation.show { display: block; }
+    .explanation strong { color: #e2e8f0; }
+
+    /* Nav buttons */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.3; cursor: default; }
+
+    .btn-prev { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+    .btn-next { background: #3b82f6; color: #fff; }
+    .btn-submit { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; }
+
+    /* Result screen */
+    #result-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 800;
+      border: 4px solid;
+    }
+    .score-circle .score-label { font-size: 0.75rem; font-weight: 500; margin-top: 2px; }
+
+    .grade-S { border-color: #22c55e; color: #22c55e; }
+    .grade-A { border-color: #3b82f6; color: #3b82f6; }
+    .grade-B { border-color: #f59e0b; color: #f59e0b; }
+    .grade-C { border-color: #ef4444; color: #ef4444; }
+
+    #result-screen h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    #result-screen p  { color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+    .result-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .rb-item { text-align: center; }
+    .rb-item .rb-val { font-size: 1.5rem; font-weight: 700; }
+    .rb-item .rb-lbl { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+    .rb-correct .rb-val { color: #22c55e; }
+    .rb-wrong   .rb-val { color: #ef4444; }
+
+    .btn-retry {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.4rem; }
+      .q-text { font-size: 0.97rem; }
+      .option { font-size: 0.88rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">AWS Networking Basics</div>
+    <h1>Kiểm tra kiến thức</h1>
+    <p>15 câu · VPC · Gateways · Security Groups · NACLs · Route Tables</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <div id="quiz-wrap"></div>
+  <div id="result-screen"></div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    tag: "vpc", tagLabel: "VPC",
+    text: "CIDR block <code>10.0.0.0/24</code> cung cấp bao nhiêu địa chỉ IP?",
+    options: ["256", "512", "1024", "65,536"],
+    answer: 0,
+    explanation: "<strong>/24</strong> = 2^(32-24) = 256 địa chỉ. AWS reserve 5 IP đầu, còn lại 251 dùng được."
+  },
+  {
+    tag: "vpc", tagLabel: "VPC",
+    text: "AWS reserve bao nhiêu IP trong mỗi subnet và để làm gì?",
+    options: [
+      "3 IP — network, broadcast, router",
+      "5 IP — network address, VPC router, DNS, future use, broadcast",
+      "2 IP — network và broadcast",
+      "4 IP — router, DNS, NAT, broadcast"
+    ],
+    answer: 1,
+    explanation: "AWS reserve đúng <strong>5 IP</strong>: .0 (network), .1 (VPC router), .2 (DNS), .3 (future), .255 (broadcast)."
+  },
+  {
+    tag: "vpc", tagLabel: "VPC",
+    text: "Điểm khác biệt chính giữa <em>Private Subnet</em> và <em>Isolated Subnet</em> là gì?",
+    options: [
+      "Private subnet dùng cho DB, Isolated subnet dùng cho app",
+      "Private subnet có route ra internet qua NAT GW, Isolated subnet không có route ra ngoài",
+      "Isolated subnet có public IP, Private subnet thì không",
+      "Không có sự khác biệt, chỉ là tên gọi khác nhau"
+    ],
+    answer: 1,
+    explanation: "<strong>Private subnet</strong> có route <code>0.0.0.0/0 → NAT Gateway</code> (outbound internet). <strong>Isolated subnet</strong> chỉ có route local — dùng cho DB tier, không ra ngoài được."
+  },
+  {
+    tag: "gw", tagLabel: "Gateways",
+    text: "NAT Gateway được đặt ở subnet nào và phục vụ subnet nào?",
+    options: [
+      "Đặt ở private subnet, phục vụ public subnet",
+      "Đặt ở isolated subnet, phục vụ private subnet",
+      "Đặt ở public subnet, phục vụ private subnet",
+      "Đặt ở bất kỳ subnet nào, phục vụ toàn VPC"
+    ],
+    answer: 2,
+    explanation: "NAT Gateway <strong>đặt ở public subnet</strong> (cần Elastic IP + IGW). EC2/Lambda trong <strong>private subnet</strong> gửi traffic → NAT GW → IGW → Internet."
+  },
+  {
+    tag: "gw", tagLabel: "Gateways",
+    text: "Lợi ích chính của S3 Gateway Endpoint so với dùng NAT Gateway để truy cập S3 là gì?",
+    options: [
+      "Tốc độ nhanh hơn vì dùng đường truyền riêng",
+      "Không tốn phí và traffic không đi qua internet",
+      "Hỗ trợ nhiều AWS service hơn NAT Gateway",
+      "Dễ cấu hình hơn, không cần thay đổi route table"
+    ],
+    answer: 1,
+    explanation: "S3 Gateway Endpoint <strong>miễn phí</strong> và traffic đi qua AWS internal network — không ra internet, không tốn NAT Gateway data processing fee. Cần thêm route vào route table."
+  },
+  {
+    tag: "gw", tagLabel: "Gateways",
+    text: "Bạn cần kết nối on-premises data center với AWS qua đường truyền vật lý riêng (không qua internet). Service nào phù hợp?",
+    options: ["AWS VPN", "AWS Direct Connect", "VPC Peering", "AWS Transit Gateway"],
+    answer: 1,
+    explanation: "<strong>AWS Direct Connect</strong> cung cấp kết nối vật lý dedicated từ on-premises → AWS. <strong>AWS VPN</strong> cũng kết nối on-premises nhưng qua internet (encrypted tunnel)."
+  },
+  {
+    tag: "route", tagLabel: "Route Tables",
+    text: "Một private subnet cần truy cập S3 mà không qua internet. Route table cần thêm entry nào?",
+    options: [
+      "<code>0.0.0.0/0 → igw-xxx</code>",
+      "<code>10.0.0.0/16 → local</code>",
+      "<code>pl-xxxxxxxx (S3 prefix list) → vpce-xxx</code>",
+      "<code>0.0.0.0/0 → nat-xxx</code>"
+    ],
+    answer: 2,
+    explanation: "S3 Gateway Endpoint dùng <strong>prefix list</strong> của S3 (<code>pl-xxxxxxxx</code>) làm destination, target là VPC Endpoint ID. Traffic đi qua AWS internal network, không qua NAT hay IGW."
+  },
+  {
+    tag: "sg", tagLabel: "SG vs NACL",
+    text: "Security Group khác Network ACL ở điểm nào về tính stateful/stateless?",
+    options: [
+      "Cả hai đều stateful",
+      "SG stateless, NACL stateful",
+      "SG stateful, NACL stateless",
+      "Cả hai đều stateless"
+    ],
+    answer: 2,
+    explanation: "<strong>SG stateful</strong>: allow inbound → response tự động được allow về. <strong>NACL stateless</strong>: phải tự tạo rule outbound cho ephemeral ports (1024–65535) để response về được."
+  },
+  {
+    tag: "sg", tagLabel: "SG vs NACL",
+    text: "Bạn cần block một IP cụ thể (<code>203.0.113.5</code>) không cho vào subnet. Dùng gì?",
+    options: [
+      "Security Group — thêm Deny rule cho IP đó",
+      "Network ACL — thêm Deny rule cho IP đó",
+      "Route Table — xóa route đến IP đó",
+      "IAM Policy — deny access từ IP đó"
+    ],
+    answer: 1,
+    explanation: "<strong>Security Group chỉ có Allow rule</strong>, không có Deny. Để block IP cụ thể phải dùng <strong>Network ACL</strong> vì NACL hỗ trợ cả Allow lẫn Deny rule."
+  },
+  {
+    tag: "sg", tagLabel: "SG vs NACL",
+    text: "NACL rule số 100 Allow port 443, rule số 200 Deny port 443 từ cùng IP. Kết quả là gì?",
+    options: [
+      "Deny — rule Deny luôn ưu tiên hơn Allow",
+      "Allow — vì rule 100 được evaluate trước và match",
+      "Deny — vì cả 2 rule đều match, Deny thắng",
+      "Error — không thể có 2 rule conflict nhau"
+    ],
+    answer: 1,
+    explanation: "NACL evaluate rules <strong>theo thứ tự số từ thấp đến cao</strong>, dừng ngay khi match. Rule 100 (Allow) được hit trước → traffic được Allow. Rule 200 không bao giờ được xét."
+  },
+  {
+    tag: "sg", tagLabel: "SG vs NACL",
+    text: "Security Group áp dụng ở cấp độ nào, còn NACL áp dụng ở cấp độ nào?",
+    options: [
+      "SG: VPC level — NACL: Subnet level",
+      "SG: Instance/ENI level — NACL: Subnet level",
+      "SG: Subnet level — NACL: Instance level",
+      "SG: AZ level — NACL: Region level"
+    ],
+    answer: 1,
+    explanation: "<strong>SG</strong> gắn vào EC2 instance hoặc ENI (Elastic Network Interface). <strong>NACL</strong> gắn vào subnet — áp dụng cho tất cả traffic vào/ra subnet đó."
+  },
+  {
+    tag: "vpc", tagLabel: "VPC",
+    text: "Tại sao Lambda function cần được đặt trong VPC khi làm việc với RDS?",
+    options: [
+      "Lambda mặc định không có internet access",
+      "RDS yêu cầu Lambda phải ở cùng AZ",
+      "Lambda mặc định chạy ngoài VPC, không reach được RDS trong private subnet",
+      "VPC giúp Lambda chạy nhanh hơn"
+    ],
+    answer: 2,
+    explanation: "Mặc định Lambda chạy trong <strong>AWS-managed VPC</strong> (không phải VPC của bạn), không thể reach private resources. Khi attach Lambda vào VPC của bạn, nó được cấp ENI trong private subnet và có thể kết nối RDS."
+  },
+  {
+    tag: "gw", tagLabel: "Gateways",
+    text: "Bạn có 5 VPC cần kết nối với nhau và với on-premises. Giải pháp nào tốt hơn VPC Peering?",
+    options: [
+      "Tạo Internet Gateway cho mỗi VPC",
+      "AWS Transit Gateway — hub-and-spoke model",
+      "Tạo NAT Gateway ở mỗi VPC",
+      "AWS Direct Connect cho từng VPC"
+    ],
+    answer: 1,
+    explanation: "<strong>AWS Transit Gateway</strong> hoạt động như hub trung tâm — mỗi VPC chỉ cần 1 attachment vào TGW thay vì tạo peering mesh (n*(n-1)/2 connections). Cũng hỗ trợ on-premises qua Direct Connect/VPN."
+  },
+  {
+    tag: "route", tagLabel: "Route Tables",
+    text: "Điều gì xảy ra nếu một subnet không được associate với bất kỳ route table nào?",
+    options: [
+      "Subnet bị isolated hoàn toàn, không có traffic",
+      "Subnet tự động dùng main route table của VPC",
+      "AWS tự tạo route table mới cho subnet đó",
+      "Subnet chỉ có thể nhận inbound traffic"
+    ],
+    answer: 1,
+    explanation: "Mỗi VPC có một <strong>main route table</strong>. Subnet không được associate riêng sẽ tự động dùng main route table. Best practice: tạo custom route table và associate rõ ràng."
+  },
+  {
+    tag: "svc", tagLabel: "Services",
+    text: "Trong VPC 3-tier cho W3 project, Security Group của RDS nên được cấu hình như thế nào?",
+    options: [
+      "Allow inbound từ <code>0.0.0.0/0</code> port 3306 để dễ debug",
+      "Allow inbound từ Lambda Security Group ID port 3306 — không allow IP range",
+      "Allow inbound từ toàn bộ private subnet CIDR port 3306",
+      "Không cần SG vì RDS trong isolated subnet đã an toàn"
+    ],
+    answer: 1,
+    explanation: "Best practice: RDS SG chỉ allow inbound từ <strong>Lambda SG ID</strong> (không phải CIDR). Nếu Lambda SG thay đổi IP, rule vẫn đúng. Dùng CIDR rộng hoặc <code>0.0.0.0/0</code> là security risk."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let submitted = new Array(questions.length).fill(false);
+
+const quizWrap = document.getElementById('quiz-wrap');
+const resultScreen = document.getElementById('result-screen');
+const progressBar = document.getElementById('progress-bar');
+
+function tagClass(tag) {
+  return { vpc: 'tag-vpc', gw: 'tag-gw', sg: 'tag-sg', route: 'tag-route', svc: 'tag-svc' }[tag] || 'tag-vpc';
+}
+
+function renderAll() {
+  quizWrap.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'card' + (qi === current ? ' active' : '');
+    card.id = 'card-' + qi;
+
+    const letters = ['A', 'B', 'C', 'D'];
+    const optionsHTML = q.options.map((opt, oi) => `
+      <div class="option ${submitted[qi] ? 'disabled' : ''} ${submitted[qi] && oi === q.answer ? 'correct' : ''} ${submitted[qi] && answers[qi] === oi && oi !== q.answer ? 'wrong' : ''}"
+           onclick="selectOption(${qi}, ${oi})">
+        <span class="letter">${letters[oi]}</span>
+        <span>${opt}</span>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="q-meta">
+        <span class="q-number">Câu ${qi + 1} / ${questions.length}</span>
+        <span class="q-tag ${tagClass(q.tag)}">${q.tagLabel}</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="explanation ${submitted[qi] ? 'show' : ''}">
+        💡 ${q.explanation}
+      </div>
+      <div class="nav">
+        <button class="btn-prev" onclick="navigate(-1)" ${qi === 0 ? 'disabled' : ''}>← Trước</button>
+        ${qi < questions.length - 1
+          ? `<button class="btn-next" onclick="navigate(1)">Tiếp →</button>`
+          : `<button class="btn-submit" onclick="showResult()">Xem kết quả 🎯</button>`
+        }
+      </div>
+    `;
+    quizWrap.appendChild(card);
+  });
+  updateProgress();
+}
+
+function selectOption(qi, oi) {
+  if (submitted[qi]) return;
+  answers[qi] = oi;
+  submitted[qi] = true;
+  renderAll();
+  showCard(qi);
+}
+
+function navigate(dir) {
+  current = Math.max(0, Math.min(questions.length - 1, current + dir));
+  showCard(current);
+  updateProgress();
+}
+
+function showCard(idx) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  const target = document.getElementById('card-' + idx);
+  if (target) target.classList.add('active');
+  current = idx;
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = submitted.filter(Boolean).length;
+  progressBar.style.width = (answered / questions.length * 100) + '%';
+}
+
+function showResult() {
+  const correct = questions.filter((q, i) => answers[i] === q.answer).length;
+  const pct = Math.round(correct / questions.length * 100);
+
+  let grade, gradeClass, msg;
+  if (pct >= 93)      { grade = 'S'; gradeClass = 'grade-S'; msg = 'Xuất sắc! Bạn nắm vững AWS Networking. 🚀'; }
+  else if (pct >= 80) { grade = 'A'; gradeClass = 'grade-A'; msg = 'Tốt lắm! Ôn lại phần còn sai là hoàn hảo.'; }
+  else if (pct >= 60) { grade = 'B'; gradeClass = 'grade-B'; msg = 'Khá ổn. Đọc lại phần Gateways và SG vs NACL nhé.'; }
+  else                { grade = 'C'; gradeClass = 'grade-C'; msg = 'Cần ôn lại file summary trước khi làm lại.'; }
+
+  quizWrap.style.display = 'none';
+  resultScreen.style.display = 'block';
+  resultScreen.innerHTML = `
+    <div class="score-circle ${gradeClass}">
+      <span>${pct}%</span>
+      <span class="score-label">Grade ${grade}</span>
+    </div>
+    <h2>${msg}</h2>
+    <p>${correct} / ${questions.length} câu đúng</p>
+    <div class="result-breakdown">
+      <div class="rb-item rb-correct">
+        <div class="rb-val">${correct}</div>
+        <div class="rb-lbl">Đúng</div>
+      </div>
+      <div class="rb-item rb-wrong">
+        <div class="rb-val">${questions.length - correct}</div>
+        <div class="rb-lbl">Sai</div>
+      </div>
+      <div class="rb-item">
+        <div class="rb-val" style="color:#94a3b8">${questions.length}</div>
+        <div class="rb-lbl">Tổng câu</div>
+      </div>
+    </div>
+    <button class="btn-retry" onclick="retry()">Làm lại từ đầu 🔄</button>
+  `;
+}
+
+function retry() {
+  answers = new Array(questions.length).fill(null);
+  submitted = new Array(questions.length).fill(false);
+  current = 0;
+  quizWrap.style.display = 'block';
+  resultScreen.style.display = 'none';
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>

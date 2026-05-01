@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — AWS Networking Gateways</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    .progress-bar-wrap {
+      background: #1e2330;
+      border-radius: 99px;
+      height: 6px;
+      margin-bottom: 32px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .question-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3448;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .question-card.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .question-meta {
+      font-size: 0.78rem;
+      color: #6366f1;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #f1f5f9;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1.5px solid #2d3448;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      background: #0f1117;
+    }
+
+    .option:hover:not(.disabled) {
+      border-color: #6366f1;
+      background: #1e2330;
+    }
+
+    .option-letter {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      border-radius: 50%;
+      background: #2d3448;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94a3b8;
+      transition: all 0.18s ease;
+    }
+
+    .option-text {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    .option.correct {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .option.correct .option-letter {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .option.wrong {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .option.wrong .option-letter {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .option.disabled { cursor: default; }
+
+    .explanation {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: #0f1117;
+      border-left: 3px solid #6366f1;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      color: #94a3b8;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .explanation.show { display: block; }
+    .explanation strong { color: #c7d2fe; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 28px;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+    }
+
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+    .btn-ghost {
+      background: transparent;
+      color: #94a3b8;
+      border: 1.5px solid #2d3448;
+    }
+
+    .btn-ghost:hover { border-color: #6366f1; color: #c7d2fe; }
+
+    .score-counter {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Result screen */
+    .result-screen {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      background: #1a1f2e;
+      border: 1px solid #2d3448;
+      border-radius: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .result-screen.show { display: block; }
+
+    .result-emoji { font-size: 4rem; margin-bottom: 16px; }
+
+    .result-score {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .result-label {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-bottom: 32px;
+    }
+
+    .result-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 36px;
+    }
+
+    .breakdown-item { text-align: center; }
+
+    .breakdown-num {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .breakdown-num.correct-num { color: #22c55e; }
+    .breakdown-num.wrong-num   { color: #ef4444; }
+
+    .breakdown-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .btn-restart {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      padding: 12px 32px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.18s;
+    }
+
+    .btn-restart:hover { opacity: 0.88; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>AWS Networking Gateways</h1>
+    <p>20 câu hỏi · Kiểm tra kiến thức sau khi học</p>
+  </header>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div id="quizArea"></div>
+
+  <div class="result-screen" id="resultScreen">
+    <div class="result-emoji" id="resultEmoji"></div>
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <div class="result-breakdown">
+      <div class="breakdown-item">
+        <div class="breakdown-num correct-num" id="correctCount"></div>
+        <div class="breakdown-label">Đúng</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-num wrong-num" id="wrongCount"></div>
+        <div class="breakdown-label">Sai</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-num" style="color:#6366f1" id="totalCount"></div>
+        <div class="breakdown-label">Tổng</div>
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">Làm lại từ đầu</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Internet Gateway (IGW) hỗ trợ traffic theo hướng nào?",
+    options: [
+      "Chỉ outbound (từ VPC ra internet)",
+      "Chỉ inbound (từ internet vào VPC)",
+      "2 chiều — inbound và outbound",
+      "Chỉ internal VPC traffic"
+    ],
+    answer: 2,
+    explanation: "<strong>IGW hỗ trợ 2 chiều</strong> — cho phép cả inbound lẫn outbound giữa VPC và internet. Resource cần có public IP hoặc Elastic IP để nhận inbound traffic."
+  },
+  {
+    q: "NAT Gateway phải được đặt ở loại subnet nào?",
+    options: [
+      "Isolated subnet",
+      "Private subnet",
+      "Public subnet",
+      "Bất kỳ subnet nào trong VPC"
+    ],
+    answer: 2,
+    explanation: "<strong>NAT Gateway phải đặt ở public subnet</strong> — vì nó cần IGW để forward traffic ra internet. Nếu đặt ở private subnet, NAT GW không có đường ra internet."
+  },
+  {
+    q: "VPC A peer với VPC B, VPC B peer với VPC C. VPC A có thể reach VPC C không?",
+    options: [
+      "Có, tự động qua VPC B",
+      "Có, nếu thêm route tương ứng",
+      "Không — VPC Peering không transitive",
+      "Có, nếu cùng Region"
+    ],
+    answer: 2,
+    explanation: "<strong>VPC Peering không transitive</strong>. A↔B và B↔C không có nghĩa A reach được C. Phải tạo peering A↔C riêng, hoặc dùng Transit Gateway."
+  },
+  {
+    q: "Thành phần nào đại diện cho thiết bị on-premises trong cấu hình Site-to-Site VPN?",
+    options: [
+      "Virtual Private Gateway (VGW)",
+      "Customer Gateway (CGW)",
+      "Transit Gateway (TGW)",
+      "Direct Connect Gateway"
+    ],
+    answer: 1,
+    explanation: "<strong>Customer Gateway (CGW)</strong> là AWS resource đại diện cho thiết bị on-premises (router/firewall). VGW là AWS-side endpoint. CGW chứa public IP và BGP ASN của thiết bị on-premises."
+  },
+  {
+    q: "Điểm khác biệt chính giữa AWS Site-to-Site VPN và AWS Direct Connect là gì?",
+    options: [
+      "VPN chỉ dùng được trong cùng Region, Direct Connect dùng được cross-region",
+      "VPN đi qua internet (encrypted), Direct Connect đi qua đường dây vật lý riêng",
+      "VPN nhanh hơn và ổn định hơn Direct Connect",
+      "Direct Connect miễn phí, VPN tính phí theo giờ"
+    ],
+    answer: 1,
+    explanation: "<strong>VPN đi qua internet</strong> (IPSec encrypted tunnel) — nhanh setup, rẻ, nhưng latency không ổn định. <strong>Direct Connect đi qua đường dây vật lý riêng</strong> — latency thấp ổn định, bandwidth lớn, nhưng setup lâu và tốn kém."
+  },
+  {
+    q: "Direct Connect Gateway giải quyết vấn đề gì?",
+    options: [
+      "Tăng bandwidth của Direct Connect connection",
+      "Cho phép 1 Direct Connect connection reach nhiều VPC ở nhiều Region",
+      "Mã hóa traffic trên Direct Connect",
+      "Kết nối 2 Direct Connect locations với nhau"
+    ],
+    answer: 1,
+    explanation: "<strong>Direct Connect Gateway</strong> cho phép 1 Direct Connect connection kết nối vào nhiều VPC ở nhiều Region — thay vì phải tạo VGW riêng cho từng VPC."
+  },
+  {
+    q: "Trước khi có Transit Gateway, vấn đề lớn nhất khi kết nối nhiều VPC với nhau là gì?",
+    options: [
+      "VPC Peering không hỗ trợ cross-region",
+      "VPC Peering không transitive, tạo ra mesh phức tạp khi có nhiều VPC",
+      "VPC Peering không hỗ trợ IPv6",
+      "VPC Peering chỉ cho phép tối đa 5 connections"
+    ],
+    answer: 1,
+    explanation: "VPC Peering <strong>không transitive</strong> — 5 VPC cần 10 peering connections, khó quản lý và scale. Transit Gateway giải quyết bằng cách làm hub trung tâm."
+  },
+  {
+    q: "Trong Transit Gateway, 'Association' của một attachment có nghĩa là gì?",
+    options: [
+      "Attachment tự động thêm routes vào TGW route table",
+      "Attachment được gắn vào TGW route table để lookup khi forward traffic",
+      "Attachment được kết nối vật lý với TGW",
+      "Attachment được phép gửi traffic đến tất cả VPC"
+    ],
+    answer: 1,
+    explanation: "<strong>Association</strong> quyết định attachment dùng TGW route table nào để lookup khi cần forward traffic. <strong>Propagation</strong> (khác với Association) là attachment tự động thêm routes của nó vào route table."
+  },
+  {
+    q: "Khi Transit Gateway có nhiều path đến cùng destination, path nào được ưu tiên?",
+    options: [
+      "VPN attachment luôn được ưu tiên nhất",
+      "Direct Connect được ưu tiên hơn VPC attachment",
+      "Longest prefix match → Static routes → VPC attachment → Direct Connect → VPN",
+      "Propagated routes được ưu tiên hơn static routes"
+    ],
+    answer: 2,
+    explanation: "TGW path selection: <strong>1. Longest prefix match</strong> → <strong>2. Static routes</strong> (ưu tiên hơn propagated) → <strong>3. VPC attachment</strong> → <strong>4. Direct Connect</strong> → <strong>5. VPN</strong>."
+  },
+  {
+    q: "Transit Gateway Peering dùng để làm gì?",
+    options: [
+      "Kết nối VPC với on-premises qua TGW",
+      "Kết nối 2 TGW ở khác Region với nhau",
+      "Tăng bandwidth của TGW",
+      "Kết nối TGW với Direct Connect Gateway"
+    ],
+    answer: 1,
+    explanation: "<strong>TGW Peering</strong> kết nối 2 Transit Gateway ở khác Region. Traffic đi qua AWS backbone, không qua internet. Lưu ý: phải tự thêm static routes — không có route propagation qua TGW peering."
+  },
+  {
+    q: "Virtual Private Gateway (VGW) có thể gắn vào bao nhiêu VPC?",
+    options: [
+      "Không giới hạn",
+      "Tối đa 5 VPC",
+      "Chỉ 1 VPC",
+      "Tối đa 10 VPC"
+    ],
+    answer: 2,
+    explanation: "<strong>VGW gắn vào 1 VPC duy nhất</strong>. Đây là hạn chế của VGW so với Transit Gateway — TGW có thể kết nối với nhiều VPC cùng lúc."
+  },
+  {
+    q: "Ingress Routing trên Internet Gateway dùng để làm gì?",
+    options: [
+      "Route traffic từ private subnet ra internet",
+      "Route inbound traffic từ internet qua một appliance (firewall/IDS) trước khi vào EC2",
+      "Tăng tốc độ inbound traffic",
+      "Block inbound traffic từ các IP cụ thể"
+    ],
+    answer: 1,
+    explanation: "<strong>IGW Ingress Routing</strong> cho phép route inbound traffic từ internet đến một security appliance (firewall, IDS/IPS) trước khi traffic đến EC2. Cấu hình qua edge route table của IGW."
+  },
+  {
+    q: "AWS Outposts khác với AWS Region thông thường ở điểm nào?",
+    options: [
+      "Outposts không hỗ trợ VPC và Security Groups",
+      "Outposts là AWS rack đặt tại data center của khách hàng",
+      "Outposts chỉ hỗ trợ storage, không hỗ trợ compute",
+      "Outposts không kết nối được với AWS Region"
+    ],
+    answer: 1,
+    explanation: "<strong>AWS Outposts</strong> là AWS rack vật lý đặt tại data center của khách hàng — chạy AWS infrastructure on-premises. Vẫn dùng được VPC, subnet, SG, route table như Region thông thường."
+  },
+  {
+    q: "Local Gateway (LGW) trong AWS Outposts có chức năng gì?",
+    options: [
+      "Kết nối Outpost với AWS Region qua internet",
+      "Cho phép traffic từ Outpost ra on-premises LAN",
+      "Thay thế Internet Gateway cho Outpost",
+      "Kết nối nhiều Outpost với nhau"
+    ],
+    answer: 1,
+    explanation: "<strong>Local Gateway (LGW)</strong> là gateway đặc biệt cho Outpost — cho phép traffic từ Outpost ra on-premises LAN (local network). Khác với IGW dùng để ra internet."
+  },
+  {
+    q: "Khi nào nên dùng Transit Gateway thay vì VPC Peering?",
+    options: [
+      "Khi chỉ cần kết nối 2 VPC trong cùng account",
+      "Khi cần kết nối nhiều VPC và on-premises, cần hub trung tâm dễ quản lý",
+      "Khi cần kết nối VPC với S3",
+      "Khi cần bandwidth cao hơn VPC Peering"
+    ],
+    answer: 1,
+    explanation: "Dùng <strong>Transit Gateway</strong> khi có nhiều VPC cần communicate với nhau và với on-premises — TGW là hub trung tâm, tránh mesh phức tạp của VPC Peering. VPC Peering phù hợp khi chỉ có 2–3 VPC, kết nối đơn giản."
+  },
+  {
+    q: "Site-to-Site VPN tạo bao nhiêu tunnel và tại sao?",
+    options: [
+      "1 tunnel — đủ cho hầu hết workload",
+      "2 tunnels — cho redundancy (active/passive)",
+      "3 tunnels — 1 primary, 2 backup",
+      "Tùy chọn, không có số cố định"
+    ],
+    answer: 1,
+    explanation: "Site-to-Site VPN tạo <strong>2 tunnels</strong> cho redundancy (active/passive). Nếu 1 tunnel fail, tunnel còn lại tiếp tục hoạt động — đảm bảo high availability cho kết nối hybrid."
+  },
+  {
+    q: "Route propagation trên Virtual Private Gateway (VGW) có tác dụng gì?",
+    options: [
+      "Tự động tạo VPN tunnel mới khi tunnel cũ fail",
+      "Tự động thêm on-premises routes vào route table của VPC",
+      "Propagate routes từ VPC này sang VPC khác",
+      "Tự động update bandwidth của VPN connection"
+    ],
+    answer: 1,
+    explanation: "<strong>Route propagation</strong> trên VGW tự động thêm on-premises IP ranges vào route table của VPC — thay vì phải tự thêm static routes thủ công mỗi khi on-premises network thay đổi."
+  },
+  {
+    q: "TGW Connect attachment dùng để kết nối với loại thiết bị nào?",
+    options: [
+      "AWS Direct Connect locations",
+      "SD-WAN appliances và third-party network appliances qua GRE tunnel",
+      "AWS S3 và DynamoDB",
+      "Các VPC trong cùng account"
+    ],
+    answer: 1,
+    explanation: "<strong>TGW Connect attachment</strong> dùng để kết nối SD-WAN appliances hoặc third-party network appliances (Cisco, Palo Alto...) vào TGW qua GRE tunnel — phổ biến trong enterprise networking."
+  },
+  {
+    q: "Để kết nối on-premises với nhiều VPC ở nhiều Region qua 1 Direct Connect connection, cần dùng gì?",
+    options: [
+      "Tạo VGW riêng cho từng VPC",
+      "Direct Connect Gateway kết hợp với VGW hoặc TGW",
+      "Tạo nhiều Direct Connect connections",
+      "Dùng VPC Peering giữa các VPC"
+    ],
+    answer: 1,
+    explanation: "<strong>Direct Connect Gateway</strong> cho phép 1 Direct Connect connection reach nhiều VPC ở nhiều Region. Kết hợp với TGW thì 1 DX connection có thể reach tất cả VPC qua TGW — không cần VGW riêng cho từng VPC."
+  },
+  {
+    q: "Subnet trong AWS có thể span nhiều Availability Zone không?",
+    options: [
+      "Có, nếu VPC đủ lớn (ít nhất /16)",
+      "Có, nhưng chỉ trong cùng Region",
+      "Không — mỗi subnet chỉ nằm trong 1 AZ duy nhất",
+      "Có, nếu bật tính năng Multi-AZ subnet"
+    ],
+    answer: 2,
+    explanation: "<strong>Mỗi subnet chỉ nằm trong 1 AZ duy nhất</strong> — không thể span nhiều AZ. Để high availability, cần tạo subnet riêng ở mỗi AZ (ví dụ: public-1a, public-1b, private-1a, private-1b)."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = new Array(questions.length).fill(false);
+let selectedAnswers = new Array(questions.length).fill(null);
+
+function buildQuiz() {
+  const area = document.getElementById('quizArea');
+  area.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+    const optionsHTML = q.options.map((opt, j) => `
+      <div class="option" id="opt-${i}-${j}" onclick="selectOption(${i}, ${j})">
+        <div class="option-letter">${letters[j]}</div>
+        <div class="option-text">${opt}</div>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="question-meta">Câu ${i + 1} / ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="explanation" id="exp-${i}">💡 ${q.explanation}</div>
+    `;
+
+    area.appendChild(card);
+  });
+
+  const nav = document.createElement('div');
+  nav.className = 'nav';
+  nav.id = 'navBar';
+  nav.innerHTML = `
+    <button class="btn btn-ghost" id="btnPrev" onclick="navigate(-1)" disabled>← Trước</button>
+    <span class="score-counter" id="scoreCounter">0 / ${questions.length} đúng</span>
+    <button class="btn btn-primary" id="btnNext" onclick="navigate(1)" disabled>Tiếp →</button>
+  `;
+  area.appendChild(nav);
+
+  updateProgress();
+}
+
+function selectOption(qIdx, optIdx) {
+  if (answered[qIdx]) return;
+
+  answered[qIdx] = true;
+  selectedAnswers[qIdx] = optIdx;
+
+  const q = questions[qIdx];
+  const letters = ['A', 'B', 'C', 'D'];
+
+  q.options.forEach((_, j) => {
+    const el = document.getElementById(`opt-${qIdx}-${j}`);
+    el.classList.add('disabled');
+    if (j === q.answer) el.classList.add('correct');
+    else if (j === optIdx) el.classList.add('wrong');
+  });
+
+  if (optIdx === q.answer) score++;
+
+  document.getElementById(`exp-${qIdx}`).classList.add('show');
+  document.getElementById('scoreCounter').textContent = `${score} / ${questions.length} đúng`;
+  document.getElementById('btnNext').disabled = false;
+  updateProgress();
+}
+
+function navigate(dir) {
+  const cards = document.querySelectorAll('.question-card');
+  cards[current].classList.remove('active');
+  current += dir;
+
+  if (current >= questions.length) {
+    showResult();
+    return;
+  }
+
+  cards[current].classList.add('active');
+
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = !answered[current];
+
+  if (current === questions.length - 1 && answered[current]) {
+    document.getElementById('btnNext').textContent = 'Xem kết quả →';
+  } else {
+    document.getElementById('btnNext').textContent = 'Tiếp →';
+  }
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = ((current + 1) / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  const result = document.getElementById('resultScreen');
+  result.classList.add('show');
+
+  const pct = Math.round((score / questions.length) * 100);
+  let emoji, label;
+
+  if (pct >= 90)      { emoji = '🏆'; label = 'Xuất sắc! Bạn nắm vững kiến thức rồi.'; }
+  else if (pct >= 75) { emoji = '🎯'; label = 'Tốt lắm! Ôn lại vài điểm nhỏ là hoàn hảo.'; }
+  else if (pct >= 60) { emoji = '📚'; label = 'Khá ổn. Đọc lại phần bạn còn nhầm nhé.'; }
+  else                { emoji = '💪'; label = 'Cần ôn thêm. Đọc lại file summary và thử lại!'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultScore').textContent = pct + '%';
+  document.getElementById('resultLabel').textContent = label;
+  document.getElementById('correctCount').textContent = score;
+  document.getElementById('wrongCount').textContent = questions.length - score;
+  document.getElementById('totalCount').textContent = questions.length;
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  answered = new Array(questions.length).fill(false);
+  selectedAnswers = new Array(questions.length).fill(null);
+
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('quizArea').style.display = 'block';
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

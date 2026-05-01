@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Quiz — Serverless & IaC</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh;padding:32px 16px}
+    .container{max-width:760px;margin:0 auto}
+    header{margin-bottom:40px;text-align:center}
+    header h1{font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:8px}
+    header p{color:#94a3b8;font-size:.95rem}
+    .progress-bar-wrap{background:#1e2330;border-radius:99px;height:6px;margin-bottom:32px;overflow:hidden}
+    .progress-bar{height:100%;background:linear-gradient(90deg,#a855f7,#06b6d4);border-radius:99px;transition:width .4s ease;width:0%}
+    .question-card{background:#1a1f2e;border:1px solid #2d3448;border-radius:16px;padding:28px;margin-bottom:20px;display:none;animation:fadeIn .3s ease}
+    .question-card.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .question-meta{font-size:.78rem;color:#a855f7;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+    .question-text{font-size:1.05rem;font-weight:500;color:#f1f5f9;line-height:1.6;margin-bottom:22px}
+    .options{display:flex;flex-direction:column;gap:10px}
+    .option{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;border:1.5px solid #2d3448;cursor:pointer;transition:all .18s ease;background:#0f1117}
+    .option:hover:not(.disabled){border-color:#a855f7;background:#1e2330}
+    .option-letter{width:26px;height:26px;min-width:26px;border-radius:50%;background:#2d3448;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#94a3b8;transition:all .18s ease}
+    .option-text{font-size:.95rem;color:#cbd5e1;line-height:1.5;padding-top:2px}
+    .option.correct{border-color:#22c55e;background:rgba(34,197,94,.08)}.option.correct .option-letter{background:#22c55e;color:#fff}
+    .option.wrong{border-color:#ef4444;background:rgba(239,68,68,.08)}.option.wrong .option-letter{background:#ef4444;color:#fff}
+    .option.disabled{cursor:default}
+    .explanation{margin-top:16px;padding:14px 16px;background:#0f1117;border-left:3px solid #a855f7;border-radius:0 8px 8px 0;font-size:.88rem;color:#94a3b8;line-height:1.6;display:none}
+    .explanation.show{display:block}.explanation strong{color:#d8b4fe}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+    .btn{padding:10px 24px;border-radius:8px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .18s ease}
+    .btn-primary{background:linear-gradient(135deg,#a855f7,#06b6d4);color:#fff}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}.btn-primary:disabled{opacity:.4;cursor:default;transform:none}
+    .btn-ghost{background:transparent;color:#94a3b8;border:1.5px solid #2d3448}.btn-ghost:hover{border-color:#a855f7;color:#d8b4fe}
+    .score-counter{font-size:.85rem;color:#64748b}
+    .result-screen{display:none;text-align:center;padding:48px 24px;background:#1a1f2e;border:1px solid #2d3448;border-radius:16px;animation:fadeIn .4s ease}
+    .result-screen.show{display:block}
+    .result-emoji{font-size:4rem;margin-bottom:16px}.result-score{font-size:3rem;font-weight:800;color:#fff;margin-bottom:8px}
+    .result-label{font-size:1.1rem;color:#94a3b8;margin-bottom:32px}
+    .result-breakdown{display:flex;justify-content:center;gap:32px;margin-bottom:36px}
+    .breakdown-item{text-align:center}.breakdown-num{font-size:1.8rem;font-weight:700}
+    .breakdown-num.correct-num{color:#22c55e}.breakdown-num.wrong-num{color:#ef4444}
+    .breakdown-label{font-size:.8rem;color:#64748b;margin-top:4px}
+    .btn-restart{background:linear-gradient(135deg,#a855f7,#06b6d4);color:#fff;padding:12px 32px;border-radius:10px;border:none;font-size:1rem;font-weight:600;cursor:pointer}
+    .btn-restart:hover{opacity:.88}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header><h1>Serverless & IaC</h1><p>20 câu hỏi · Kiểm tra kiến thức sau khi đọc topic summary</p></header>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div id="quizArea"></div>
+  <div class="result-screen" id="resultScreen">
+    <div class="result-emoji" id="resultEmoji"></div><div class="result-score" id="resultScore"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <div class="result-breakdown">
+      <div class="breakdown-item"><div class="breakdown-num correct-num" id="correctCount"></div><div class="breakdown-label">Đúng</div></div>
+      <div class="breakdown-item"><div class="breakdown-num wrong-num" id="wrongCount"></div><div class="breakdown-label">Sai</div></div>
+      <div class="breakdown-item"><div class="breakdown-num" style="color:#a855f7" id="totalCount"></div><div class="breakdown-label">Tổng</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">Làm lại từ đầu</button>
+  </div>
+</div>
+<script>
+const questions=[
+  {q:"Lambda là gì và mô hình hoạt động của nó?",options:["Managed EC2 instances tự động scale","Serverless compute — chạy code khi có event trigger, không quản lý server","Container orchestration service","Message queue service"],answer:1,explanation:"<strong>Lambda là serverless compute</strong> — AWS lo provisioning, scaling, patching. Bạn chỉ lo code. <strong>Event-driven</strong>: Lambda chỉ chạy khi có trigger (S3 upload, API call, SQS message...), không chạy liên tục."},
+  {q:"Lambda handler function nhận những parameters nào?",options:["request, response","event, context","input, output","trigger, callback"],answer:1,explanation:"Lambda handler nhận 2 parameters: <strong>event</strong> (data từ trigger — JSON object chứa thông tin về event) và <strong>context</strong> (runtime info: timeout còn lại, request ID, function name...)."},
+  {q:"Lambda Execution Role là gì và tại sao cần?",options:["Role để user login vào Lambda console","IAM Role Lambda assume khi chạy — cho phép gọi AWS services khác","Role để deploy Lambda function","Role để monitor Lambda metrics"],answer:1,explanation:"<strong>Lambda Execution Role</strong> là IAM Role Lambda assume khi chạy. Cần ít nhất <strong>AWSLambdaBasicExecutionRole</strong> để write CloudWatch Logs. Thêm permissions tùy service cần gọi (S3, DynamoDB...). Không hardcode credentials."},
+  {q:"Lambda timeout tối đa là bao nhiêu?",options:["30 giây","5 phút","15 phút (900 giây)","1 giờ"],answer:2,explanation:"Lambda timeout tối đa là <strong>15 phút (900 giây)</strong>. Default là 3 giây — cần tăng lên nếu function cần chạy lâu hơn. Không phù hợp cho long-running tasks (>15 phút) — dùng ECS, Batch, hoặc Step Functions thay thế."},
+  {q:"Cold start trong Lambda xảy ra khi nào?",options:["Khi Lambda function bị lỗi","Khi Lambda chưa có execution environment sẵn — phải init runtime trước khi chạy code","Khi Lambda hết memory","Khi Lambda bị throttle"],answer:1,explanation:"<strong>Cold start</strong> xảy ra khi Lambda chưa có execution environment sẵn (function mới deploy, sau thời gian không có traffic). Phải init runtime (~100ms-1s). <strong>Warm start</strong>: environment còn tồn tại → chạy ngay."},
+  {q:"Cách nào hiệu quả nhất để loại bỏ cold start?",options:["Tăng memory lên tối đa","Dùng Provisioned Concurrency — pre-warm instances sẵn","Dùng Python thay Java","Giảm package size"],answer:1,explanation:"<strong>Provisioned Concurrency</strong> pre-warm một số instances sẵn — loại bỏ cold start hoàn toàn. Các cách khác (runtime nhẹ, giảm package size) chỉ giảm cold start time, không loại bỏ. Provisioned Concurrency tốn thêm chi phí."},
+  {q:"Reserved Concurrency trong Lambda dùng để làm gì?",options:["Pre-warm instances để giảm cold start","Giới hạn tối đa concurrency của 1 function — tránh throttle toàn account","Tăng tốc độ xử lý","Giảm chi phí Lambda"],answer:1,explanation:"<strong>Reserved Concurrency</strong> giới hạn tối đa số instances của 1 function chạy đồng thời. Dùng để: bảo vệ downstream services (không overwhelm database), đảm bảo capacity cho function quan trọng, tránh 1 function dùng hết concurrency của account."},
+  {q:"Lambda trigger nào phù hợp để xử lý file khi user upload lên S3?",options:["API Gateway","DynamoDB Streams","S3 Event Notification","EventBridge Scheduler"],answer:2,explanation:"<strong>S3 Event Notification</strong> trigger Lambda khi có object được upload (s3:ObjectCreated). Dùng để: resize images, parse CSV, virus scan, generate thumbnails... Lambda nhận event chứa bucket name và object key."},
+  {q:"Lambda pricing dựa trên những yếu tố nào?",options:["Số lượng functions và memory","Số requests và duration (GB-seconds)","Số lượng triggers và timeout","Chỉ tính theo giờ như EC2"],answer:1,explanation:"Lambda pricing: <strong>per request</strong> ($0.20/1M requests) + <strong>per duration</strong> ($0.0000166667/GB-second). Free tier: 1M requests + 400,000 GB-seconds/tháng. Không tốn tiền khi không có traffic — khác EC2 tính theo giờ."},
+  {q:"API Gateway thường đứng trước Lambda để làm gì?",options:["Lưu trữ Lambda code","Nhận HTTP requests, invoke Lambda, trả response — với auth, throttle, transform","Monitor Lambda performance","Deploy Lambda function"],answer:1,explanation:"<strong>API Gateway</strong> là managed service đứng trước Lambda: nhận HTTP requests từ client, authenticate, throttle, transform request, invoke Lambda, trả response. Tạo REST/HTTP/WebSocket APIs mà không cần quản lý server."},
+  {q:"API Gateway HTTP API khác REST API ở điểm nào?",options:["HTTP API hỗ trợ WebSocket, REST API không","HTTP API đơn giản hơn, rẻ hơn ~70%, latency thấp hơn — REST API có nhiều features hơn","REST API rẻ hơn HTTP API","Không có sự khác biệt"],answer:1,explanation:"<strong>HTTP API</strong>: đơn giản hơn, rẻ hơn ~70%, latency thấp hơn — dùng cho hầu hết use cases. <strong>REST API</strong>: nhiều features hơn (caching, request validation, usage plans, API keys) — dùng khi cần những features đó."},
+  {q:"CloudFormation Stack là gì?",options:["Template YAML/JSON định nghĩa resources","Tập hợp AWS resources được tạo và quản lý cùng nhau từ 1 template","S3 bucket lưu CloudFormation templates","IAM Role cho CloudFormation"],answer:1,explanation:"<strong>CloudFormation Stack</strong> = tập hợp AWS resources được tạo từ 1 template. Xóa stack → xóa tất cả resources trong stack. Update stack → CloudFormation tính diff và chỉ update những gì thay đổi. Reproducible và consistent."},
+  {q:"Section nào là bắt buộc trong CloudFormation template?",options:["Parameters","Outputs","Resources","Mappings"],answer:2,explanation:"<strong>Resources</strong> là section duy nhất bắt buộc trong CloudFormation template — định nghĩa AWS resources cần tạo. Parameters (input values), Outputs (export values), Mappings, Conditions đều optional."},
+  {q:"CloudFormation intrinsic function !Ref dùng để làm gì?",options:["Reference một file external","Reference resource hoặc parameter trong template","Tạo random string","Import value từ stack khác"],answer:1,explanation:"<strong>!Ref</strong> reference resource hoặc parameter. Với resource → trả về ID/ARN. Với parameter → trả về value. <strong>!Sub</strong> = string substitution. <strong>!GetAtt</strong> = lấy attribute của resource. <strong>!ImportValue</strong> = import output từ stack khác."},
+  {q:"CloudFormation Change Sets dùng để làm gì?",options:["Rollback stack về version trước","Preview thay đổi trước khi apply — xem resource nào sẽ được tạo/update/xóa","Tạo backup của stack","Deploy stack sang Region khác"],answer:1,explanation:"<strong>Change Sets</strong> cho phép preview thay đổi trước khi execute — xem resource nào sẽ được Add/Modify/Remove. Best practice: luôn review change set trước khi execute trên production để tránh unexpected changes."},
+  {q:"CloudFormation khác Terraform ở điểm nào quan trọng nhất?",options:["CloudFormation hỗ trợ multi-cloud, Terraform chỉ AWS","CloudFormation AWS-only với rollback tự động, Terraform multi-cloud với HCL và tự quản lý state","Terraform miễn phí, CloudFormation tính phí","Không có sự khác biệt đáng kể"],answer:1,explanation:"<strong>CloudFormation</strong>: AWS-only, YAML/JSON, AWS lo state management, rollback tự động. <strong>Terraform</strong>: multi-cloud, HCL, tự quản lý state file, rollback manual. Chọn CloudFormation cho AWS-only. Terraform khi multi-cloud hoặc team đã quen."},
+  {q:"Nhược điểm nào của serverless architecture cần lưu ý?",options:["Không thể scale tự động","Cold start latency, timeout tối đa 15 phút, debugging phức tạp hơn","Phải quản lý server","Không hỗ trợ Python"],answer:1,explanation:"Nhược điểm serverless: <strong>Cold start latency</strong>, <strong>timeout tối đa 15 phút</strong> (không phù hợp long-running tasks), <strong>debugging phức tạp hơn</strong> (distributed, stateless), vendor lock-in. Ưu điểm: không quản lý server, auto-scale, pay per use."},
+  {q:"Lambda Environment Variables dùng để làm gì?",options:["Lưu code của Lambda function","Lưu config (table name, API endpoint...) mà không hardcode trong code","Monitor Lambda performance","Định nghĩa IAM permissions"],answer:1,explanation:"<strong>Environment Variables</strong> lưu config values (database table name, API endpoints, feature flags...) mà không hardcode trong code. Dùng os.environ['KEY'] trong Python. Có thể encrypt bằng KMS. Thay đổi config không cần redeploy code."},
+  {q:"API Gateway Stages dùng để làm gì?",options:["Tăng performance của API","Deploy API lên nhiều environments (dev, staging, prod) với config riêng","Monitor API metrics","Authenticate API requests"],answer:1,explanation:"<strong>API Gateway Stages</strong> cho phép deploy cùng 1 API lên nhiều environments: dev, staging, prod. Mỗi stage có URL riêng, có thể có config khác nhau (throttling, caching, variables). Dùng stage variables để point đến Lambda alias khác nhau."},
+  {q:"Khi Lambda cần gọi DynamoDB, cách nào là best practice?",options:["Hardcode AWS access key và secret key trong code","Gán IAM Execution Role với DynamoDB permissions cho Lambda","Tạo IAM User và lưu credentials trong environment variables","Dùng root account credentials"],answer:1,explanation:"Best practice: <strong>gán IAM Execution Role</strong> với đúng DynamoDB permissions (dynamodb:GetItem, PutItem...) cho Lambda. Lambda tự động nhận temporary credentials qua STS — không cần hardcode credentials. Hardcode credentials là security risk nghiêm trọng."}
+];
+let current=0,score=0,answered=new Array(questions.length).fill(false);
+function buildQuiz(){
+  const area=document.getElementById('quizArea');area.innerHTML='';const letters=['A','B','C','D'];
+  questions.forEach((q,i)=>{
+    const card=document.createElement('div');card.className='question-card'+(i===0?' active':'');card.id=`card-${i}`;
+    const opts=q.options.map((opt,j)=>`<div class="option" id="opt-${i}-${j}" onclick="selectOption(${i},${j})"><div class="option-letter">${letters[j]}</div><div class="option-text">${opt}</div></div>`).join('');
+    card.innerHTML=`<div class="question-meta">Câu ${i+1} / ${questions.length}</div><div class="question-text">${q.q}</div><div class="options">${opts}</div><div class="explanation" id="exp-${i}">💡 ${q.explanation}</div>`;
+    area.appendChild(card);
+  });
+  const nav=document.createElement('div');nav.className='nav';
+  nav.innerHTML=`<button class="btn btn-ghost" id="btnPrev" onclick="navigate(-1)" disabled>← Trước</button><span class="score-counter" id="scoreCounter">0 / ${questions.length} đúng</span><button class="btn btn-primary" id="btnNext" onclick="navigate(1)" disabled>Tiếp →</button>`;
+  area.appendChild(nav);updateProgress();
+}
+function selectOption(qIdx,optIdx){
+  if(answered[qIdx])return;answered[qIdx]=true;const q=questions[qIdx];
+  q.options.forEach((_,j)=>{const el=document.getElementById(`opt-${qIdx}-${j}`);el.classList.add('disabled');if(j===q.answer)el.classList.add('correct');else if(j===optIdx)el.classList.add('wrong');});
+  if(optIdx===q.answer)score++;
+  document.getElementById(`exp-${qIdx}`).classList.add('show');document.getElementById('scoreCounter').textContent=`${score} / ${questions.length} đúng`;
+  document.getElementById('btnNext').disabled=false;if(current===questions.length-1)document.getElementById('btnNext').textContent='Xem kết quả →';updateProgress();
+}
+function navigate(dir){
+  const cards=document.querySelectorAll('.question-card');cards[current].classList.remove('active');current+=dir;
+  if(current>=questions.length){showResult();return;}
+  cards[current].classList.add('active');document.getElementById('btnPrev').disabled=current===0;
+  document.getElementById('btnNext').disabled=!answered[current];
+  document.getElementById('btnNext').textContent=current===questions.length-1&&answered[current]?'Xem kết quả →':'Tiếp →';updateProgress();
+}
+function updateProgress(){document.getElementById('progressBar').style.width=((current+1)/questions.length*100)+'%';}
+function showResult(){
+  document.getElementById('quizArea').style.display='none';document.getElementById('resultScreen').classList.add('show');
+  const pct=Math.round(score/questions.length*100);
+  const d=pct>=90?['🏆','Xuất sắc! Bạn nắm vững Serverless & IaC rồi.']:pct>=75?['🎯','Tốt lắm! Ôn lại vài điểm nhỏ.']:pct>=60?['📚','Khá ổn. Đọc lại phần nhầm.']:['💪','Cần ôn thêm!'];
+  document.getElementById('resultEmoji').textContent=d[0];document.getElementById('resultScore').textContent=pct+'%';document.getElementById('resultLabel').textContent=d[1];
+  document.getElementById('correctCount').textContent=score;document.getElementById('wrongCount').textContent=questions.length-score;document.getElementById('totalCount').textContent=questions.length;
+}
+function restartQuiz(){current=0;score=0;answered=new Array(questions.length).fill(false);document.getElementById('resultScreen').classList.remove('show');document.getElementById('quizArea').style.display='block';buildQuiz();}
+buildQuiz();
+</script>
+</body></html>

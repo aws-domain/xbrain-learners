@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Quiz — Database</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh;padding:32px 16px}
+    .container{max-width:760px;margin:0 auto}
+    header{margin-bottom:40px;text-align:center}
+    header h1{font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:8px}
+    header p{color:#94a3b8;font-size:.95rem}
+    .progress-bar-wrap{background:#1e2330;border-radius:99px;height:6px;margin-bottom:32px;overflow:hidden}
+    .progress-bar{height:100%;background:linear-gradient(90deg,#06b6d4,#3b82f6);border-radius:99px;transition:width .4s ease;width:0%}
+    .question-card{background:#1a1f2e;border:1px solid #2d3448;border-radius:16px;padding:28px;margin-bottom:20px;display:none;animation:fadeIn .3s ease}
+    .question-card.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .question-meta{font-size:.78rem;color:#06b6d4;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+    .question-text{font-size:1.05rem;font-weight:500;color:#f1f5f9;line-height:1.6;margin-bottom:22px}
+    .options{display:flex;flex-direction:column;gap:10px}
+    .option{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;border:1.5px solid #2d3448;cursor:pointer;transition:all .18s ease;background:#0f1117}
+    .option:hover:not(.disabled){border-color:#06b6d4;background:#1e2330}
+    .option-letter{width:26px;height:26px;min-width:26px;border-radius:50%;background:#2d3448;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#94a3b8;transition:all .18s ease}
+    .option-text{font-size:.95rem;color:#cbd5e1;line-height:1.5;padding-top:2px}
+    .option.correct{border-color:#22c55e;background:rgba(34,197,94,.08)}.option.correct .option-letter{background:#22c55e;color:#fff}
+    .option.wrong{border-color:#ef4444;background:rgba(239,68,68,.08)}.option.wrong .option-letter{background:#ef4444;color:#fff}
+    .option.disabled{cursor:default}
+    .explanation{margin-top:16px;padding:14px 16px;background:#0f1117;border-left:3px solid #06b6d4;border-radius:0 8px 8px 0;font-size:.88rem;color:#94a3b8;line-height:1.6;display:none}
+    .explanation.show{display:block}.explanation strong{color:#a5f3fc}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+    .btn{padding:10px 24px;border-radius:8px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .18s ease}
+    .btn-primary{background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}.btn-primary:disabled{opacity:.4;cursor:default;transform:none}
+    .btn-ghost{background:transparent;color:#94a3b8;border:1.5px solid #2d3448}.btn-ghost:hover{border-color:#06b6d4;color:#a5f3fc}
+    .score-counter{font-size:.85rem;color:#64748b}
+    .result-screen{display:none;text-align:center;padding:48px 24px;background:#1a1f2e;border:1px solid #2d3448;border-radius:16px;animation:fadeIn .4s ease}
+    .result-screen.show{display:block}
+    .result-emoji{font-size:4rem;margin-bottom:16px}.result-score{font-size:3rem;font-weight:800;color:#fff;margin-bottom:8px}
+    .result-label{font-size:1.1rem;color:#94a3b8;margin-bottom:32px}
+    .result-breakdown{display:flex;justify-content:center;gap:32px;margin-bottom:36px}
+    .breakdown-item{text-align:center}.breakdown-num{font-size:1.8rem;font-weight:700}
+    .breakdown-num.correct-num{color:#22c55e}.breakdown-num.wrong-num{color:#ef4444}
+    .breakdown-label{font-size:.8rem;color:#64748b;margin-top:4px}
+    .btn-restart{background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;padding:12px 32px;border-radius:10px;border:none;font-size:1rem;font-weight:600;cursor:pointer}
+    .btn-restart:hover{opacity:.88}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header><h1>Database</h1><p>20 câu hỏi · Kiểm tra kiến thức sau khi đọc topic summary</p></header>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div id="quizArea"></div>
+  <div class="result-screen" id="resultScreen">
+    <div class="result-emoji" id="resultEmoji"></div><div class="result-score" id="resultScore"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <div class="result-breakdown">
+      <div class="breakdown-item"><div class="breakdown-num correct-num" id="correctCount"></div><div class="breakdown-label">Đúng</div></div>
+      <div class="breakdown-item"><div class="breakdown-num wrong-num" id="wrongCount"></div><div class="breakdown-label">Sai</div></div>
+      <div class="breakdown-item"><div class="breakdown-num" style="color:#06b6d4" id="totalCount"></div><div class="breakdown-label">Tổng</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">Làm lại từ đầu</button>
+  </div>
+</div>
+<script>
+const questions=[
+  {q:"Sự khác biệt chính giữa Relational và Non-Relational database là gì?",options:["Relational nhanh hơn, Non-Relational chậm hơn","Relational có schema cố định + SQL, Non-Relational có flexible schema + API calls","Relational chỉ dùng trên cloud, Non-Relational dùng on-premises","Relational miễn phí, Non-Relational tính phí"],answer:1,explanation:"<strong>Relational</strong>: schema cố định, dùng SQL, scale vertical, phù hợp complex queries/transactions. <strong>Non-Relational</strong>: flexible schema, dùng API calls, scale horizontal, phù hợp high throughput và flexible data."},
+  {q:"RDS Multi-AZ Deployment dùng để làm gì?",options:["Scale read traffic bằng cách phân phối queries","High availability — standby replica sync, failover tự động khi primary fail","Giảm chi phí bằng cách chia sẻ resources","Backup data sang Region khác"],answer:1,explanation:"<strong>RDS Multi-AZ</strong> dùng cho <strong>high availability</strong> — AWS tạo standby replica ở AZ khác với synchronous replication. Failover tự động ~1-2 phút khi primary fail. <strong>Không</strong> dùng để scale read traffic — standby không serve reads."},
+  {q:"RDS Read Replica khác Multi-AZ ở điểm nào?",options:["Read Replica dùng synchronous replication, Multi-AZ dùng asynchronous","Read Replica dùng để scale read traffic (async replication), Multi-AZ dùng cho HA (sync replication)","Không có sự khác biệt — cùng chức năng","Read Replica chỉ dùng được trong cùng Region"],answer:1,explanation:"<strong>Read Replica</strong>: asynchronous replication, app đọc từ replica để giảm tải primary, có thể cross-region, có thể promote thành standalone. <strong>Multi-AZ</strong>: synchronous replication, chỉ cho HA, standby không serve reads."},
+  {q:"Amazon Aurora có ưu điểm gì so với MySQL thông thường trên RDS?",options:["Aurora rẻ hơn MySQL RDS","Aurora nhanh hơn 5x MySQL, storage tự động scale, 6 copies trên 3 AZ","Aurora hỗ trợ nhiều engine hơn","Aurora không cần backup"],answer:1,explanation:"<strong>Aurora</strong>: 5x faster hơn MySQL, 3x faster hơn PostgreSQL. Storage tự động scale 10GB-128TB. <strong>6 copies</strong> của data trên 3 AZ — highly durable. Aurora Serverless tự động scale compute theo demand."},
+  {q:"DynamoDB là loại database nào và có đặc điểm gì nổi bật?",options:["Relational database, hỗ trợ SQL","Fully managed NoSQL, serverless, single-digit millisecond latency ở mọi scale","Graph database cho relationship queries","Time-series database cho IoT data"],answer:1,explanation:"<strong>DynamoDB</strong>: fully managed NoSQL (key-value + document), serverless (không provision server), <strong>single-digit millisecond latency</strong> ở bất kỳ scale nào. Dùng cho gaming, IoT, mobile, real-time apps, session management."},
+  {q:"Trong DynamoDB, Partition Key có vai trò gì?",options:["Sắp xếp items trong cùng partition","Xác định partition lưu data — phải unique nếu dùng đơn","Định nghĩa schema của table","Index phụ để query theo attribute khác"],answer:1,explanation:"<strong>Partition Key (PK)</strong> xác định partition nào sẽ lưu item. Phải unique nếu dùng đơn (simple primary key). Chọn PK tốt: cardinality cao, phân phối đều — tránh hot partition (1 partition nhận quá nhiều traffic)."},
+  {q:"Sort Key trong DynamoDB dùng để làm gì?",options:["Tự động sort kết quả query theo alphabet","Kết hợp với Partition Key tạo composite key — cho phép nhiều items cùng PK","Encrypt data trong partition","Định nghĩa TTL cho items"],answer:1,explanation:"<strong>Sort Key (SK)</strong> kết hợp với PK tạo <strong>composite primary key</strong> — cho phép nhiều items có cùng PK nhưng SK khác nhau. Ví dụ: PK=userId, SK=timestamp → lưu nhiều events của cùng 1 user."},
+  {q:"DynamoDB Query vs Scan — khác gì nhau?",options:["Query đọc toàn bộ table, Scan chỉ đọc 1 partition","Query dùng PK/SK (hiệu quả), Scan đọc toàn bộ table rồi filter (tốn RCU)","Không có sự khác biệt về performance","Scan nhanh hơn Query vì parallel processing"],answer:1,explanation:"<strong>Query</strong>: dùng PK/SK, chỉ đọc data cần, hiệu quả, chi phí thấp. <strong>Scan</strong>: đọc toàn bộ table rồi filter — tốn nhiều RCU, chậm trên table lớn. Best practice: luôn thiết kế data model để dùng Query thay Scan."},
+  {q:"DynamoDB On-Demand capacity mode phù hợp khi nào?",options:["Khi traffic predictable và steady","Khi traffic unpredictable — trả per request, không cần provision","Khi cần IOPS cao nhất","Khi muốn tiết kiệm chi phí tối đa"],answer:1,explanation:"<strong>On-Demand mode</strong>: trả per request, tự động scale, không cần provision. Phù hợp khi traffic <strong>unpredictable</strong>. <strong>Provisioned mode</strong>: trả per RCU/WCU, rẻ hơn khi traffic predictable và steady."},
+  {q:"RCU (Read Capacity Unit) trong DynamoDB là gì?",options:["1 write của item ≤1KB/giây","1 strongly consistent read của item ≤4KB/giây","1 scan của toàn bộ table","1 query trả về tối đa 1MB data"],answer:1,explanation:"<strong>RCU</strong> = 1 strongly consistent read của item ≤4KB/giây. Item >4KB cần nhiều RCU hơn. Eventually consistent read tốn 0.5 RCU. <strong>WCU</strong> = 1 write của item ≤1KB/giây."},
+  {q:"Global Secondary Index (GSI) trong DynamoDB giải quyết vấn đề gì?",options:["Tăng tốc độ write operations","Cho phép query theo attribute khác ngoài primary key — giải quyết multiple access patterns","Tự động backup table","Encrypt data ở rest"],answer:1,explanation:"<strong>GSI</strong> cho phép query theo attribute khác ngoài PK/SK của base table. Ví dụ: table có PK=userId, nhưng cần query theo email → tạo GSI với PK=email. Asynchronous replication từ base table."},
+  {q:"DynamoDB Streams dùng để làm gì?",options:["Stream data từ Kinesis vào DynamoDB","Capture mọi thay đổi (insert/update/delete) trong table theo thứ tự","Real-time sync giữa 2 tables","Monitor performance của DynamoDB"],answer:1,explanation:"<strong>DynamoDB Streams</strong> capture mọi thay đổi (insert/update/delete) trong table theo thứ tự thời gian. Dùng để: trigger Lambda khi data thay đổi, replicate data sang table khác, audit trail."},
+  {q:"DAX (DynamoDB Accelerator) cải thiện điều gì?",options:["Tăng write throughput","Giảm latency từ milliseconds xuống microseconds cho read-heavy workloads","Giảm chi phí storage","Tăng số lượng GSI có thể tạo"],answer:1,explanation:"<strong>DAX</strong> là in-memory cache cho DynamoDB — giảm latency từ single-digit ms xuống <strong>microseconds</strong>. Fully managed, compatible với DynamoDB API. Dùng cho read-heavy workloads cần microsecond latency."},
+  {q:"ElastiCache Redis khác Memcached ở điểm nào?",options:["Redis chậm hơn Memcached","Redis hỗ trợ data structures phức tạp, persistence, replication, pub/sub — Memcached đơn giản hơn","Memcached hỗ trợ nhiều data types hơn Redis","Không có sự khác biệt"],answer:1,explanation:"<strong>Redis</strong>: data structures phức tạp (lists, sets, sorted sets), persistence, replication, pub/sub, Lua scripting. <strong>Memcached</strong>: đơn giản hơn, multi-threaded, không persistence. Chọn Redis khi cần features phức tạp."},
+  {q:"Khi nào nên dùng Aurora thay vì RDS MySQL?",options:["Khi cần database rẻ nhất","Khi cần high performance, high availability, và AWS-native features","Khi cần chạy Oracle database","Khi cần database on-premises"],answer:1,explanation:"<strong>Aurora</strong> khi cần: performance cao hơn (5x MySQL), storage tự động scale, 6 copies trên 3 AZ, Aurora Serverless. <strong>RDS MySQL</strong> khi cần: standard MySQL, quen thuộc, hoặc cost-sensitive (Aurora đắt hơn RDS)."},
+  {q:"RDS Automated Backup cho phép restore về thời điểm nào?",options:["Chỉ restore về backup gần nhất","Bất kỳ thời điểm nào trong retention period (1-35 ngày) — point-in-time recovery","Chỉ restore về đầu ngày","Chỉ restore về snapshot thủ công"],answer:1,explanation:"<strong>RDS Automated Backup</strong> backup hàng ngày + transaction logs → <strong>point-in-time recovery</strong> về bất kỳ thời điểm nào trong retention period (1-35 ngày). Ví dụ: restore về 2 giờ trước khi có lỗi."},
+  {q:"Khi nào nên dùng DynamoDB thay vì RDS?",options:["Khi cần complex SQL joins và transactions","Khi cần scale lớn, latency thấp, schema flexible, serverless (gaming, IoT, session)","Khi cần Oracle hoặc SQL Server","Khi cần data warehouse"],answer:1,explanation:"<strong>DynamoDB</strong> khi cần: scale lớn, single-digit ms latency, flexible schema, serverless, high throughput (gaming, IoT, mobile, session store). <strong>RDS</strong> khi cần: SQL, complex joins, ACID transactions (e-commerce, ERP, financial)."},
+  {q:"ElastiCache nên đặt ở loại subnet nào?",options:["Public subnet — để admin access từ bất kỳ đâu","Private subnet — không expose ra internet","Isolated subnet — không có kết nối gì","Bất kỳ subnet nào"],answer:1,explanation:"<strong>ElastiCache đặt ở private subnet</strong> — không expose ra internet. Chỉ application servers trong VPC mới cần access cache. Đặt public là security risk nghiêm trọng."},
+  {q:"Aurora Serverless khác Aurora thông thường ở điểm nào?",options:["Aurora Serverless rẻ hơn trong mọi trường hợp","Aurora Serverless tự động scale compute lên/xuống theo demand, trả theo ACU","Aurora Serverless không hỗ trợ MySQL","Aurora Serverless không có backup"],answer:1,explanation:"<strong>Aurora Serverless</strong> tự động scale compute (Aurora Capacity Units - ACU) lên/xuống theo demand — trả theo ACU dùng thực tế. Phù hợp cho workloads không đều (dev/test, intermittent). Aurora thông thường provision capacity cố định."},
+  {q:"Khi nào nên dùng Redshift thay vì RDS?",options:["Khi cần OLTP (Online Transaction Processing)","Khi cần data warehouse — analytics, complex queries trên petabytes of data","Khi cần NoSQL database","Khi cần in-memory caching"],answer:1,explanation:"<strong>Redshift</strong> là data warehouse — tối ưu cho OLAP (Online Analytical Processing): analytics, BI, complex queries trên petabytes. <strong>RDS</strong> là OLTP — transactional workloads, nhiều reads/writes nhỏ. Khác nhau hoàn toàn về use case."}
+];
+let current=0,score=0,answered=new Array(questions.length).fill(false);
+function buildQuiz(){
+  const area=document.getElementById('quizArea');area.innerHTML='';const letters=['A','B','C','D'];
+  questions.forEach((q,i)=>{
+    const card=document.createElement('div');card.className='question-card'+(i===0?' active':'');card.id=`card-${i}`;
+    const opts=q.options.map((opt,j)=>`<div class="option" id="opt-${i}-${j}" onclick="selectOption(${i},${j})"><div class="option-letter">${letters[j]}</div><div class="option-text">${opt}</div></div>`).join('');
+    card.innerHTML=`<div class="question-meta">Câu ${i+1} / ${questions.length}</div><div class="question-text">${q.q}</div><div class="options">${opts}</div><div class="explanation" id="exp-${i}">💡 ${q.explanation}</div>`;
+    area.appendChild(card);
+  });
+  const nav=document.createElement('div');nav.className='nav';
+  nav.innerHTML=`<button class="btn btn-ghost" id="btnPrev" onclick="navigate(-1)" disabled>← Trước</button><span class="score-counter" id="scoreCounter">0 / ${questions.length} đúng</span><button class="btn btn-primary" id="btnNext" onclick="navigate(1)" disabled>Tiếp →</button>`;
+  area.appendChild(nav);updateProgress();
+}
+function selectOption(qIdx,optIdx){
+  if(answered[qIdx])return;answered[qIdx]=true;const q=questions[qIdx];
+  q.options.forEach((_,j)=>{const el=document.getElementById(`opt-${qIdx}-${j}`);el.classList.add('disabled');if(j===q.answer)el.classList.add('correct');else if(j===optIdx)el.classList.add('wrong');});
+  if(optIdx===q.answer)score++;
+  document.getElementById(`exp-${qIdx}`).classList.add('show');document.getElementById('scoreCounter').textContent=`${score} / ${questions.length} đúng`;
+  document.getElementById('btnNext').disabled=false;if(current===questions.length-1)document.getElementById('btnNext').textContent='Xem kết quả →';updateProgress();
+}
+function navigate(dir){
+  const cards=document.querySelectorAll('.question-card');cards[current].classList.remove('active');current+=dir;
+  if(current>=questions.length){showResult();return;}
+  cards[current].classList.add('active');document.getElementById('btnPrev').disabled=current===0;
+  document.getElementById('btnNext').disabled=!answered[current];
+  document.getElementById('btnNext').textContent=current===questions.length-1&&answered[current]?'Xem kết quả →':'Tiếp →';updateProgress();
+}
+function updateProgress(){document.getElementById('progressBar').style.width=((current+1)/questions.length*100)+'%';}
+function showResult(){
+  document.getElementById('quizArea').style.display='none';document.getElementById('resultScreen').classList.add('show');
+  const pct=Math.round(score/questions.length*100);
+  const d=pct>=90?['🏆','Xuất sắc! Bạn nắm vững Database rồi.']:pct>=75?['🎯','Tốt lắm! Ôn lại vài điểm nhỏ.']:pct>=60?['📚','Khá ổn. Đọc lại phần nhầm.']:['💪','Cần ôn thêm!'];
+  document.getElementById('resultEmoji').textContent=d[0];document.getElementById('resultScore').textContent=pct+'%';document.getElementById('resultLabel').textContent=d[1];
+  document.getElementById('correctCount').textContent=score;document.getElementById('wrongCount').textContent=questions.length-score;document.getElementById('totalCount').textContent=questions.length;
+}
+function restartQuiz(){current=0;score=0;answered=new Array(questions.length).fill(false);document.getElementById('resultScreen').classList.remove('show');document.getElementById('quizArea').style.display='block';buildQuiz();}
+buildQuiz();
+</script>
+</body></html>

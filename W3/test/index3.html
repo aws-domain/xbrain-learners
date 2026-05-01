@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — Cloud Foundations & Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 32px 16px;
+    }
+    .container { max-width: 760px; margin: 0 auto; }
+    header { margin-bottom: 40px; text-align: center; }
+    header h1 { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    header p { color: #94a3b8; font-size: 0.95rem; }
+    .progress-bar-wrap { background: #1e2330; border-radius: 99px; height: 6px; margin-bottom: 32px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); border-radius: 99px; transition: width 0.4s ease; width: 0%; }
+    .question-card { background: #1a1f2e; border: 1px solid #2d3448; border-radius: 16px; padding: 28px; margin-bottom: 20px; display: none; animation: fadeIn 0.3s ease; }
+    .question-card.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .question-meta { font-size: 0.78rem; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    .question-text { font-size: 1.05rem; font-weight: 500; color: #f1f5f9; line-height: 1.6; margin-bottom: 22px; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 10px; border: 1.5px solid #2d3448; cursor: pointer; transition: all 0.18s ease; background: #0f1117; }
+    .option:hover:not(.disabled) { border-color: #10b981; background: #1e2330; }
+    .option-letter { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; background: #2d3448; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; color: #94a3b8; transition: all 0.18s ease; }
+    .option-text { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; padding-top: 2px; }
+    .option.correct { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+    .option.correct .option-letter { background: #22c55e; color: #fff; }
+    .option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .option.wrong .option-letter { background: #ef4444; color: #fff; }
+    .option.disabled { cursor: default; }
+    .explanation { margin-top: 16px; padding: 14px 16px; background: #0f1117; border-left: 3px solid #10b981; border-radius: 0 8px 8px 0; font-size: 0.88rem; color: #94a3b8; line-height: 1.6; display: none; }
+    .explanation.show { display: block; }
+    .explanation strong { color: #6ee7b7; }
+    .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+    .btn { padding: 10px 24px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.18s ease; }
+    .btn-primary { background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff; }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; }
+    .btn-ghost { background: transparent; color: #94a3b8; border: 1.5px solid #2d3448; }
+    .btn-ghost:hover { border-color: #10b981; color: #6ee7b7; }
+    .score-counter { font-size: 0.85rem; color: #64748b; }
+    .result-screen { display: none; text-align: center; padding: 48px 24px; background: #1a1f2e; border: 1px solid #2d3448; border-radius: 16px; animation: fadeIn 0.4s ease; }
+    .result-screen.show { display: block; }
+    .result-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .result-score { font-size: 3rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .result-label { font-size: 1.1rem; color: #94a3b8; margin-bottom: 32px; }
+    .result-breakdown { display: flex; justify-content: center; gap: 32px; margin-bottom: 36px; }
+    .breakdown-item { text-align: center; }
+    .breakdown-num { font-size: 1.8rem; font-weight: 700; }
+    .breakdown-num.correct-num { color: #22c55e; }
+    .breakdown-num.wrong-num { color: #ef4444; }
+    .breakdown-label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+    .btn-restart { background: linear-gradient(135deg, #10b981, #3b82f6); color: #fff; padding: 12px 32px; border-radius: 10px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-restart:hover { opacity: 0.88; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Cloud Foundations & Architecture</h1>
+    <p>20 câu hỏi · Kiểm tra kiến thức sau khi đọc topic summary</p>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div id="quizArea"></div>
+  <div class="result-screen" id="resultScreen">
+    <div class="result-emoji" id="resultEmoji"></div>
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <div class="result-breakdown">
+      <div class="breakdown-item"><div class="breakdown-num correct-num" id="correctCount"></div><div class="breakdown-label">Đúng</div></div>
+      <div class="breakdown-item"><div class="breakdown-num wrong-num" id="wrongCount"></div><div class="breakdown-label">Sai</div></div>
+      <div class="breakdown-item"><div class="breakdown-num" style="color:#10b981" id="totalCount"></div><div class="breakdown-label">Tổng</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">Làm lại từ đầu</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Cloud computing theo mô hình pay-as-you-go có nghĩa là gì?",
+    options: [
+      "Trả tiền trước cho toàn bộ năm, nhận discount",
+      "Trả theo mức độ sử dụng thực tế, không mua hardware trước",
+      "Trả phí cố định hàng tháng bất kể dùng bao nhiêu",
+      "Chỉ trả khi hệ thống có lỗi"
+    ],
+    answer: 1,
+    explanation: "<strong>Pay-as-you-go</strong> = trả theo mức độ sử dụng thực tế — đây là lợi ích 'Trade fixed expense for variable expense'. Không cần mua hardware trước, không lãng phí capacity không dùng đến."
+  },
+  {
+    q: "Công ty đang dùng server vật lý tại data center riêng, đồng thời cũng dùng AWS cho một số workloads. Đây là mô hình triển khai nào?",
+    options: [
+      "Cloud",
+      "On-Premises",
+      "Hybrid",
+      "Multi-Cloud"
+    ],
+    answer: 2,
+    explanation: "<strong>Hybrid</strong> = kết hợp on-premises và cloud. Phổ biến khi công ty đang migrate dần lên cloud, hoặc có compliance yêu cầu giữ một số data tại chỗ."
+  },
+  {
+    q: "EC2 thuộc mô hình dịch vụ nào?",
+    options: [
+      "SaaS — vì AWS lo tất cả",
+      "PaaS — vì AWS lo OS và runtime",
+      "IaaS — vì bạn vẫn phải quản lý OS, runtime, và application",
+      "FaaS — vì EC2 là serverless"
+    ],
+    answer: 2,
+    explanation: "<strong>EC2 là IaaS</strong> — AWS lo hardware, network, virtualization. Bạn lo OS (patching), runtime, và application. PaaS (Elastic Beanstalk) thì AWS lo thêm OS và runtime. SaaS thì AWS lo tất cả."
+  },
+  {
+    q: "Lợi ích 'Economies of scale' trong cloud computing có nghĩa là gì?",
+    options: [
+      "Bạn có thể scale hệ thống lên xuống tự động",
+      "AWS mua hardware số lượng lớn nên giá rẻ hơn, tiết kiệm được truyền cho khách hàng",
+      "Bạn tiết kiệm được chi phí khi dùng nhiều services cùng lúc",
+      "AWS có nhiều Region nên latency thấp hơn"
+    ],
+    answer: 1,
+    explanation: "<strong>Economies of scale</strong> = AWS mua hardware với số lượng cực lớn → giá rẻ hơn nhiều so với công ty tự mua → tiết kiệm được truyền cho khách hàng dưới dạng giá thấp hơn."
+  },
+  {
+    q: "AWS Region là gì?",
+    options: [
+      "Một data center vật lý duy nhất",
+      "Một điểm phân phối nội dung của CloudFront",
+      "Khu vực địa lý riêng biệt chứa nhiều Availability Zones",
+      "Một VPC mặc định được tạo sẵn"
+    ],
+    answer: 2,
+    explanation: "<strong>Region</strong> là khu vực địa lý riêng biệt (ví dụ: ap-southeast-1 = Singapore), chứa nhiều AZ. Mỗi Region độc lập hoàn toàn — data không tự động replicate sang Region khác."
+  },
+  {
+    q: "Tại sao nên deploy ứng dụng ở ít nhất 2 Availability Zones?",
+    options: [
+      "Để giảm chi phí bằng cách chia sẻ resources",
+      "Để tránh single point of failure và đảm bảo high availability",
+      "Vì AWS yêu cầu bắt buộc phải dùng 2 AZ",
+      "Để tăng tốc độ xử lý bằng cách parallel processing"
+    ],
+    answer: 1,
+    explanation: "AZ cách nhau đủ xa để tránh <strong>single point of failure</strong> (thiên tai, mất điện...) nhưng đủ gần để low-latency replication. Deploy ở 2+ AZ → nếu 1 AZ fail, AZ còn lại vẫn phục vụ được."
+  },
+  {
+    q: "Edge Locations trong AWS dùng để làm gì?",
+    options: [
+      "Chạy EC2 instances gần người dùng hơn",
+      "Lưu trữ database với latency thấp",
+      "Phân phối nội dung qua CloudFront CDN, đặt gần người dùng cuối",
+      "Kết nối on-premises với AWS"
+    ],
+    answer: 2,
+    explanation: "<strong>Edge Locations</strong> là điểm phân phối nội dung của CloudFront (CDN). Nhiều hơn số Region — đặt gần người dùng cuối để cache và serve content với latency thấp nhất."
+  },
+  {
+    q: "Well-Architected Framework có bao nhiêu pillars và đó là những pillars nào?",
+    options: [
+      "5 pillars: Security, Reliability, Performance, Cost, Operations",
+      "6 pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability",
+      "7 pillars: bao gồm thêm Scalability",
+      "4 pillars: Security, Reliability, Performance, Cost"
+    ],
+    answer: 1,
+    explanation: "Well-Architected Framework có <strong>6 pillars</strong>: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, và Sustainability (thêm vào năm 2021). Hay bị nhầm là 5 vì Sustainability là pillar mới nhất."
+  },
+  {
+    q: "Pillar nào trong Well-Architected Framework tập trung vào việc hệ thống có thể recover khi có sự cố?",
+    options: [
+      "Operational Excellence",
+      "Security",
+      "Reliability",
+      "Performance Efficiency"
+    ],
+    answer: 2,
+    explanation: "<strong>Reliability</strong> = hệ thống hoạt động đúng và recover được khi có sự cố. Ví dụ: Multi-AZ deployment, backup, auto-scaling, circuit breaker. Operational Excellence tập trung vào vận hành và monitoring."
+  },
+  {
+    q: "Trong kiến trúc 3-tier, Application Tier nên đặt ở loại subnet nào?",
+    options: [
+      "Public subnet — để user có thể access trực tiếp",
+      "Private subnet — có internet outbound qua NAT GW nhưng không có inbound từ internet",
+      "Isolated subnet — không có kết nối internet",
+      "Bất kỳ subnet nào cũng được"
+    ],
+    answer: 1,
+    explanation: "<strong>Application Tier (EC2, Lambda)</strong> đặt ở <strong>private subnet</strong> — có thể gọi ra internet qua NAT GW (để download packages, gọi APIs) nhưng không nhận inbound từ internet trực tiếp. Traffic vào phải qua Load Balancer ở public subnet."
+  },
+  {
+    q: "Data Tier (RDS, DynamoDB) nên đặt ở loại subnet nào và tại sao?",
+    options: [
+      "Public subnet — để admin có thể access từ bất kỳ đâu",
+      "Private subnet — để có thể gọi API bên ngoài khi cần",
+      "Isolated subnet — chỉ có local route, không có route ra internet",
+      "Không cần đặt trong subnet — database là managed service"
+    ],
+    answer: 2,
+    explanation: "<strong>Data Tier đặt ở isolated subnet</strong> — chỉ có local route trong VPC, không có route ra internet. Database không cần ra internet, chỉ cần nhận traffic từ Application Tier. Isolated = isolated khỏi internet, không phải khỏi VPC."
+  },
+  {
+    q: "Theo Shared Responsibility Model, ai chịu trách nhiệm về OS patching trên EC2?",
+    options: [
+      "AWS — vì EC2 là managed service",
+      "Bạn (customer) — vì EC2 là IaaS, bạn quản lý OS",
+      "Chia đôi — AWS lo security patches, bạn lo feature updates",
+      "Tùy thuộc vào region bạn deploy"
+    ],
+    answer: 1,
+    explanation: "EC2 là IaaS — <strong>bạn chịu trách nhiệm OS patching</strong>. AWS lo 'security OF the cloud' (hardware, hypervisor). Bạn lo 'security IN the cloud' (OS, application, data, IAM). Với managed services như RDS, AWS lo OS patching thay bạn."
+  },
+  {
+    q: "AWS chịu trách nhiệm về điều gì theo Shared Responsibility Model?",
+    options: [
+      "IAM users và permissions của bạn",
+      "Data bạn lưu trữ trên S3",
+      "Physical hardware, network infrastructure, và hypervisor",
+      "Application security và encryption config"
+    ],
+    answer: 2,
+    explanation: "AWS chịu trách nhiệm <strong>'Security OF the cloud'</strong>: physical hardware, network infrastructure, hypervisor, và security của managed services. Bạn chịu trách nhiệm 'Security IN the cloud': data, IAM, OS patching, application security."
+  },
+  {
+    q: "EC2 Spot Instances phù hợp nhất cho workload nào?",
+    options: [
+      "Production database cần uptime 99.99%",
+      "Web server phục vụ traffic của khách hàng",
+      "Batch processing jobs có thể bị interrupt và restart",
+      "Development environment cần chạy liên tục"
+    ],
+    answer: 2,
+    explanation: "<strong>Spot Instances</strong> tiết kiệm 60–90% nhưng có thể bị AWS terminate với 2 phút notice. Phù hợp cho <strong>fault-tolerant, batch jobs</strong> có thể checkpoint và restart. Không dùng cho production workloads cần uptime cao."
+  },
+  {
+    q: "Reserved Instances tiết kiệm bao nhiêu so với On-Demand và dùng khi nào?",
+    options: [
+      "10–20%, dùng cho dev/test environments",
+      "30–72%, dùng cho production steady-state workloads với commitment 1–3 năm",
+      "60–90%, dùng cho batch processing",
+      "30–66%, dùng khi muốn flexibility về instance type"
+    ],
+    answer: 1,
+    explanation: "<strong>Reserved Instances</strong> tiết kiệm 30–72% với commitment 1–3 năm. Dùng cho production workloads có predictable, steady-state usage. Savings Plans (30–66%) flexible hơn — commit theo $/giờ thay vì instance type cụ thể."
+  },
+  {
+    q: "Pillar 'Sustainability' trong Well-Architected Framework tập trung vào điều gì?",
+    options: [
+      "Đảm bảo hệ thống hoạt động liên tục không bị downtime",
+      "Giảm chi phí vận hành dài hạn",
+      "Giảm tác động môi trường bằng cách tối ưu utilization và dùng managed services",
+      "Đảm bảo data được backup bền vững"
+    ],
+    answer: 2,
+    explanation: "<strong>Sustainability</strong> (pillar thứ 6, mới nhất) tập trung vào giảm tác động môi trường: tối ưu resource utilization, dùng managed services (hiệu quả hơn tự quản lý), chọn Region có energy mix tốt hơn."
+  },
+  {
+    q: "Presentation Tier trong kiến trúc 3-tier chứa những gì?",
+    options: [
+      "RDS, DynamoDB, ElastiCache",
+      "EC2 app servers, Lambda functions",
+      "ALB, CloudFront, Static assets trên S3",
+      "NAT Gateway, Internet Gateway"
+    ],
+    answer: 2,
+    explanation: "<strong>Presentation Tier</strong> = lớp ngoài cùng tiếp xúc với internet: <strong>ALB</strong> (load balancer), <strong>CloudFront</strong> (CDN), <strong>S3</strong> (static assets). Đặt ở public subnet. Application Tier (EC2/Lambda) ở private subnet. Data Tier (RDS/DynamoDB) ở isolated subnet."
+  },
+  {
+    q: "Lợi ích 'Stop guessing capacity' của cloud có nghĩa là gì?",
+    options: [
+      "AWS tự động dự đoán traffic và scale trước",
+      "Không cần mua hardware dư thừa trước — scale up/down theo nhu cầu thực tế",
+      "AWS đảm bảo 100% uptime nên không cần lo về capacity",
+      "Bạn không cần monitor hệ thống vì AWS lo tất cả"
+    ],
+    answer: 1,
+    explanation: "Trước đây phải mua hardware dư thừa để đề phòng peak traffic — lãng phí khi traffic thấp. Cloud cho phép <strong>scale up/down theo nhu cầu thực tế</strong> — không cần đoán trước, không lãng phí capacity."
+  },
+  {
+    q: "Pillar 'Operational Excellence' trong Well-Architected Framework tập trung vào điều gì?",
+    options: [
+      "Giảm chi phí vận hành xuống mức thấp nhất",
+      "Chạy và monitor hệ thống hiệu quả, cải tiến liên tục quy trình vận hành",
+      "Đảm bảo hệ thống không bao giờ bị downtime",
+      "Tối ưu performance của từng service"
+    ],
+    answer: 1,
+    explanation: "<strong>Operational Excellence</strong> = chạy và monitor hệ thống hiệu quả, cải tiến liên tục. Ví dụ: dùng CloudWatch để monitor, IaC (CloudFormation) để deploy consistent, runbooks để xử lý incidents, post-mortem để học từ failures."
+  },
+  {
+    q: "Khi chọn AWS Region để deploy, cần cân nhắc những yếu tố nào?",
+    options: [
+      "Chỉ cần chọn Region gần nhất với văn phòng công ty",
+      "Latency, compliance/data residency, pricing, và service availability",
+      "Chỉ cần chọn Region rẻ nhất",
+      "Region nào cũng như nhau, không có sự khác biệt"
+    ],
+    answer: 1,
+    explanation: "Chọn Region dựa trên 4 yếu tố: <strong>Latency</strong> (gần user), <strong>Compliance</strong> (data residency requirements — ví dụ GDPR yêu cầu data ở EU), <strong>Pricing</strong> (giá khác nhau giữa các Region), <strong>Service availability</strong> (không phải service nào cũng có ở mọi Region)."
+  }
+];
+
+let current = 0, score = 0;
+let answered = new Array(questions.length).fill(false);
+
+function buildQuiz() {
+  const area = document.getElementById('quizArea');
+  area.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.id = `card-${i}`;
+    const opts = q.options.map((opt, j) => `
+      <div class="option" id="opt-${i}-${j}" onclick="selectOption(${i},${j})">
+        <div class="option-letter">${letters[j]}</div>
+        <div class="option-text">${opt}</div>
+      </div>`).join('');
+    card.innerHTML = `
+      <div class="question-meta">Câu ${i+1} / ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">${opts}</div>
+      <div class="explanation" id="exp-${i}">💡 ${q.explanation}</div>`;
+    area.appendChild(card);
+  });
+  const nav = document.createElement('div');
+  nav.className = 'nav'; nav.id = 'navBar';
+  nav.innerHTML = `
+    <button class="btn btn-ghost" id="btnPrev" onclick="navigate(-1)" disabled>← Trước</button>
+    <span class="score-counter" id="scoreCounter">0 / ${questions.length} đúng</span>
+    <button class="btn btn-primary" id="btnNext" onclick="navigate(1)" disabled>Tiếp →</button>`;
+  area.appendChild(nav);
+  updateProgress();
+}
+
+function selectOption(qIdx, optIdx) {
+  if (answered[qIdx]) return;
+  answered[qIdx] = true;
+  const q = questions[qIdx];
+  q.options.forEach((_, j) => {
+    const el = document.getElementById(`opt-${qIdx}-${j}`);
+    el.classList.add('disabled');
+    if (j === q.answer) el.classList.add('correct');
+    else if (j === optIdx) el.classList.add('wrong');
+  });
+  if (optIdx === q.answer) score++;
+  document.getElementById(`exp-${qIdx}`).classList.add('show');
+  document.getElementById('scoreCounter').textContent = `${score} / ${questions.length} đúng`;
+  document.getElementById('btnNext').disabled = false;
+  if (current === questions.length - 1)
+    document.getElementById('btnNext').textContent = 'Xem kết quả →';
+  updateProgress();
+}
+
+function navigate(dir) {
+  const cards = document.querySelectorAll('.question-card');
+  cards[current].classList.remove('active');
+  current += dir;
+  if (current >= questions.length) { showResult(); return; }
+  cards[current].classList.add('active');
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = !answered[current];
+  document.getElementById('btnNext').textContent =
+    current === questions.length - 1 && answered[current] ? 'Xem kết quả →' : 'Tiếp →';
+  updateProgress();
+}
+
+function updateProgress() {
+  document.getElementById('progressBar').style.width =
+    ((current + 1) / questions.length * 100) + '%';
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  const result = document.getElementById('resultScreen');
+  result.classList.add('show');
+  const pct = Math.round(score / questions.length * 100);
+  let emoji, label;
+  if (pct >= 90)      { emoji = '🏆'; label = 'Xuất sắc! Bạn nắm vững Cloud Foundations rồi.'; }
+  else if (pct >= 75) { emoji = '🎯'; label = 'Tốt lắm! Ôn lại vài điểm nhỏ là hoàn hảo.'; }
+  else if (pct >= 60) { emoji = '📚'; label = 'Khá ổn. Đọc lại phần bạn còn nhầm nhé.'; }
+  else                { emoji = '💪'; label = 'Cần ôn thêm. Đọc lại file summary và thử lại!'; }
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultScore').textContent = pct + '%';
+  document.getElementById('resultLabel').textContent = label;
+  document.getElementById('correctCount').textContent = score;
+  document.getElementById('wrongCount').textContent = questions.length - score;
+  document.getElementById('totalCount').textContent = questions.length;
+}
+
+function restartQuiz() {
+  current = 0; score = 0;
+  answered = new Array(questions.length).fill(false);
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('quizArea').style.display = 'block';
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
