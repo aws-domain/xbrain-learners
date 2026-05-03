@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Domain 2 — Security & Compliance | CLF-C02 Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1a1f2e, #232b3e); border-bottom: 2px solid #ef4444; padding: 24px 32px; display: flex; align-items: center; gap: 16px; }
+    .aws-badge { background: #ef4444; color: #fff; font-weight: 800; padding: 6px 14px; border-radius: 6px; font-size: 13px; letter-spacing: 1px; }
+    header h1 { font-size: 22px; font-weight: 700; }
+    header p { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+    .progress-bar-wrap { background: #1e2535; padding: 12px 32px; border-bottom: 1px solid #2d3748; }
+    .progress-bar-track { background: #2d3748; border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { background: #ef4444; height: 100%; border-radius: 99px; transition: width 0.4s ease; width: 0%; }
+    .progress-label { font-size: 12px; color: #64748b; margin-top: 6px; }
+    main { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+    .question-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 28px; margin-bottom: 24px; display: none; }
+    .question-card.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .q-number { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .q-tag { font-size: 11px; background: #3b0a0a; color: #fca5a5; padding: 3px 10px; border-radius: 99px; }
+    .q-text { font-size: 17px; font-weight: 500; line-height: 1.6; margin-bottom: 24px; color: #f1f5f9; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option { display: flex; align-items: flex-start; gap: 12px; background: #0f1117; border: 1.5px solid #2d3748; border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
+    .option:hover:not(.disabled) { border-color: #ef4444; background: #1a1f2e; }
+    .option.selected { border-color: #60a5fa; background: #1e3a5f; }
+    .option.correct { border-color: #22c55e; background: #052e16; }
+    .option.wrong { border-color: #ef4444; background: #2d0a0a; }
+    .option.disabled { cursor: default; }
+    .opt-letter { min-width: 28px; height: 28px; border-radius: 50%; background: #2d3748; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #94a3b8; flex-shrink: 0; }
+    .option.correct .opt-letter { background: #22c55e; color: #fff; }
+    .option.wrong .opt-letter { background: #ef4444; color: #fff; }
+    .option.selected:not(.correct):not(.wrong) .opt-letter { background: #3b82f6; color: #fff; }
+    .opt-text { font-size: 15px; line-height: 1.5; padding-top: 2px; }
+    .explanation { margin-top: 20px; padding: 16px; background: #0d1f0d; border-left: 4px solid #22c55e; border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.6; color: #86efac; display: none; }
+    .explanation.wrong-exp { background: #1a0a0a; border-color: #ef4444; color: #fca5a5; }
+    .explanation.show { display: block; animation: fadeIn 0.3s ease; }
+    .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+    .btn { padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: #ef4444; color: #fff; }
+    .btn-primary:hover { background: #dc2626; }
+    .btn-secondary { background: #2d3748; color: #e2e8f0; }
+    .btn-secondary:hover { background: #374151; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #results { display: none; text-align: center; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 16px; padding: 48px 32px; }
+    .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 6px solid #ef4444; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .score-num { font-size: 42px; font-weight: 800; color: #ef4444; }
+    .score-label { font-size: 13px; color: #64748b; }
+    #results h2 { font-size: 26px; margin-bottom: 8px; }
+    #results p { color: #94a3b8; margin-bottom: 32px; }
+    .result-stats { display: flex; gap: 24px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+    .stat-box { background: #0f1117; border: 1px solid #2d3748; border-radius: 10px; padding: 16px 24px; min-width: 120px; }
+    .stat-box .val { font-size: 28px; font-weight: 700; }
+    .stat-box .lbl { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .correct-val { color: #22c55e; } .wrong-val { color: #ef4444; }
+    .pass { color: #22c55e; } .fail { color: #ef4444; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="aws-badge">CLF-C02</div>
+  <div>
+    <h1>Domain 2: Security and Compliance</h1>
+    <p>30% of scored content &nbsp;·&nbsp; 28 questions</p>
+  </div>
+</header>
+<div class="progress-bar-wrap">
+  <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">Question 1 of 28</div>
+</div>
+<main>
+  <div id="quiz-container"></div>
+  <div id="results">
+    <div class="score-circle"><span class="score-num" id="scoreNum">0%</span><span class="score-label">Score</span></div>
+    <h2 id="resultTitle"></h2><p id="resultMsg"></p>
+    <div class="result-stats">
+      <div class="stat-box"><div class="val correct-val" id="correctCount">0</div><div class="lbl">Correct</div></div>
+      <div class="stat-box"><div class="val wrong-val" id="wrongCount">0</div><div class="lbl">Incorrect</div></div>
+      <div class="stat-box"><div class="val" id="totalCount">28</div><div class="lbl">Total</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()">🔄 Restart Quiz</button>
+  </div>
+</main>
+<script>
+const questions = [
+  { tag:"Shared Responsibility", text:"According to the AWS Shared Responsibility Model, which of the following is AWS responsible for?", options:["Patching the operating system on EC2 instances","Physical security of data centers","Configuring security groups","Managing IAM user permissions"], answer:1, explanation:"AWS is responsible for 'Security OF the cloud' — this includes physical security of data centers, hardware, hypervisors, and the global infrastructure. Customers are responsible for what they put IN the cloud." },
+  { tag:"Shared Responsibility", text:"A company runs a web application on Amazon EC2. Who is responsible for patching the EC2 operating system?", options:["AWS, because EC2 is a managed service","The customer, because EC2 is IaaS","AWS and the customer share this equally","Neither — AWS handles all patching automatically"], answer:1, explanation:"EC2 is IaaS (Infrastructure as a Service). The customer is responsible for patching the guest OS, configuring security groups, and managing the application. AWS only patches the underlying hypervisor and physical infrastructure." },
+  { tag:"Shared Responsibility", text:"Which of the following is a SHARED responsibility between AWS and the customer?", options:["Physical security of AWS data centers","Patch management (infrastructure vs. guest OS)","Encryption of data at rest","IAM user password policies"], answer:1, explanation:"Patch management is shared: AWS patches the infrastructure (hypervisor, physical hardware), while customers patch the guest OS and applications. Data encryption and IAM policies are customer responsibilities; physical security is AWS's." },
+  { tag:"Shared Responsibility", text:"A company uses Amazon RDS. Who is responsible for patching the database engine?", options:["The customer","AWS","Both AWS and the customer","A third-party vendor"], answer:1, explanation:"Amazon RDS is a managed service (PaaS). AWS is responsible for patching the OS and database engine. The customer is responsible for database settings, user access, data encryption, and security groups." },
+  { tag:"IAM", text:"What is the recommended best practice for the AWS root user account?", options:["Use it for all daily administrative tasks","Enable MFA and avoid using it for everyday tasks","Share credentials with the IT team","Delete it after creating IAM users"], answer:1, explanation:"The root user has unrestricted access to all AWS services. Best practice is to enable MFA on the root account and only use it for specific tasks that require root access (like closing the account or changing the support plan)." },
+  { tag:"IAM", text:"A developer needs to give an EC2 instance permission to read from an S3 bucket. What is the BEST approach?", options:["Create an IAM user and embed access keys in the application code","Attach an IAM Role to the EC2 instance with the required S3 permissions","Store access keys in environment variables on the EC2 instance","Use the root account credentials"], answer:1, explanation:"IAM Roles are the best practice for granting AWS services permissions to other services. Roles provide temporary credentials automatically — no need to manage or embed long-term access keys in code." },
+  { tag:"IAM", text:"Which IAM component is a JSON document that defines what actions are allowed or denied on AWS resources?", options:["IAM Role","IAM Group","IAM Policy","IAM User"], answer:2, explanation:"An IAM Policy is a JSON document that defines permissions — specifying Effect (Allow/Deny), Action (what API calls), and Resource (which AWS resources). Policies are attached to users, groups, or roles." },
+  { tag:"IAM", text:"In IAM policy evaluation, what happens when there is a conflict between an Allow and a Deny statement?", options:["Allow takes precedence","Deny takes precedence","The most recently created policy wins","The policy attached to the user takes precedence over group policies"], answer:1, explanation:"In AWS IAM, an explicit Deny always overrides any Allow. This is a fundamental rule of IAM policy evaluation — if any policy denies an action, it is denied regardless of other Allow statements." },
+  { tag:"IAM", text:"Which AWS service allows you to manage access to multiple AWS accounts and business applications using a single sign-on?", options:["AWS IAM","Amazon Cognito","AWS IAM Identity Center (SSO)","AWS Directory Service"], answer:2, explanation:"AWS IAM Identity Center (formerly AWS Single Sign-On) provides centralized access management for multiple AWS accounts and applications, supporting federated identity with providers like Active Directory, Okta, and Azure AD." },
+  { tag:"IAM", text:"What is the Principle of Least Privilege?", options:["Granting all users administrator access for convenience","Granting only the minimum permissions required to perform a task","Denying all permissions by default and never granting any","Sharing permissions between users to reduce management overhead"], answer:1, explanation:"The Principle of Least Privilege means granting users, roles, and services only the minimum permissions they need to perform their specific tasks — nothing more. This reduces the attack surface and limits potential damage from compromised credentials." },
+  { tag:"Security Services", text:"Which AWS service uses machine learning to continuously monitor for malicious activity and unauthorized behavior in your AWS account?", options:["Amazon Inspector","AWS Shield","Amazon GuardDuty","AWS WAF"], answer:2, explanation:"Amazon GuardDuty is a threat detection service that uses ML to analyze VPC Flow Logs, CloudTrail events, and DNS logs to detect threats like unauthorized access, cryptocurrency mining, and data exfiltration — without requiring any agents." },
+  { tag:"Security Services", text:"A company needs to assess security vulnerabilities in their EC2 instances and container images. Which service should they use?", options:["Amazon GuardDuty","Amazon Inspector","AWS Shield","AWS Macie"], answer:1, explanation:"Amazon Inspector automatically assesses EC2 instances and container images for software vulnerabilities (CVEs), network exposure, and unintended access. It integrates with AWS Security Hub for centralized findings." },
+  { tag:"Security Services", text:"Which AWS service provides DDoS protection for all AWS customers at no additional cost?", options:["AWS WAF","AWS Shield Advanced","AWS Shield Standard","Amazon GuardDuty"], answer:2, explanation:"AWS Shield Standard is automatically enabled for all AWS customers at no extra cost. It provides protection against common Layer 3 and Layer 4 DDoS attacks. Shield Advanced is a paid service with enhanced protection." },
+  { tag:"Security Services", text:"A company wants to protect its web application from SQL injection and cross-site scripting (XSS) attacks. Which service should they use?", options:["AWS Shield","Amazon GuardDuty","AWS WAF (Web Application Firewall)","AWS Firewall Manager"], answer:2, explanation:"AWS WAF (Web Application Firewall) protects web applications from common exploits like SQL injection, XSS, and bad bots by filtering HTTP/HTTPS requests based on rules. It can be deployed on CloudFront, ALB, and API Gateway." },
+  { tag:"Compliance", text:"Where can a company download AWS compliance reports such as SOC 2 and PCI DSS certifications?", options:["AWS Trusted Advisor","AWS Config","AWS Artifact","AWS Security Hub"], answer:2, explanation:"AWS Artifact is a self-service portal where customers can access AWS compliance reports (SOC 1/2/3, PCI DSS, ISO certifications, HIPAA BAA) and agreements. It's free and accessible through the AWS Console." },
+  { tag:"Compliance", text:"Which AWS service records all API calls made in your AWS account, including who made the call, when, and from where?", options:["Amazon CloudWatch","AWS Config","AWS CloudTrail","AWS Audit Manager"], answer:2, explanation:"AWS CloudTrail records all API calls in your AWS account — capturing who did what, when, and from which IP address. Logs are stored in S3 and are essential for security auditing, compliance, and incident investigation." },
+  { tag:"Compliance", text:"A company needs to track configuration changes to their AWS resources over time and evaluate compliance with internal policies. Which service should they use?", options:["AWS CloudTrail","Amazon CloudWatch","AWS Config","AWS Trusted Advisor"], answer:2, explanation:"AWS Config records configuration changes to AWS resources over time and evaluates them against compliance rules. CloudTrail records API calls (who did what), while Config records resource configurations (what changed)." },
+  { tag:"Security Services", text:"Which AWS service uses ML to automatically discover and protect sensitive data (like PII and financial data) stored in Amazon S3?", options:["Amazon GuardDuty","Amazon Inspector","Amazon Macie","AWS Security Hub"], answer:2, explanation:"Amazon Macie uses machine learning to automatically discover, classify, and protect sensitive data in S3, including PII (personally identifiable information), financial data, and credentials. It alerts when data is improperly exposed." },
+  { tag:"IAM", text:"Which of the following tasks can ONLY be performed by the AWS root user?", options:["Creating IAM users","Launching EC2 instances","Closing the AWS account","Creating S3 buckets"], answer:2, explanation:"Closing an AWS account is one of the tasks that can only be performed by the root user. Other root-only tasks include changing the AWS Support plan, restoring IAM admin permissions, and modifying certain account settings." },
+  { tag:"Security Services", text:"A company wants to centrally manage WAF rules, Shield Advanced protections, and security groups across multiple AWS accounts. Which service should they use?", options:["AWS Security Hub","AWS Firewall Manager","Amazon GuardDuty","AWS Config"], answer:1, explanation:"AWS Firewall Manager provides centralized management of firewall rules (WAF, Shield Advanced, Security Groups, Network Firewall) across multiple accounts in an AWS Organization, ensuring consistent security policies." },
+  { tag:"Encryption", text:"Which AWS service is used to create and manage encryption keys for protecting data at rest and in transit?", options:["AWS Certificate Manager","AWS Secrets Manager","AWS KMS (Key Management Service)","AWS CloudHSM"], answer:2, explanation:"AWS KMS (Key Management Service) allows you to create and manage cryptographic keys (Customer Master Keys) used to encrypt data. It integrates with most AWS services including S3, EBS, RDS, and DynamoDB." },
+  { tag:"Encryption", text:"A company wants to protect data while it is being transmitted between their application and AWS services. What type of encryption should they implement?", options:["Encryption at rest","Encryption in transit","Client-side encryption","Server-side encryption"], answer:1, explanation:"Encryption in transit protects data as it moves across networks using TLS/SSL (HTTPS). This prevents interception of data during transmission between clients and AWS services or between AWS services." },
+  { tag:"IAM", text:"An IAM user needs temporary access to resources in another AWS account. What is the recommended approach?", options:["Create a new IAM user in the second account","Share the root account credentials","Use IAM Roles with cross-account access","Use the same access keys in both accounts"], answer:2, explanation:"IAM Roles with cross-account access allow users from one account to assume a role in another account, receiving temporary credentials. This is more secure than creating duplicate users or sharing credentials." },
+  { tag:"Security Services", text:"Which AWS service provides a centralized view of security findings from multiple AWS security services like GuardDuty, Inspector, and Macie?", options:["AWS CloudTrail","AWS Config","AWS Security Hub","Amazon Detective"], answer:2, explanation:"AWS Security Hub aggregates security findings from multiple AWS services (GuardDuty, Inspector, Macie, Firewall Manager) into a single centralized view, providing a security score and compliance checks." },
+  { tag:"Shared Responsibility", text:"Which of the following is the customer's responsibility when using AWS Lambda?", options:["Patching the underlying operating system","Managing the physical servers","Writing and securing the function code and IAM permissions","Maintaining the Lambda runtime environment"], answer:2, explanation:"With Lambda (serverless), AWS manages the physical servers, OS, and runtime environment. The customer is responsible for the function code, IAM permissions, environment variables, and data security." },
+  { tag:"IAM", text:"What type of IAM credential is used for programmatic access to AWS services via the CLI or SDK?", options:["Username and password","Access Key ID and Secret Access Key","MFA token","X.509 certificate"], answer:1, explanation:"Access Key ID and Secret Access Key are used for programmatic access to AWS via the CLI, SDK, or API. They should never be hardcoded in application code — use IAM Roles for EC2 or store them in AWS Secrets Manager." },
+  { tag:"Compliance", text:"A company needs to ensure their AWS workloads comply with HIPAA regulations for healthcare data. Where can they find AWS's HIPAA compliance documentation?", options:["AWS Trusted Advisor","AWS Config","AWS Artifact","AWS Security Hub"], answer:2, explanation:"AWS Artifact provides access to AWS compliance reports and agreements including HIPAA BAA (Business Associate Agreement), PCI DSS, SOC reports, and ISO certifications — all available for download at no cost." },
+  { tag:"Security Services", text:"Which of the following correctly describes the difference between AWS CloudTrail and Amazon CloudWatch?", options:["CloudTrail monitors performance metrics; CloudWatch records API calls","CloudTrail records API calls (who did what); CloudWatch monitors performance metrics and logs","Both services do the same thing","CloudWatch is for security; CloudTrail is for performance"], answer:1, explanation:"CloudTrail = 'who did what' — records all API calls for auditing and security investigation. CloudWatch = 'how is the system performing' — monitors metrics, logs, and creates alarms for operational health." }
+];
+
+let current = 0, answered = [], score = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.id = 'q' + i;
+    card.innerHTML = `
+      <div class="q-meta"><span class="q-number">Question ${i+1} of ${questions.length}</span><span class="q-tag">${q.tag}</span></div>
+      <div class="q-text">${q.text}</div>
+      <div class="options" id="opts${i}">${q.options.map((o,j)=>`<div class="option" id="opt${i}_${j}" onclick="selectAnswer(${i},${j})"><div class="opt-letter">${String.fromCharCode(65+j)}</div><div class="opt-text">${o}</div></div>`).join('')}</div>
+      <div class="explanation" id="exp${i}"></div>
+      <div class="nav"><button class="btn btn-secondary" onclick="prevQ()" ${i===0?'disabled':''}>← Previous</button><button class="btn btn-primary" id="nextBtn${i}" onclick="nextQ(${i})" disabled>${i===questions.length-1?'Finish Quiz':'Next →'}</button></div>`;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (answered[qIdx] !== undefined) return;
+  answered[qIdx] = optIdx;
+  const q = questions[qIdx];
+  const opts = document.querySelectorAll(`#opts${qIdx} .option`);
+  opts.forEach(o => o.classList.add('disabled'));
+  opts[optIdx].classList.add(optIdx === q.answer ? 'correct' : 'wrong');
+  if (optIdx !== q.answer) opts[q.answer].classList.add('correct');
+  if (optIdx === q.answer) score++;
+  const exp = document.getElementById(`exp${qIdx}`);
+  exp.textContent = '💡 ' + q.explanation;
+  exp.className = 'explanation show' + (optIdx !== q.answer ? ' wrong-exp' : '');
+  document.getElementById(`nextBtn${qIdx}`).disabled = false;
+}
+
+function nextQ(i) {
+  if (answered[i] === undefined) return;
+  document.getElementById('q'+i).classList.remove('active');
+  if (i === questions.length - 1) { showResults(); return; }
+  current = i + 1;
+  document.getElementById('q'+current).classList.add('active');
+  updateProgress();
+}
+
+function prevQ() {
+  if (current === 0) return;
+  document.getElementById('q'+current).classList.remove('active');
+  current--;
+  document.getElementById('q'+current).classList.add('active');
+  updateProgress();
+}
+
+function updateProgress() {
+  document.getElementById('progressFill').style.width = (current / questions.length * 100).toFixed(0) + '%';
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${questions.length}`;
+}
+
+function showResults() {
+  document.getElementById('quiz-container').style.display = 'none';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Quiz Complete!';
+  const pct = Math.round(score / questions.length * 100);
+  document.getElementById('scoreNum').textContent = pct + '%';
+  document.getElementById('correctCount').textContent = score;
+  document.getElementById('wrongCount').textContent = questions.length - score;
+  document.getElementById('totalCount').textContent = questions.length;
+  const pass = pct >= 70;
+  document.getElementById('resultTitle').textContent = pass ? '🎉 Passed!' : '📚 Keep Studying';
+  document.getElementById('resultTitle').className = pass ? 'pass' : 'fail';
+  document.getElementById('resultMsg').textContent = pass ? `Excellent! You scored ${pct}% — you're ready for Domain 3.` : `You scored ${pct}%. Review Domain 2 materials and try again. Passing score is 70%.`;
+  document.getElementById('results').style.display = 'block';
+}
+
+function restartQuiz() {
+  current = 0; answered = []; score = 0;
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

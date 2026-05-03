@@ -2,7 +2,9 @@
   "mcpServers": {
     "aws-docs": {
       "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -15,16 +17,20 @@
     },
     "aws-cli": {
       "command": "uvx",
-      "args": ["awslabs.aws-cli-mcp-server@latest"],
+      "args": [
+        "awslabs.aws-cli-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
-      "disabled": false,
+      "disabled": true,
       "autoApprove": []
     },
     "aws-serverless": {
       "command": "uvx",
-      "args": ["awslabs.aws-serverless-mcp-server@latest"],
+      "args": [
+        "awslabs.aws-serverless-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -33,7 +39,9 @@
     },
     "cloudwatch": {
       "command": "uvx",
-      "args": ["awslabs.cloudwatch-mcp-server@latest"],
+      "args": [
+        "awslabs.cloudwatch-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -46,7 +54,9 @@
     },
     "iam": {
       "command": "uvx",
-      "args": ["awslabs.iam-mcp-server@latest"],
+      "args": [
+        "awslabs.iam-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -55,11 +65,13 @@
     },
     "cost": {
       "command": "uvx",
-      "args": ["awslabs.cost-analysis-mcp-server@latest"],
+      "args": [
+        "awslabs.cost-analysis-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "get_cost_and_usage",
         "get_cost_forecast"

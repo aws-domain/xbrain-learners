@@ -23,6 +23,9 @@
 | AWS SimuLearn: Networking Concepts | SimuLearn | Networking | 1h | Fundamental |
 | Differences Between Security Groups and NACLs | Digital course | Networking | 6m | Fundamental |
 | Understanding AWS Networking Gateways | Digital course | Networking | 30m | Fundamental |
+| Introduction to Amazon API Gateway | Digital course | Networking | 6m | Fundamental |
+| Introduction to Amazon Virtual Private Cloud (VPC) | Lab | Networking | 1h | Fundamental |
+| Configuring and Deploying VPCs with Multiple Subnets | Digital course | Networking | 1h | Fundamental |
 
 ## In Progress 🔄
 
