@@ -1,165 +1,183 @@
-# Task 4.3 — AWS Technical Resources and Support Options
+# Task 4.3 — Technical Resources and AWS Support
 
 > **Exam weight:** Domain 4 = 12% of scored content
 
-## AWS Support Plans
-
-| | Basic | Developer | Business | Enterprise On-Ramp | Enterprise |
-|---|---|---|---|---|---|
-| **Giá** | Miễn phí | $29/month | $100/month | $5,500/month | $15,000/month |
-| **Technical support** | Không | Business hours | 24/7 | 24/7 | 24/7 |
-| **Response time (critical)** | N/A | N/A | < 1 hour | < 30 min | < 15 min |
-| **Trusted Advisor** | 7 checks | 7 checks | Full | Full | Full |
-| **TAM** | Không | Không | Không | Pool of TAMs | Dedicated TAM |
-| **Concierge** | Không | Không | Không | Không | Có |
-
-### Basic Support
-- Miễn phí cho tất cả AWS accounts
-- Truy cập: documentation, whitepapers, AWS re:Post
-- AWS Trusted Advisor: 7 core checks
-- AWS Health Dashboard
-
-### Developer Support
-- Phù hợp cho: development và testing
-- Email support trong business hours
-- 1 primary contact
-
-### Business Support
-- Phù hợp cho: production workloads
-- 24/7 phone, email, chat support
-- Full Trusted Advisor checks
-- AWS Support API
-- Third-party software support
-
-### Enterprise On-Ramp Support
-- Phù hợp cho: business-critical workloads
-- Pool of Technical Account Managers (TAMs)
-- Concierge Support Team
-- Infrastructure Event Management (một lần/năm)
-
-### Enterprise Support
-- Phù hợp cho: mission-critical workloads
-- **Dedicated Technical Account Manager (TAM)**
-- Concierge Support Team
-- Infrastructure Event Management (không giới hạn)
-- Well-Architected Reviews
-- Operations Reviews
+> ⚠️ **Lưu ý quan trọng cho kỳ thi CLF-C02:**  
+> AWS đang trong quá trình thay đổi cấu trúc Support Plans (hiệu lực từ 1/1/2027):
+> - **Developer Support** → bị discontinued, thay bằng **Business Support+**
+> - **Business Support** → bị discontinued, thay bằng **Business Support+**
+> - **Enterprise On-Ramp** → bị discontinued, tự động upgrade lên **Enterprise Support**
+>
+> Tuy nhiên, **đề thi CLF-C02 hiện tại vẫn hỏi về 4 plans cũ** (Basic, Developer, Business, Enterprise).  
+> Học cả hai để an toàn.
 
 ---
 
-## AWS Technical Resources
+## AWS Support Plans (4 plans — vẫn xuất hiện trong exam)
 
-### AWS Documentation
-- docs.aws.amazon.com
-- User guides, API references, developer guides
-- Luôn cập nhật, chính xác nhất
+### Basic Support
+- **Giá:** Miễn phí (tất cả AWS accounts)
+- **Technical support:** Không có
+- **Trusted Advisor:** 7 core checks (Security + Service Limits)
+- **Bao gồm:** Documentation, whitepapers, AWS re:Post forums, Service Health Dashboard
+- **Dùng cho:** Non-production, learning, experimentation
 
-### AWS Whitepapers
-- In-depth technical papers về AWS services và best practices
-- Topics: security, architecture, cost optimization...
-- aws.amazon.com/whitepapers
+### Developer Support
+- **Giá:** $29/tháng hoặc 3% monthly AWS charges (lấy cái cao hơn)
+- **Technical support:** Email trong **business hours** (8AM–6PM theo timezone của account)
+- **Contacts:** 1 primary contact, unlimited cases
+- **Response time:**
+  - General guidance: < 24 business hours
+  - System impaired: < 12 business hours
+- **Trusted Advisor:** 7 core checks
+- **Dùng cho:** Development và testing environments
 
-### AWS Knowledge Center
-- FAQ và hướng dẫn giải quyết vấn đề phổ biến
-- aws.amazon.com/premiumsupport/knowledge-center
+### Business Support
+- **Giá:** $100/tháng hoặc % monthly charges (10% cho $0–$10K, giảm dần theo volume)
+- **Technical support:** **24/7** phone, email, chat
+- **Contacts:** Unlimited contacts, unlimited cases
+- **Response time:**
+  - General guidance: < 24 giờ
+  - System impaired: < 12 giờ
+  - Production system impaired: **< 4 giờ**
+  - Production system down: **< 1 giờ**
+- **Trusted Advisor:** Full access (tất cả checks)
+- **AWS Health API:** ✅
+- **Third-party software support:** ✅
+- **Dùng cho:** Production workloads
 
-### AWS re:Post
-- **Community Q&A platform** (thay thế AWS Forums)
-- Hỏi đáp với AWS experts và community
-- repost.aws
+### Enterprise On-Ramp Support
+- **Giá:** $5,500/tháng hoặc 10% monthly charges
+- **Technical support:** 24/7 phone, email, chat
+- **Response time:**
+  - Business-critical system down: **< 30 phút**
+- **TAM:** Access to a **pool of TAMs** (không dedicated)
+- **Concierge Support Team:** ✅
+- **Dùng cho:** Production và business-critical workloads
 
-### AWS Prescriptive Guidance
-- **Step-by-step guidance** cho specific use cases
-- Migration patterns, modernization strategies
-- aws.amazon.com/prescriptive-guidance
+### Enterprise Support
+- **Giá:** $15,000/tháng (đang giảm xuống $5,000 theo thông báo mới)
+- **Technical support:** 24/7 phone, email, chat
+- **Response time:**
+  - Business-critical system down: **< 15 phút**
+- **TAM:** **Dedicated** Technical Account Manager
+- **Concierge Support Team:** ✅
+- **Infrastructure Event Management:** Included
+- **Well-Architected Reviews:** Included
+- **Dùng cho:** Mission-critical workloads, large enterprises
 
-### AWS Blogs
-- aws.amazon.com/blogs
-- Announcements, tutorials, case studies
+---
+
+## So sánh Support Plans (bảng thi quan trọng)
+
+| | Basic | Developer | Business | Enterprise |
+|---|---|---|---|---|
+| **Giá** | Free | $29/tháng | $100/tháng | $15,000/tháng |
+| **24/7 support** | ❌ | ❌ (business hours) | ✅ | ✅ |
+| **Phone support** | ❌ | ❌ | ✅ | ✅ |
+| **Production down response** | N/A | N/A | **< 1 giờ** | **< 15 phút** |
+| **Trusted Advisor** | 7 checks | 7 checks | Full | Full |
+| **TAM** | ❌ | ❌ | ❌ | ✅ (dedicated) |
+| **Health API** | ❌ | ❌ | ✅ | ✅ |
 
 ---
 
 ## AWS Trusted Advisor
 
-5 categories:
-1. **Cost Optimization** — Idle resources, underutilized instances
-2. **Performance** — High utilization, CloudFront optimization
-3. **Security** — Open ports, MFA on root, public S3 buckets
-4. **Fault Tolerance** — Multi-AZ, backups, Route 53 health checks
-5. **Service Limits** — Approaching service quotas
+### Tổng quan
+- Công cụ **tự động kiểm tra** AWS environment và đưa ra recommendations
+- Giống như "người cố vấn" kiểm tra best practices
 
-**Free checks (Basic/Developer):** 7 core security và service limit checks  
-**Full checks (Business/Enterprise):** 100+ checks across all categories
+### 5 Categories
+1. **Cost Optimization** — Identify unused/underutilized resources, RI recommendations
+2. **Performance** — Improve speed and responsiveness
+3. **Security** — Close security gaps, enable security features
+4. **Fault Tolerance** — Increase availability and redundancy
+5. **Service Limits** — Check if approaching AWS service quotas
+
+### Access Levels
+- **Basic/Developer:** 7 core checks (chủ yếu Security và Service Limits)
+- **Business/Enterprise:** Full access — 500+ checks across all 5 categories
+
+---
+
+## AWS Technical Account Manager (TAM)
+
+- **Dedicated advisor** cho Enterprise customers
+- Proactively monitor environment, identify issues trước khi xảy ra
+- Hỗ trợ planning, architecture reviews, operational reviews
+- Điểm liên hệ chính với AWS
+- **Chỉ có ở Enterprise Support plan** (dedicated) — Enterprise On-Ramp có pool of TAMs
+
+---
+
+## Các Technical Resources khác
+
+### AWS Knowledge Center
+- **FAQ và how-to guides** cho các vấn đề phổ biến
+- Miễn phí, không cần support plan
+
+### AWS re:Post
+- **Community Q&A platform** (thay thế AWS Forums cũ)
+- Hỏi và trả lời từ AWS experts, employees, và community
+- Miễn phí cho tất cả
+- URL: repost.aws
+
+### AWS IQ
+- Kết nối customers với **AWS Certified third-party experts**
+- Experts giúp implement solutions, migrate workloads
+- Thanh toán qua AWS account
+
+### AWS Managed Services (AMS)
+- AWS **vận hành infrastructure** thay cho bạn
+- Handles patching, monitoring, backup, incident management
+- Dành cho enterprises muốn outsource cloud operations
+
+### AWS Professional Services
+- **AWS consultants** giúp implement cloud strategies
+- Dành cho large-scale migrations và transformations
+
+---
+
+## AWS Marketplace
+
+- **Digital catalog** với hàng nghìn third-party software
+- Mua software và charges xuất hiện trên AWS bill
+- Categories: Security, Networking, Storage, ML, DevOps...
+- Vendors: Palo Alto, Splunk, Datadog, MongoDB...
 
 ---
 
 ## AWS Health Dashboard
 
 ### Service Health Dashboard
-- Status của tất cả AWS services theo Region
-- Lịch sử incidents
+- Hiển thị **trạng thái của tất cả AWS services** theo region
+- Public, không cần đăng nhập
 - URL: health.aws.amazon.com
 
-### AWS Health (Personal Health Dashboard)
-- **Personalized view** về events ảnh hưởng đến **account của bạn**
-- Proactive notifications về scheduled maintenance
-- Tích hợp với EventBridge để automate responses
-- AWS Health API — programmatic access
+### Personal Health Dashboard (AWS Health)
+- Hiển thị events **ảnh hưởng đến account của bạn** cụ thể
+- Scheduled maintenance, service degradations, security notifications
+- **Business/Enterprise:** Access qua AWS Health API
 
 ---
 
-## AWS Partner Network (APN)
+## AWS Artifact
 
-### Independent Software Vendors (ISVs)
-- Công ty phát triển **software products** chạy trên AWS
-- Ví dụ: Datadog, Splunk, HashiCorp
-
-### System Integrators (SIs)
-- Công ty **tư vấn và triển khai** AWS solutions
-- Ví dụ: Accenture, Deloitte, Wipro
-
-### AWS Marketplace
-- **Digital catalog** với hàng nghìn software listings
-- Mua, deploy, manage third-party software
-- Billing tích hợp vào AWS bill
-- Categories: Security, Networking, Storage, ML, DevOps...
-- **Benefits:** Simplified procurement, flexible pricing, quick deployment
-
-### Partner Benefits
-- Partner training và certification
-- Partner events và summits
-- Volume discounts
-- Co-selling với AWS
-
----
-
-## AWS Professional Services
-
-- AWS team của **consultants** giúp achieve business outcomes
-- Work alongside customer teams
-- Dùng cho: large migrations, complex architectures
-
-### AWS Solutions Architects
-- **Technical experts** giúp design AWS solutions
-- Available qua AWS Support (Business/Enterprise)
-- Không tính phí riêng (included trong support plan)
-
----
-
-## AWS Trust and Safety Team
-
-- Report **abuse của AWS resources**
-- Ví dụ: spam, phishing, malware, DDoS attacks từ AWS IPs
-- Contact: aws.amazon.com/forms/report-abuse
+- Portal để download **compliance reports và certifications** của AWS
+- SOC 1/2/3, PCI DSS, ISO 27001, HIPAA BAA...
+- Miễn phí, accessible qua AWS Console
+- Dùng để chứng minh với auditors rằng AWS infrastructure đáp ứng compliance requirements
 
 ---
 
 ## Exam Tips
 
-- Basic = miễn phí; Developer = email only; Business = 24/7 phone
-- TAM = chỉ có Enterprise On-Ramp và Enterprise
-- Trusted Advisor full checks = cần Business hoặc Enterprise
-- AWS Health = personalized alerts cho account của bạn
-- AWS Marketplace = mua third-party software, billing qua AWS
-- re:Post = community forum (thay thế AWS Forums)
-- Trust and Safety = report abuse, không phải security incidents
+- Developer plan = email only, **business hours** — **không có 24/7**
+- Business plan = **minimum** để có 24/7 phone support + production down < 1 giờ
+- Enterprise = **dedicated TAM** + < 15 phút response
+- Trusted Advisor full access = **Business plan trở lên**
+- TAM dedicated = **chỉ Enterprise** (On-Ramp có pool, không dedicated)
+- AWS Artifact = compliance reports — **không phải support tool**
+- re:Post = community forum, miễn phí cho tất cả
+- Personal Health Dashboard = events ảnh hưởng đến **account của bạn** cụ thể (khác Service Health Dashboard là global)

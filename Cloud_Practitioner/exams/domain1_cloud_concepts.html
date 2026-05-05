@@ -315,16 +315,34 @@ const questions = [
   }
 ];
 
+const STORAGE_KEY = 'quiz_domain1';
+
 let current = 0;
 let answered = [];
 let score = 0;
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ current, answered, score }));
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const s = JSON.parse(saved);
+      current = s.current || 0;
+      answered = s.answered || [];
+      score = s.score || 0;
+    }
+  } catch(e) { /* ignore */ }
+}
 
 function buildQuiz() {
   const container = document.getElementById('quiz-container');
   container.innerHTML = '';
   questions.forEach((q, i) => {
     const card = document.createElement('div');
-    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.className = 'question-card' + (i === current ? ' active' : '');
     card.id = 'q' + i;
     card.innerHTML = `
       <div class="q-meta">
@@ -341,10 +359,23 @@ function buildQuiz() {
       </div>
       <div class="explanation" id="exp${i}"></div>
       <div class="nav">
-        <button class="btn btn-secondary" onclick="prevQ()" ${i===0?'disabled':''}>← Previous</button>
+        <button class="btn btn-secondary" onclick="prevQ(${i})" ${i===0?'disabled':''}>← Previous</button>
         <button class="btn btn-primary" id="nextBtn${i}" onclick="nextQ(${i})" disabled>${i===questions.length-1?'Finish Quiz':'Next →'}</button>
       </div>`;
     container.appendChild(card);
+  });
+  // Restore answered state into DOM
+  answered.forEach((optIdx, qIdx) => {
+    if (optIdx === undefined) return;
+    const q = questions[qIdx];
+    const opts = document.querySelectorAll(`#opts${qIdx} .option`);
+    opts.forEach(o => o.classList.add('disabled'));
+    opts[optIdx].classList.add(optIdx === q.answer ? 'correct' : 'wrong');
+    if (optIdx !== q.answer) opts[q.answer].classList.add('correct');
+    const exp = document.getElementById(`exp${qIdx}`);
+    exp.textContent = '💡 ' + q.explanation;
+    exp.className = 'explanation show' + (optIdx !== q.answer ? ' wrong-exp' : '');
+    document.getElementById(`nextBtn${qIdx}`).disabled = false;
   });
   updateProgress();
 }
@@ -362,6 +393,7 @@ function selectAnswer(qIdx, optIdx) {
   exp.textContent = '💡 ' + q.explanation;
   exp.className = 'explanation show' + (optIdx !== q.answer ? ' wrong-exp' : '');
   document.getElementById(`nextBtn${qIdx}`).disabled = false;
+  saveState();
 }
 
 function nextQ(i) {
@@ -371,14 +403,16 @@ function nextQ(i) {
   current = i + 1;
   document.getElementById('q'+current).classList.add('active');
   updateProgress();
+  saveState();
 }
 
-function prevQ() {
-  if (current === 0) return;
-  document.getElementById('q'+current).classList.remove('active');
-  current--;
+function prevQ(i) {
+  if (i === 0) return;
+  document.getElementById('q'+i).classList.remove('active');
+  current = i - 1;
   document.getElementById('q'+current).classList.add('active');
   updateProgress();
+  saveState();
 }
 
 function updateProgress() {
@@ -403,15 +437,18 @@ function showResults() {
     ? `Great job! You scored ${pct}% — you're ready to move on to Domain 2.`
     : `You scored ${pct}%. Review the Domain 1 study materials and try again. Passing score is 70%.`;
   document.getElementById('results').style.display = 'block';
+  localStorage.removeItem(STORAGE_KEY);
 }
 
 function restartQuiz() {
   current = 0; answered = []; score = 0;
+  localStorage.removeItem(STORAGE_KEY);
   document.getElementById('results').style.display = 'none';
   document.getElementById('quiz-container').style.display = 'block';
   buildQuiz();
 }
 
+loadState();
 buildQuiz();
 </script>
 </body>
