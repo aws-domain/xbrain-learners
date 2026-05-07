@@ -19,8 +19,7 @@
       "expected_answer": "Yes. The deployment freeze (Fri 18:00 - Mon 08:00) normally blocks deploys, but the incident response policy allows P1 hotfixes to override the freeze with VP Engineering (Mark Sullivan) approval.",
       "source_documents": [
         "deployment_policy.md",
-        "incident_response_policy.md",
-        "team_structure.md"
+        "incident_response_policy.md"
       ],
       "reasoning_required": "Synthesize freeze policy + P1 exception + who approves.",
       "grading_notes": "Must mention: (1) freeze is active, (2) P1 overrides it, (3) VP Mark Sullivan approval."
@@ -30,8 +29,9 @@
       "question": "Which services would be directly affected if AuthSvc goes completely down?",
       "expected_answer": "PaymentGW and OrderSvc — both depend on AuthSvc for token validation. All other services may also be impacted since AuthSvc is described as the single point of auth.",
       "source_documents": [
-        "service_architecture.md",
-        "service_authsvc.md"
+        "service_authsvc.md",
+        "service_paymentgw.md",
+        "service_ordersvc.md"
       ],
       "reasoning_required": "Cross-reference dependency graph with AuthSvc description.",
       "grading_notes": "Must identify PaymentGW and OrderSvc as direct dependencies."

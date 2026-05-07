@@ -114,7 +114,7 @@ See `monitoring_dashboard_guide.md` for a full walkthrough of key dashboards.
 ## First Week Goals
 
 1. **Shadow on-call rotation.** Your team lead will pair you with the current on-call engineer for your first week. Observe how alerts are triaged, how incidents are communicated, and how dashboards are used.
-2. **Review service architecture docs.** Read `service_architecture.md` for a complete picture of all six services and how they connect. Read the specific docs for your team's services.
+2. **Review service architecture docs.** Read `architecture_review_feb_2026.md` for a complete picture of all six services and how they connect. Read the specific docs for your team's services.
 3. **Complete security training.** Mandatory for all engineers. Takes approximately 2 hours. Link will be sent by IT on Day 1. Must be completed within your first week.
    - Covers: PCI-DSS awareness (GeekBrain is PCI-DSS Level 1 compliant), data handling policies, access control principles.
 
@@ -154,8 +154,8 @@ Production database access requires separate approval and MFA. Contact your team
 
 ## Related Documents
 
-- `team_structure.md` — Full team roster, responsibilities, and escalation paths
-- `service_architecture.md` — All six services: tech stacks, dependencies
+- `team_platform.md`, `team_commerce.md`, `team_data.md`, `team_engagement.md` — Team rosters, responsibilities, and escalation paths
+- `architecture_review_feb_2026.md` — Service architecture review and tech stacks
 - `on_call_handbook.md` — On-call procedures for when you take your first shift
 - `monitoring_dashboard_guide.md` — Dashboard guide
 - `security_policy.md` — Full security and compliance policies

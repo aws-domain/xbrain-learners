@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Bedrock & AI Knowledge Quiz — W4</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1419;
+            color: #e7e9ea;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #2f3336;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 1.8rem;
+            color: #ff9900;
+            margin-bottom: 8px;
+        }
+        header p {
+            color: #71767b;
+            font-size: 0.95rem;
+        }
+        .progress-bar {
+            background: #2f3336;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #ff9900, #ffb84d);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+        .progress-text {
+            text-align: center;
+            color: #71767b;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        .question-card {
+            background: #16202a;
+            border: 1px solid #2f3336;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        .question-card.correct { border-color: #00ba7c; }
+        .question-card.incorrect { border-color: #f4212e; }
+        .question-card.unanswered { border-color: #ff9900; }
+        .question-number {
+            display: inline-block;
+            background: #ff9900;
+            color: #0f1419;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .question-category {
+            display: inline-block;
+            background: #1d3a5c;
+            color: #5b9bd5;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 8px;
+            margin-left: 8px;
+        }
+        .question-text {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .options { list-style: none; }
+        .options li {
+            background: #1e2a35;
+            border: 1px solid #2f3336;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .options li:hover { background: #253341; border-color: #ff9900; }
+        .options li.selected { background: #1d3a5c; border-color: #5b9bd5; }
+        .options li.correct-answer { background: #0d3d2e; border-color: #00ba7c; }
+        .options li.wrong-answer { background: #3d1519; border-color: #f4212e; }
+        .options li .option-letter {
+            font-weight: 700;
+            color: #ff9900;
+            min-width: 22px;
+        }
+        .explanation {
+            display: none;
+            background: #1a2c1a;
+            border: 1px solid #2d5a2d;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #a8d5a8;
+        }
+        .explanation.show { display: block; }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #ff9900;
+            color: #0f1419;
+        }
+        .btn-primary:hover { background: #ffb84d; }
+        .btn-secondary {
+            background: #2f3336;
+            color: #e7e9ea;
+            margin-left: 10px;
+        }
+        .btn-secondary:hover { background: #3a3f42; }
+        .actions {
+            text-align: center;
+            padding: 30px 0;
+        }
+        .result-panel {
+            display: none;
+            background: #16202a;
+            border: 1px solid #2f3336;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .result-panel.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ff9900;
+        }
+        .result-text {
+            font-size: 1.1rem;
+            margin-top: 10px;
+            color: #71767b;
+        }
+        .result-breakdown {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .result-stat { text-align: center; }
+        .result-stat .num { font-size: 1.5rem; font-weight: 700; }
+        .result-stat .label { font-size: 0.8rem; color: #71767b; }
+        .stat-correct .num { color: #00ba7c; }
+        .stat-wrong .num { color: #f4212e; }
+        .stat-skip .num { color: #ff9900; }
+        code {
+            background: #2f3336;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: #ffb84d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AWS Bedrock & AI Knowledge Quiz</h1>
+            <p>Kiem tra kien thuc tu 3 file: Foundation Models, Getting Started, RAG & Knowledge Base</p>
+        </header>
+
+        <div class="progress-text" id="progressText">0 / 30 cau</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+        <div class="result-panel" id="resultPanel">
+            <div class="result-score" id="resultScore"></div>
+            <div class="result-text" id="resultText"></div>
+            <div class="result-breakdown">
+                <div class="result-stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">Dung</div></div>
+                <div class="result-stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">Sai</div></div>
+                <div class="result-stat stat-skip"><div class="num" id="skipCount">0</div><div class="label">Bo qua</div></div>
+            </div>
+        </div>
+
+        <div id="questionsContainer"></div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()">Nop bai</button>
+            <button class="btn btn-secondary" onclick="resetQuiz()">Lam lai</button>
+        </div>
+    </div>
+
+    <script>
+const questions = [
+    // === FOUNDATION MODELS & AI BASICS ===
+    {
+        category: "AI Basics",
+        question: "Machine Learning (ML) la gi trong moi quan he voi AI?",
+        options: [
+            "ML la khai niem rong hon AI",
+            "ML la mot nhanh con cua AI, tap trung vao thuat toan hoc tu du lieu",
+            "ML va AI la hai linh vuc hoan toan tach biet",
+            "ML chi ap dung cho xu ly hinh anh"
+        ],
+        correct: 1,
+        explanation: "ML la mot nhanh con cua AI tap trung vao cac thuat toan hoc tu du lieu. He thong cai thien hieu suat thong qua kinh nghiem ma khong can lap trinh ro rang."
+    },
+    {
+        category: "AI Basics",
+        question: "Dac diem NAO KHONG phai cua Foundation Models?",
+        options: [
+            "Duoc huan luyen tren luong du lieu da dang khong lo",
+            "Co the duoc dieu chinh cho nhieu tac vu downstream",
+            "Yeu cau training rieng cho tung task cu the tu dau",
+            "Ho tro transfer learning sang cac tac vu cu the"
+        ],
+        correct: 2,
+        explanation: "Foundation Models KHONG yeu cau training rieng cho tung task. Chung duoc pre-trained tren du lieu rong, sau do fine-tuned cho cac ung dung cu the — khac voi Traditional AI phai train tu dau cho moi task."
+    },
+    {
+        category: "AI Basics",
+        question: "Reinforcement Learning hoc bang cach nao?",
+        options: [
+            "Hoc tu du lieu co nhan (cap input-output)",
+            "Tim kiem mau trong du lieu khong co nhan",
+            "Hoc thong qua thu va sai voi phan thuong/hinh phat",
+            "Ket hop du lieu co nhan va khong co nhan"
+        ],
+        correct: 2,
+        explanation: "Reinforcement Learning hoc thong qua thu va sai (trial and error) voi he thong phan thuong va hinh phat. Agent tuong tac voi moi truong va hoc cach toi uu hanh vi."
+    },
+    {
+        category: "Foundation Models",
+        question: "Dieu gi xay ra khi tang Temperature tu 0 len 1 khi goi model?",
+        options: [
+            "Response ngan hon",
+            "Response deterministic hon (it ngau nhien)",
+            "Response creative hon (nhieu ngau nhien)",
+            "Model su dung it tokens hon"
+        ],
+        correct: 2,
+        explanation: "Temperature kiem soat tinh ngau nhien: 0 = deterministic (luon chon token co xac suat cao nhat), 1 = creative (nhieu ngau nhien hon, da dang hon). Tang temperature lam output it du doan hon."
+    },
+    {
+        category: "Foundation Models",
+        question: "Top-p (nucleus sampling) trong inference parameters co chuc nang gi?",
+        options: [
+            "Gioi han so luong tokens toi da trong response",
+            "Chon tap token co tong xac suat tich luy dat nguong p",
+            "Dinh nghia diem dung cua response",
+            "Kiem soat so luong requests dong thoi"
+        ],
+        correct: 1,
+        explanation: "Top-p (nucleus sampling) chon mot tap tokens nho nhat co tong xac suat tich luy >= p. Vi du top_p=0.9 nghia la chi xet cac tokens chiem 90% xac suat. Cung voi temperature, no kiem soat su da dang cua output."
+    },
+    // === AMAZON BEDROCK OVERVIEW ===
+    {
+        category: "Bedrock Overview",
+        question: "Amazon Bedrock la gi?",
+        options: [
+            "Mot database service cua AWS",
+            "Dich vu fully managed cung cap truy cap vao foundation models qua API",
+            "Mot framework de train model tu dau",
+            "Dich vu hosting website tinh"
+        ],
+        correct: 1,
+        explanation: "Amazon Bedrock la dich vu fully managed cung cap quyen truy cap vao foundation models tu cac cong ty AI hang dau (Anthropic, Meta, Amazon...) thong qua mot API duy nhat, voi bao mat cap doanh nghiep."
+    },
+    {
+        category: "Bedrock Overview",
+        question: "Uu diem chinh cua Converse API so voi Invoke API la gi?",
+        options: [
+            "Converse API re hon",
+            "Converse API la API thong nhat cho tat ca models, de chuyen doi giua cac models",
+            "Converse API chi ho tro Anthropic Claude",
+            "Converse API khong can authentication"
+        ],
+        correct: 1,
+        explanation: "Converse API la API thong nhat (unified) cho tat ca models tren Bedrock. Uu diem: de chuyen doi giua cac models ma khong can doi code, ho tro streaming, tich hop tot voi cac tinh nang AWS khac."
+    },
+    {
+        category: "Bedrock Overview",
+        question: "Model provisioning kieu 'On-Demand' tren Bedrock co dac diem gi?",
+        options: [
+            "Phai cam ket toi thieu 1 nam",
+            "Tra theo su dung, khong cam ket",
+            "Chi ho tro batch processing",
+            "Yeu cau reserved capacity truoc"
+        ],
+        correct: 1,
+        explanation: "On-Demand: tra theo su dung (pay-as-you-go), khong cam ket. Phu hop khi workload khong du doan. Provisioned Throughput thi dat truoc dung luong cho hieu suat on dinh."
+    },
+    {
+        category: "Bedrock Overview",
+        question: "Guardrails trong Amazon Bedrock KHONG bao gom tinh nang nao?",
+        options: [
+            "Content filtering (loc noi dung doc hai)",
+            "PII protection (bao ve thong tin ca nhan)",
+            "Model training (huan luyen model)",
+            "Topic filtering (chan chu de khong mong muon)"
+        ],
+        correct: 2,
+        explanation: "Guardrails bao gom: Content Filtering, PII Protection, Topic Filtering, Word Filtering, Contextual Grounding. Model training KHONG phai chuc nang cua Guardrails — do la Model Customization."
+    },
+    {
+        category: "Bedrock Overview",
+        question: "Khi nao can su dung Provisioned Throughput thay vi On-Demand?",
+        options: [
+            "Khi moi bat dau thu nghiem",
+            "Khi can hieu suat on dinh va du doan cho production workload",
+            "Khi chi goi model 1-2 lan moi ngay",
+            "Khi dung model mien phi"
+        ],
+        correct: 1,
+        explanation: "Provisioned Throughput phu hop khi can dung luong du tru cho hieu suat on dinh — thuong la production workload voi luu luong cao va can dam bao latency thap, khong bi throttling."
+    },
+    // === BEDROCK APIs & CLIENTS ===
+    {
+        category: "Bedrock APIs",
+        question: "Tai sao can 2 boto3 clients rieng biet: <code>bedrock-agent-runtime</code> va <code>bedrock-runtime</code>?",
+        options: [
+            "Vi chung o 2 AWS regions khac nhau",
+            "bedrock-agent-runtime cho KB/Agent (stateful), bedrock-runtime cho goi model (stateless)",
+            "Mot cai mien phi, mot cai tinh phi",
+            "Khong can 2, dung 1 la du"
+        ],
+        correct: 1,
+        explanation: "bedrock-agent-runtime quan ly Knowledge Base, Agent, memory — cac stateful operations. bedrock-runtime goi model truc tiep — stateless, low-level. Tach rieng vi chuc nang va lifecycle khac nhau."
+    },
+    {
+        category: "Bedrock APIs",
+        question: "Model moi (Claude 3.5+, Claude 4.x) yeu cau gi khi goi qua Bedrock?",
+        options: [
+            "Phai dung region eu-west-1",
+            "Phai dung Inference Profile voi prefix 'us.' truoc model ID",
+            "Phai dung Invoke API, khong duoc dung Converse",
+            "Phai co VPC Endpoint"
+        ],
+        correct: 1,
+        explanation: "Model moi bat buoc dung Inference Profile (prefix 'us.'). Vi du: us.anthropic.claude-haiku-4-5-20251001-v1:0. AWS yeu cau nay de tu dong route request sang region co capacity, dam bao availability cao."
+    },
+    {
+        category: "Bedrock APIs",
+        question: "Loi nao xay ra khi truyen ca <code>temperature</code> va <code>top_p</code> cung luc cho model moi?",
+        options: [
+            "Model tra ve ket qua ngau nhien",
+            "Loi: 'temperature and top_p cannot both be specified for this model'",
+            "Khong co loi, model tu dong chon 1",
+            "Response bi cat ngan"
+        ],
+        correct: 1,
+        explanation: "Voi model moi, khong duoc truyen ca temperature va top_p cung luc — se bao loi. Chi giu 1 trong 2 parameter. Thong thuong giu temperature va bo top_p."
+    },
+    {
+        category: "Bedrock APIs",
+        question: "Doan code nao dung de goi Bedrock InvokeModel voi Claude?",
+        options: [
+            "client.invoke_model(modelId=id, body=json.dumps({'messages': [...], 'anthropic_version': 'bedrock-2023-05-31', 'max_tokens': 1000}))",
+            "client.call_model(model=id, prompt='...')",
+            "client.generate(modelId=id, input='...')",
+            "client.run_model(id=id, text='...')"
+        ],
+        correct: 0,
+        explanation: "invoke_model() la method dung de goi model truc tiep. Body phai la JSON string chua: anthropic_version, messages (array), max_tokens. Day la low-level API cho toan quyen kiem soat."
+    },
+    // === RAG & KNOWLEDGE BASE ===
+    {
+        category: "RAG",
+        question: "Tai sao can RAG thay vi de LLM tra loi truc tiep tu training data?",
+        options: [
+            "Vi LLM khong biet tieng Viet",
+            "Vi LLM chi biet thong tin den training cutoff, khong biet du lieu noi bo/moi — RAG giam hallucination",
+            "Vi RAG nhanh hon goi LLM truc tiep",
+            "Vi AWS bat buoc dung RAG"
+        ],
+        correct: 1,
+        explanation: "LLM chi biet thong tin den training cutoff — khong biet du lieu noi bo hoac du lieu moi. RAG inject du lieu thuc te vao prompt, giam hallucination, va khong can fine-tune model khi du lieu thay doi."
+    },
+    {
+        category: "RAG",
+        question: "Thu tu dung cua RAG pipeline la gi?",
+        options: [
+            "Generate → Retrieve → Construct prompt",
+            "Embed query → Cosine similarity search → Construct prompt → Invoke LLM",
+            "Invoke LLM → Search database → Return answer",
+            "Upload docs → Fine-tune model → Generate"
+        ],
+        correct: 1,
+        explanation: "RAG pipeline: (1) Embed query thanh vector, (2) Cosine similarity search trong Vector Store de tim top-K chunks, (3) Construct prompt voi context + question, (4) Invoke LLM de generate answer."
+    },
+    {
+        category: "RAG",
+        question: "Cosine similarity score trong Retrieve API co y nghia gi?",
+        options: [
+            "Score cao = document cu hon",
+            "Score > 0.5 la retrieval tot, score < 0.3 co the lay sai document",
+            "Score luon bang 1.0 neu tim dung",
+            "Score chi ap dung cho SQL queries"
+        ],
+        correct: 1,
+        explanation: "Score = cosine similarity giua query vector va chunk vector. Range 0-1. Score > 0.5: retrieval tot. Score < 0.3: co the lay sai document. Day la do do 'giong' giua cau hoi va noi dung chunk."
+    },
+    // === CHUNKING & EMBEDDING ===
+    {
+        category: "Chunking",
+        question: "Tai sao can overlap khi chunking documents?",
+        options: [
+            "De tang kich thuoc vector store",
+            "De thong tin quan trong o ranh gioi giua 2 chunks khong bi cat dut",
+            "De giam so luong chunks",
+            "Vi AWS bat buoc"
+        ],
+        correct: 1,
+        explanation: "Overlap dam bao thong tin quan trong nam o ranh gioi giua 2 chunks khong bi mat. Overlap 20% la gia tri thuong dung — moi chunk se chua 20% noi dung cua chunk truoc do."
+    },
+    {
+        category: "Chunking",
+        question: "Voi 36 documents, chunk size 300 tokens, overlap 20% — uoc tinh se co bao nhieu chunks?",
+        options: [
+            "36 chunks (1 doc = 1 chunk)",
+            "Khoang 100 chunks",
+            "Khoang 216-224 chunks",
+            "Hon 1000 chunks"
+        ],
+        correct: 2,
+        explanation: "Moi doc ~1100 words ~ 1467 tokens. Step = 300 x 0.8 = 240. Chunks/doc = ceil((1467-300)/240) + 1 ~ 6. Tong: 36 x 6 ~ 216 chunks (thuc te 224). Hieu cong thuc nay de estimate storage va cost."
+    },
+    {
+        category: "Chunking",
+        question: "Chunking strategy nao phu hop nhat khi document ngan va can giu toan bo context?",
+        options: [
+            "Fixed-size chunking",
+            "Hierarchical chunking",
+            "No chunking (1 document = 1 chunk)",
+            "Semantic chunking"
+        ],
+        correct: 2,
+        explanation: "No chunking: 1 document = 1 chunk. Phu hop khi document ngan va can toan bo context trong 1 lan retrieve. Neu document dai thi khong nen dung vi se vuot qua context window cua LLM."
+    },
+    {
+        category: "Embedding",
+        question: "So sanh Amazon Titan Embeddings va Cohere Embed — khi nao nen dung Titan?",
+        options: [
+            "Khi can ho tro 100+ ngon ngu",
+            "Khi noi dung chu yeu la English va can tiet kiem chi phi (re hon 5x)",
+            "Khi can precision cao nhat co the",
+            "Khi dung voi DynamoDB"
+        ],
+        correct: 1,
+        explanation: "Titan Embeddings: $0.00002/1K tokens (re hon 5x Cohere), native AWS, phu hop English. Cohere: $0.00010/1K tokens, ho tro 100+ ngon ngu. Chon Titan khi English-only va can tiet kiem."
+    },
+    {
+        category: "Embedding",
+        question: "Dieu gi xay ra neu muon doi Embedding model sau khi da tao Knowledge Base?",
+        options: [
+            "Chi can update configuration",
+            "Phai tao lai Knowledge Base tu dau — khong the thay doi",
+            "Bedrock tu dong migrate",
+            "Chi can re-sync data source"
+        ],
+        correct: 1,
+        explanation: "Embedding model KHONG the thay doi sau khi tao KB. Phai tao lai KB moi neu muon doi model. Vi vectors da duoc tao boi model cu — model moi se tao vectors khong tuong thich."
+    },
+    // === VECTOR STORE & RETRIEVE ===
+    {
+        category: "Vector Store",
+        question: "Vector Store mac dinh va phu hop nhat cho hau het use cases tren Bedrock KB la gi?",
+        options: [
+            "Amazon S3 Vectors",
+            "Aurora PostgreSQL",
+            "OpenSearch Serverless",
+            "Neptune Analytics"
+        ],
+        correct: 2,
+        explanation: "OpenSearch Serverless la lua chon mac dinh: ho tro hybrid search (vector + keyword), serverless (khong can quan ly), phu hop hau het use cases va lab/demo."
+    },
+    {
+        category: "Retrieve API",
+        question: "Tang numberOfResults (top-K) tu 5 len 10 co anh huong gi?",
+        options: [
+            "Khong anh huong gi",
+            "Nhieu context hon, answer day du hon, nhung cham hon va ton nhieu tokens hon",
+            "Giam do chinh xac cua retrieval",
+            "Lam model bi loi"
+        ],
+        correct: 1,
+        explanation: "Tang K: nhieu chunks tra ve → nhieu context → answer co the day du hon (dac biet L2 multi-source). Nhung: cham hon (nhieu data), ton nhieu tokens input (tang cost). L1: K=5, L2: K=8-10."
+    },
+    // === RETRIEVE AND GENERATE vs MANUAL ===
+    {
+        category: "RAG Pattern",
+        question: "So sanh RetrieveAndGenerate API vs Retrieve + InvokeModel rieng — dieu nao DUNG?",
+        options: [
+            "RetrieveAndGenerate cho nhieu control hon ve prompt",
+            "Retrieve + InvokeModel cho toan quyen control prompt, de debug hon",
+            "RetrieveAndGenerate nhanh hon gap 10 lan",
+            "Khong co su khac biet"
+        ],
+        correct: 1,
+        explanation: "RetrieveAndGenerate: don gian, it code, NHUNG it control va khong tuy chinh duoc prompt. Retrieve + InvokeModel: nhieu code hon, NHUNG toan quyen control prompt, de debug, de toi uu cho conflict resolution (L2)."
+    },
+    // === AGENTS & TOOLS ===
+    {
+        category: "Bedrock Agents",
+        question: "Thanh phan NAO KHONG thuoc cau truc cua mot Bedrock Agent?",
+        options: [
+            "Foundation Model",
+            "Instructions (huong dan)",
+            "Action Groups (hanh dong co the thuc hien)",
+            "VPC Subnet"
+        ],
+        correct: 3,
+        explanation: "Mot Bedrock Agent gom: Foundation Model + Instructions + Action Groups + Knowledge Bases. VPC Subnet la khai niem networking, khong phai thanh phan cua Agent."
+    },
+    {
+        category: "Bedrock Agents",
+        question: "Trong RAG pipeline voi tools (L3), khi nao LLM nen goi Database Query tool thay vi retrieve tu KB?",
+        options: [
+            "Khi hoi ve team structure",
+            "Khi hoi ve so lieu chinh xac (cost, metrics lich su) — du lieu khong co trong documents",
+            "Khi hoi ve deployment policy",
+            "Khi hoi ve company overview"
+        ],
+        correct: 1,
+        explanation: "Knowledge Base chua documents (policies, architecture, team info). Database chua so lieu chinh xac (costs, incidents, SLA, daily metrics). Cau hoi ve so lieu/lich su → dung DB tool. Cau hoi ve policy/team → dung KB."
+    },
+    // === SECURITY & BEST PRACTICES ===
+    {
+        category: "Security",
+        question: "IAM policy nao the hien dung nguyen tac least privilege cho Bedrock?",
+        options: [
+            "Allow bedrock:* tren Resource *",
+            "Allow bedrock:InvokeModel chi tren resource arn:aws:bedrock:region::foundation-model/anthropic.claude-*",
+            "Allow * tren tat ca Bedrock resources",
+            "Deny tat ca roi manually approve tung request"
+        ],
+        correct: 1,
+        explanation: "Least privilege: chi cap quyen can thiet. Allow bedrock:InvokeModel chi tren model cu the (anthropic.claude-*) thay vi wildcard *. Gioi han action + resource = bao mat tot nhat."
+    },
+    {
+        category: "Security",
+        question: "Du lieu cua ban khi su dung Amazon Bedrock co bi dung de train base models khong?",
+        options: [
+            "Co, AWS dung du lieu cua ban de cai thien models",
+            "Khong, du lieu khong duoc dung de train base models — customer data duoc co lap",
+            "Chi khi ban dong y",
+            "Chi ap dung cho On-Demand tier"
+        ],
+        correct: 1,
+        explanation: "Amazon Bedrock dam bao: du lieu KHONG duoc dung de train base models. Customer data duoc co lap hoan toan. Day la cam ket quan trong ve data privacy cua Bedrock."
+    },
+    // === PROMPT ENGINEERING ===
+    {
+        category: "Prompt Engineering",
+        question: "De xu ly conflict giua documents trong L2 RAG, system prompt nen chi dan LLM the nao?",
+        options: [
+            "Luon chon document dau tien tim duoc",
+            "Uu tien document moi nhat/version cao nhat, giai thich khi co conflict",
+            "Bo qua tat ca documents co conflict",
+            "Hoi lai nguoi dung moi lan co conflict"
+        ],
+        correct: 1,
+        explanation: "System prompt nen chi dan: 'When documents conflict, prefer the most recent version or highest version number. Acknowledge the discrepancy.' Vi du: v2 (1000 rpm) override v1_archived (500 rpm)."
+    },
+    {
+        category: "Cost",
+        question: "Amazon Bedrock tinh phi chu yeu dua tren yeu to nao?",
+        options: [
+            "So luong documents trong S3",
+            "So luong tokens (input + output) cho moi lan goi model",
+            "So luong IAM users",
+            "Dung luong EBS volume"
+        ],
+        correct: 1,
+        explanation: "Bedrock tinh phi theo token-based pricing: so tokens input + output cho moi model invocation. Ngoai ra con phi cho custom models (training/hosting) va Knowledge Bases (storage/queries)."
+    }
+];
+
+        let userAnswers = new Array(questions.length).fill(-1);
+        let submitted = false;
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `question-${idx}`;
+                card.innerHTML = `
+                    <span class="question-number">Cau ${idx + 1}</span>
+                    <span class="question-category">${q.category}</span>
+                    <p class="question-text">${q.question}</p>
+                    <ul class="options">
+                        ${q.options.map((opt, oi) => `
+                            <li onclick="selectOption(${idx}, ${oi})" id="opt-${idx}-${oi}">
+                                <span class="option-letter">${String.fromCharCode(65 + oi)}.</span>
+                                <span>${opt}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <div class="explanation" id="explanation-${idx}">${q.explanation}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectOption(qIdx, optIdx) {
+            if (submitted) return;
+            userAnswers[qIdx] = optIdx;
+            const options = document.querySelectorAll(`#question-${qIdx} .options li`);
+            options.forEach((li, i) => {
+                li.className = i === optIdx ? 'selected' : '';
+            });
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const answered = userAnswers.filter(a => a !== -1).length;
+            document.getElementById('progressText').textContent = `${answered} / ${questions.length} cau`;
+            document.getElementById('progressFill').style.width = `${(answered / questions.length) * 100}%`;
+        }
+
+        function submitQuiz() {
+            if (submitted) return;
+            submitted = true;
+
+            let correct = 0, wrong = 0, skip = 0;
+
+            questions.forEach((q, idx) => {
+                const card = document.getElementById(`question-${idx}`);
+                const explanation = document.getElementById(`explanation-${idx}`);
+
+                if (userAnswers[idx] === -1) {
+                    skip++;
+                    card.className = 'question-card unanswered';
+                } else if (userAnswers[idx] === q.correct) {
+                    correct++;
+                    card.className = 'question-card correct';
+                    document.getElementById(`opt-${idx}-${userAnswers[idx]}`).className = 'correct-answer';
+                } else {
+                    wrong++;
+                    card.className = 'question-card incorrect';
+                    document.getElementById(`opt-${idx}-${userAnswers[idx]}`).className = 'wrong-answer';
+                    document.getElementById(`opt-${idx}-${q.correct}`).className = 'correct-answer';
+                }
+                explanation.className = 'explanation show';
+            });
+
+            const score = Math.round((correct / questions.length) * 100);
+            document.getElementById('resultScore').textContent = `${score}%`;
+            document.getElementById('resultText').textContent = score >= 80 ? 'Xuat sac! Ban nam vung kien thuc.' : score >= 60 ? 'Kha tot! Can on tap them mot so phan.' : 'Can on tap lai. Doc ky cac file summarize.';
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('wrongCount').textContent = wrong;
+            document.getElementById('skipCount').textContent = skip;
+            document.getElementById('resultPanel').className = 'result-panel show';
+            document.getElementById('submitBtn').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            submitted = false;
+            userAnswers = new Array(questions.length).fill(-1);
+            document.getElementById('resultPanel').className = 'result-panel';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = `0 / ${questions.length} cau`;
+            renderQuestions();
+        }
+
+        renderQuestions();
+    </script>
+</body>
+</html>
