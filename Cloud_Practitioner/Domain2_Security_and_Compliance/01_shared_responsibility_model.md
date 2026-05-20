@@ -6,10 +6,11 @@
 
 AWS Shared Responsibility Model phân chia trách nhiệm bảo mật giữa **AWS** và **khách hàng**:
 
-> **AWS** chịu trách nhiệm bảo mật **OF** the cloud  
+> **AWS** chịu trách nhiệm bảo mật **OF** the cloud\
+> \
 > **Khách hàng** chịu trách nhiệm bảo mật **IN** the cloud
 
----
+***
 
 ## AWS Responsibilities — "Security OF the Cloud"
 
@@ -21,7 +22,7 @@ AWS chịu trách nhiệm bảo vệ **cơ sở hạ tầng** chạy tất cả 
 - **Managed services infrastructure** — Phần cứng và phần mềm nền tảng của các managed services (RDS, DynamoDB, Lambda...)
 - **Global infrastructure** — Regions, Availability Zones, Edge Locations
 
----
+***
 
 ## Customer Responsibilities — "Security IN the Cloud"
 
@@ -34,44 +35,47 @@ Khách hàng chịu trách nhiệm về **những gì họ đưa lên cloud**:
 - **Application** — Code, dependencies, vulnerabilities
 - **Client-side encryption** — Mã hóa dữ liệu trước khi gửi lên AWS
 
----
+***
 
 ## Trách nhiệm thay đổi theo loại dịch vụ
 
-| Loại dịch vụ | AWS chịu trách nhiệm | Khách hàng chịu trách nhiệm |
-|---|---|---|
-| **IaaS** (EC2) | Hardware, hypervisor, network | OS, middleware, app, data |
-| **PaaS** (Elastic Beanstalk, RDS) | Hardware, OS, platform | App, data, access management |
-| **SaaS** (Amazon Chime, WorkMail) | Hầu hết mọi thứ | Data, user access |
-| **Serverless** (Lambda) | Hardware, OS, runtime | Code, IAM, data |
+| Loại dịch vụ                      | AWS chịu trách nhiệm          | Khách hàng chịu trách nhiệm  |
+| --------------------------------- | ----------------------------- | ---------------------------- |
+| **IaaS** (EC2)                    | Hardware, hypervisor, network | OS, middleware, app, data    |
+| **PaaS** (Elastic Beanstalk, RDS) | Hardware, OS, platform        | App, data, access management |
+| **SaaS** (Amazon Chime, WorkMail) | Hầu hết mọi thứ               | Data, user access            |
+| **Serverless** (Lambda)           | Hardware, OS, runtime         | Code, IAM, data              |
 
 ### Ví dụ cụ thể:
 
 **Amazon EC2:**
+
 - AWS: Physical host, hypervisor, network infrastructure
 - Customer: OS patching, security groups, application, data
 
 **Amazon RDS:**
+
 - AWS: Physical host, hypervisor, OS, database engine patching
 - Customer: Database settings, user access, data encryption, security groups
 
 **AWS Lambda:**
+
 - AWS: Physical host, OS, runtime environment
 - Customer: Function code, IAM permissions, environment variables
 
----
+***
 
 ## Shared Responsibilities
 
 Một số trách nhiệm được **chia sẻ** giữa AWS và khách hàng:
 
-| Trách nhiệm | AWS | Khách hàng |
-|---|---|---|
-| **Patch management** | Patch infrastructure | Patch guest OS và apps |
-| **Configuration management** | Configure infrastructure | Configure OS, DB, apps |
-| **Awareness & training** | Train AWS employees | Train customer employees |
+| Trách nhiệm                  | AWS                      | Khách hàng               |
+| ---------------------------- | ------------------------ | ------------------------ |
+| **Patch management**         | Patch infrastructure     | Patch guest OS và apps   |
+| **Configuration management** | Configure infrastructure | Configure OS, DB, apps   |
+| **Awareness & training**     | Train AWS employees      | Train customer employees |
 
----
+***
 
 ## Exam Tips
 

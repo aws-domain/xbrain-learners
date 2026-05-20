@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Networking Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #f8fafc;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background: #1e293b;
+            border-radius: 9999px;
+            height: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        .score-display {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .score-display span {
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .question-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-number {
+            color: #3b82f6;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #f1f5f9;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: #3b82f6;
+            background: #1a2744;
+        }
+
+        .option.selected {
+            border-color: #3b82f6;
+            background: #1e3a5f;
+        }
+
+        .option.correct {
+            border-color: #4ade80;
+            background: #0d3320;
+        }
+
+        .option.incorrect {
+            border-color: #f87171;
+            background: #3b1111;
+        }
+
+        .option.disabled {
+            cursor: default;
+        }
+
+        .option-letter {
+            background: #334155;
+            color: #94a3b8;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .option.correct .option-letter {
+            background: #4ade80;
+            color: #0d3320;
+        }
+
+        .option.incorrect .option-letter {
+            background: #f87171;
+            color: #3b1111;
+        }
+
+        .option-text {
+            line-height: 1.5;
+        }
+
+        .explanation {
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #0f172a;
+            border-left: 3px solid #3b82f6;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .results h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .results .final-score {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .results .final-score.excellent {
+            color: #4ade80;
+        }
+
+        .results .final-score.good {
+            color: #fbbf24;
+        }
+
+        .results .final-score.needs-work {
+            color: #f87171;
+        }
+
+        .results p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .topic-breakdown {
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        .topic-breakdown h3 {
+            margin-bottom: 1rem;
+            color: #f8fafc;
+        }
+
+        .topic-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #334155;
+            font-size: 0.9rem;
+        }
+
+        .topic-row .topic-name {
+            color: #cbd5e1;
+        }
+
+        .topic-row .topic-score {
+            font-weight: 600;
+        }
+
+        .topic-row .topic-score.good {
+            color: #4ade80;
+        }
+
+        .topic-row .topic-score.bad {
+            color: #f87171;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 1rem 0.5rem; }
+            h1 { font-size: 1.4rem; }
+            .question-text { font-size: 1rem; }
+            .option { padding: 0.75rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS Networking Quiz</h1>
+        <p class="subtitle">40 questions covering VPC, Subnets, Gateways, Security, Load Balancing, Connectivity</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text" id="progressText">Question 1 / 40</p>
+        <div class="score-display">Score: <span id="scoreDisplay">0</span> / <span id="totalAnswered">0</span></div>
+
+        <div id="quizContainer"></div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" id="prevBtn" onclick="navigate(-1)" disabled>Previous</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="navigate(1)">Next</button>
+        </div>
+
+        <div class="results" id="results">
+            <h2>Quiz Complete!</h2>
+            <div class="final-score" id="finalScore"></div>
+            <p id="resultMessage"></p>
+            <div class="topic-breakdown" id="topicBreakdown"></div>
+            <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top:2rem">Retry Quiz</button>
+        </div>
+    </div>
+
+    <script>
+const questions = [
+    // === VPC BASICS & SUBNETS ===
+    {
+        topic: "VPC & Subnets",
+        question: "Khi tạo VPC với CIDR 10.0.0.0/16, trong mỗi subnet AWS reserve bao nhiêu IP address không dùng được cho resource?",
+        options: ["3 IP", "4 IP", "5 IP", "2 IP"],
+        correct: 2,
+        explanation: "AWS reserve 5 IP đầu tiên trong mỗi subnet: network address, VPC router, DNS server, future use, và broadcast address."
+    },
+    {
+        topic: "VPC & Subnets",
+        question: "Subnet nào sau đây KHÔNG có route ra internet nhưng vẫn communicate được với các subnet khác trong VPC?",
+        options: ["Public Subnet", "Private Subnet", "Isolated Subnet", "VPN-only Subnet"],
+        correct: 2,
+        explanation: "Isolated Subnet chỉ có local route — isolated khỏi internet nhưng vẫn giao tiếp được trong VPC qua local route. Private Subnet vẫn có route ra internet qua NAT Gateway."
+    },
+    {
+        topic: "VPC & Subnets",
+        question: "Một subnet có thể span qua bao nhiêu Availability Zone?",
+        options: ["Tối đa 2 AZ", "Tối đa 3 AZ", "Chỉ 1 AZ duy nhất", "Tùy thuộc Region"],
+        correct: 2,
+        explanation: "Mỗi subnet nằm hoàn toàn trong 1 AZ duy nhất — không thể span nhiều AZ. Để high availability, tạo subnet ở nhiều AZ."
+    },
+    {
+        topic: "VPC & Subnets",
+        question: "Trong kiến trúc VPC 3-tier, NAT Gateway được đặt ở đâu?",
+        options: ["Private Subnet", "Public Subnet", "Isolated Subnet", "Ngoài VPC"],
+        correct: 1,
+        explanation: "NAT Gateway đặt ở public subnet (vì nó cần IGW để forward traffic ra internet), nhưng phục vụ private subnet — resource trong private subnet gửi traffic → NAT GW → IGW → Internet."
+    },
+    {
+        topic: "VPC & Subnets",
+        question: "CIDR block 10.0.0.0/16 cung cấp bao nhiêu địa chỉ IP?",
+        options: ["256", "1,024", "32,768", "65,536"],
+        correct: 3,
+        explanation: "Con số sau / càng lớn thì dải IP càng nhỏ. /16 = 2^(32-16) = 2^16 = 65,536 địa chỉ IP."
+    },
+    // === ROUTE TABLES ===
+    {
+        topic: "Route Tables",
+        question: "Khi một packet có destination IP 10.0.2.5 và route table có cả 10.0.0.0/16 → local và 0.0.0.0/0 → NAT GW, route nào được chọn?",
+        options: ["0.0.0.0/0 → NAT GW vì nó là default", "10.0.0.0/16 → local vì longest prefix match", "Cả hai đều match nên random", "Packet bị drop"],
+        correct: 1,
+        explanation: "Longest prefix match: khi nhiều rule cùng khớp, router chọn rule cụ thể nhất (prefix dài nhất). /16 cụ thể hơn /0, nên traffic đi qua local."
+    },
+    {
+        topic: "Route Tables",
+        question: "Route table của Public Subnet khác Private Subnet ở điểm nào?",
+        options: [
+            "Public có 0.0.0.0/0 → IGW, Private có 0.0.0.0/0 → NAT GW",
+            "Public có local route, Private không có",
+            "Private có route table riêng, Public dùng chung VPC route table",
+            "Không khác gì — chỉ khác ở Security Group"
+        ],
+        correct: 0,
+        explanation: "Public Subnet route 0.0.0.0/0 → Internet Gateway (2 chiều). Private Subnet route 0.0.0.0/0 → NAT Gateway (chỉ outbound). Cả hai đều có local route."
+    },
+    {
+        topic: "Route Tables",
+        question: "Prefix List (pl-xxxxxxxx) trong route table dùng để làm gì?",
+        options: [
+            "Danh sách Security Groups được phép",
+            "Danh sách IP ranges của một AWS service, do AWS quản lý và tự update",
+            "Danh sách các subnet trong VPC",
+            "Danh sách các VPC đã peering"
+        ],
+        correct: 1,
+        explanation: "Prefix List là danh sách các IP ranges được đặt tên. AWS Managed Prefix List (vd: pl-6fa54006 cho S3) chứa tất cả IP ranges của service đó — AWS tự maintain và update khi IP thay đổi."
+    },
+    // === GATEWAYS ===
+    {
+        topic: "Gateways",
+        question: "Internet Gateway (IGW) cho phép traffic theo hướng nào?",
+        options: ["Chỉ outbound", "Chỉ inbound", "2 chiều (inbound + outbound)", "Tùy config route table"],
+        correct: 2,
+        explanation: "IGW cho phép traffic 2 chiều giữa VPC và internet. Resource cần có public IP hoặc Elastic IP để nhận inbound traffic. NAT Gateway mới là chỉ outbound."
+    },
+    {
+        topic: "Gateways",
+        question: "Có bao nhiêu loại VPC Endpoint?",
+        options: ["1 loại", "2 loại", "3 loại", "4 loại"],
+        correct: 2,
+        explanation: "3 loại: Gateway Endpoint (S3, DynamoDB — miễn phí), Interface Endpoint/PrivateLink (hầu hết services — có phí), và Gateway Load Balancer Endpoint (traffic inspection)."
+    },
+    {
+        topic: "Gateways",
+        question: "S3 Gateway Endpoint có tính phí không?",
+        options: ["Có — $0.01/giờ/AZ", "Có — $0.045/GB data", "Miễn phí", "Miễn phí data nhưng có phí request"],
+        correct: 2,
+        explanation: "S3 Gateway Endpoint hoàn toàn miễn phí. Nó còn giúp tiết kiệm chi phí NAT Gateway data processing vì traffic đến S3 không cần đi qua NAT."
+    },
+    {
+        topic: "Gateways",
+        question: "Gateway Endpoint chỉ hỗ trợ 2 service nào?",
+        options: ["S3 và SQS", "S3 và DynamoDB", "DynamoDB và Lambda", "S3 và CloudWatch"],
+        correct: 1,
+        explanation: "Gateway Endpoint chỉ hỗ trợ S3 và DynamoDB. Các service khác (SQS, SNS, Secrets Manager, ECR...) phải dùng Interface Endpoint (PrivateLink)."
+    },
+    {
+        topic: "Gateways",
+        question: "NAT Gateway có Elastic IP không?",
+        options: ["Không, dùng IP động", "Có, bắt buộc phải gán EIP", "Tùy chọn khi tạo", "Dùng public IP tự động assign"],
+        correct: 1,
+        explanation: "NAT Gateway bắt buộc phải có Elastic IP (public IP cố định). Chi phí NAT Gateway khoảng $0.045/giờ + $0.045/GB data processed."
+    },
+    // === SECURITY GROUPS & NACLs ===
+    {
+        topic: "Security Groups & NACLs",
+        question: "Security Group là stateful. Điều này có nghĩa gì?",
+        options: [
+            "Rules được evaluate theo thứ tự",
+            "Allow inbound → response traffic tự động được allow về mà không cần outbound rule",
+            "Có cả Allow và Deny rules",
+            "Áp dụng cho toàn bộ subnet"
+        ],
+        correct: 1,
+        explanation: "Stateful = SG nhớ trạng thái connection. Khi allow traffic theo một chiều (ví dụ outbound), response traffic chiều ngược lại tự động được allow — không cần tạo rule riêng."
+    },
+    {
+        topic: "Security Groups & NACLs",
+        question: "NACL evaluate rules theo cách nào?",
+        options: [
+            "Tất cả rules được evaluate cùng lúc",
+            "Theo thứ tự số tăng dần, dừng khi match rule đầu tiên",
+            "Random order mỗi lần",
+            "Rules mới nhất được evaluate trước"
+        ],
+        correct: 1,
+        explanation: "NACL evaluate rules theo thứ tự số tăng dần (thấp → cao). Khi match rule đầu tiên thì dừng — không tiếp tục evaluate các rules còn lại."
+    },
+    {
+        topic: "Security Groups & NACLs",
+        question: "Khi dùng NACL, tại sao cần thêm inbound rule allow port 1024-65535?",
+        options: [
+            "Để cho phép SSH connections",
+            "Vì NACL stateless — response traffic dùng ephemeral port cần được explicitly allow",
+            "Để mở tất cả ports cho testing",
+            "AWS yêu cầu bắt buộc"
+        ],
+        correct: 1,
+        explanation: "NACL stateless — không nhớ connection. Response traffic từ server về client dùng ephemeral port (1024-65535) ngẫu nhiên. Nếu không có rule allow dải port này, response bị chặn."
+    },
+    {
+        topic: "Security Groups & NACLs",
+        question: "Security Group có thể có Deny rule không?",
+        options: ["Có", "Không — chỉ có Allow rules", "Chỉ cho inbound", "Chỉ cho outbound"],
+        correct: 1,
+        explanation: "Security Group chỉ có Allow rules — không có Deny. Mọi traffic không match rule Allow nào sẽ bị implicit deny. Nếu cần Deny cụ thể (block 1 IP), phải dùng NACL."
+    },
+    {
+        topic: "Security Groups & NACLs",
+        question: "Tối đa bao nhiêu Security Group có thể gắn vào 1 ENI?",
+        options: ["1", "3", "5", "10"],
+        correct: 2,
+        explanation: "Tối đa 5 Security Groups per ENI. Rules từ tất cả SG được merge — allow từ bất kỳ SG nào là traffic được phép đi qua."
+    },
+    {
+        topic: "Security Groups & NACLs",
+        question: "Nếu NACL block traffic nhưng Security Group allow, traffic có đi được không?",
+        options: [
+            "Có — SG override NACL",
+            "Không — traffic phải pass cả 2 lớp",
+            "Tùy thuộc rule number của NACL",
+            "Có — vì SG stateful"
+        ],
+        correct: 1,
+        explanation: "Traffic phải pass cả 2 lớp: NACL kiểm tra trước (subnet level), sau đó SG kiểm tra (instance level). Một trong 2 block là traffic bị chặn."
+    },
+    // === LAMBDA NETWORKING ===
+    {
+        topic: "Lambda Networking",
+        question: "Lambda mặc định (không config VPC) có thể truy cập resource nào?",
+        options: [
+            "RDS trong private subnet",
+            "S3, DynamoDB, SQS qua public endpoint + internet",
+            "ElastiCache trong VPC",
+            "EC2 trong private subnet"
+        ],
+        correct: 1,
+        explanation: "Lambda mặc định chạy trong AWS-managed network — có internet access, gọi được AWS services có public endpoint (S3, DynamoDB, SQS...). Nhưng KHÔNG reach được private resources trong VPC."
+    },
+    {
+        topic: "Lambda Networking",
+        question: "Lambda trong VPC mất gì so với Lambda ngoài VPC?",
+        options: [
+            "Khả năng đọc S3",
+            "Internet access (mặc định)",
+            "Khả năng scale",
+            "Quyền IAM"
+        ],
+        correct: 1,
+        explanation: "Lambda trong VPC nằm ở private subnet, không có public IP → mất internet access mặc định. Muốn ra internet phải có NAT Gateway. S3 có thể dùng Gateway Endpoint (không cần internet)."
+    },
+    {
+        topic: "Lambda Networking",
+        question: "Lambda trong VPC cần NAT Gateway trong trường hợp nào?",
+        options: [
+            "Để truy cập RDS",
+            "Để gọi external API hoặc AWS services không có VPC Endpoint",
+            "Để ghi log vào CloudWatch",
+            "Luôn luôn cần"
+        ],
+        correct: 1,
+        explanation: "NAT Gateway cần khi Lambda phải gọi internet (external APIs) hoặc AWS services không có VPC Endpoint. Nếu chỉ cần S3/DynamoDB → dùng Gateway Endpoint, không cần NAT."
+    },
+    {
+        topic: "Lambda Networking",
+        question: "Pattern SG đúng cho Lambda kết nối RDS là gì?",
+        options: [
+            "RDS SG inbound: allow 0.0.0.0/0 port 3306",
+            "RDS SG inbound: allow Lambda SG port 3306",
+            "Lambda SG inbound: allow RDS SG port 3306",
+            "Không cần SG — cùng VPC là connect được"
+        ],
+        correct: 1,
+        explanation: "Pattern đúng: RDS SG inbound allow port 3306 từ Lambda SG (source là SG ID, không phải 0.0.0.0/0). Đây là least-privilege principle — chỉ Lambda mới connect được RDS."
+    },
+    // === VPC PEERING ===
+    {
+        topic: "VPC Peering & Transit Gateway",
+        question: "VPC Peering có tính transitive không?",
+        options: [
+            "Có — A↔B, B↔C thì A reach được C",
+            "Không — phải tạo peering A↔C riêng",
+            "Có nhưng cần enable trong settings",
+            "Chỉ transitive trong cùng Region"
+        ],
+        correct: 1,
+        explanation: "VPC Peering KHÔNG transitive. A peer B, B peer C → A KHÔNG tự động reach C. Phải tạo peering A↔C riêng, hoặc dùng Transit Gateway."
+    },
+    {
+        topic: "VPC Peering & Transit Gateway",
+        question: "5 VPC cần full mesh connectivity bằng VPC Peering cần bao nhiêu peering connections?",
+        options: ["5", "10", "15", "20"],
+        correct: 1,
+        explanation: "Công thức: n*(n-1)/2. Với 5 VPC: 5*4/2 = 10 connections. Đây là lý do VPC Peering không scale — Transit Gateway giải quyết bằng hub trung tâm."
+    },
+    // === TRANSIT GATEWAY ===
+    {
+        topic: "VPC Peering & Transit Gateway",
+        question: "Transit Gateway giải quyết vấn đề gì của VPC Peering?",
+        options: [
+            "Tăng bandwidth",
+            "Không transitive và mesh phức tạp khi nhiều VPC",
+            "Giảm latency",
+            "Mã hóa traffic"
+        ],
+        correct: 1,
+        explanation: "TGW là hub trung tâm — tất cả VPC và on-premises kết nối vào TGW. Không cần mesh phức tạp, TGW lo routing. Từ 10 VPC cần 45 peering connections → chỉ cần 10 TGW attachments."
+    },
+    {
+        topic: "VPC Peering & Transit Gateway",
+        question: "TGW Route Table: Association và Propagation khác gì nhau?",
+        options: [
+            "Association = route table dùng để lookup, Propagation = attachment tự thêm routes vào",
+            "Association = propagation tự động, Propagation = thủ công",
+            "Giống nhau, chỉ khác tên",
+            "Association cho VPC, Propagation cho VPN"
+        ],
+        correct: 0,
+        explanation: "Association: mỗi attachment associate với 1 TGW route table — quyết định dùng table nào để lookup khi forward traffic. Propagation: attachment tự động thêm routes của nó vào route table để các attachment khác biết đường đến."
+    },
+    {
+        topic: "VPC Peering & Transit Gateway",
+        question: "TGW path selection ưu tiên route nào cao nhất?",
+        options: [
+            "VPN attachment routes",
+            "Propagated routes",
+            "Longest prefix match (cụ thể nhất)",
+            "Direct Connect routes"
+        ],
+        correct: 2,
+        explanation: "TGW ưu tiên: 1) Longest prefix match, 2) Static routes > propagated, 3) VPC > VPN, 4) Direct Connect > VPN (nếu cùng prefix). Luôn là cụ thể nhất trước."
+    },
+    // === HYBRID CONNECTIVITY ===
+    {
+        topic: "Hybrid Connectivity",
+        question: "Site-to-Site VPN cần 2 thành phần AWS-side và on-premises. Đó là gì?",
+        options: [
+            "Internet Gateway + Router",
+            "Virtual Private Gateway (VGW) + Customer Gateway (CGW)",
+            "Transit Gateway + NAT Gateway",
+            "Direct Connect Gateway + Switch"
+        ],
+        correct: 1,
+        explanation: "Site-to-Site VPN cần: Virtual Private Gateway (AWS side, gắn vào VPC) + Customer Gateway (AWS resource đại diện cho thiết bị on-premises). VPN tạo 2 tunnels cho redundancy."
+    },
+    {
+        topic: "Hybrid Connectivity",
+        question: "So sánh VPN vs Direct Connect: đâu là sự khác biệt CHÍNH?",
+        options: [
+            "VPN miễn phí, Direct Connect tốn phí",
+            "VPN qua internet (encrypted), Direct Connect qua đường dây vật lý riêng",
+            "VPN chỉ cho inbound, Direct Connect cho cả 2 chiều",
+            "VPN chỉ dùng với 1 VPC, Direct Connect cho nhiều VPC"
+        ],
+        correct: 1,
+        explanation: "VPN dùng internet (encrypted IPSec, ~1.25 Gbps, setup nhanh). Direct Connect dùng đường dây vật lý riêng (1-100 Gbps, latency thấp ổn định, setup tuần-tháng, tốn kém hơn)."
+    },
+    {
+        topic: "Hybrid Connectivity",
+        question: "Direct Connect Gateway dùng để làm gì?",
+        options: [
+            "Mã hóa traffic trên Direct Connect",
+            "Cho phép 1 Direct Connect connection reach nhiều VPC ở nhiều Region",
+            "Tăng bandwidth của Direct Connect",
+            "Thay thế Customer Gateway"
+        ],
+        correct: 1,
+        explanation: "Direct Connect Gateway cho phép 1 connection reach nhiều VPC ở nhiều Region — không cần tạo VGW riêng cho từng VPC. Tiết kiệm và đơn giản hóa quản lý."
+    },
+    {
+        topic: "Hybrid Connectivity",
+        question: "Client VPN khác Site-to-Site VPN ở điểm nào?",
+        options: [
+            "Client VPN dùng IPSec, Site-to-Site dùng OpenVPN",
+            "Client VPN kết nối từng user cá nhân, Site-to-Site kết nối toàn bộ network/site",
+            "Client VPN nhanh hơn",
+            "Không khác — chỉ khác tên gọi"
+        ],
+        correct: 1,
+        explanation: "Client VPN: từng user cá nhân → AWS (OpenVPN, dùng cho remote worker). Site-to-Site VPN: toàn bộ on-premises network → AWS (IPSec, dùng cho office/DC)."
+    },
+    {
+        topic: "Hybrid Connectivity",
+        question: "Để đạt maximum resiliency (99.99% SLA) cho Direct Connect, cần gì?",
+        options: [
+            "1 connection với 2 tunnels",
+            "2 connections đến cùng 1 DX location",
+            "Nhiều connections, nhiều on-premises locations, nhiều DX locations",
+            "Direct Connect + VPN backup"
+        ],
+        correct: 2,
+        explanation: "Maximum resiliency (99.99%): nhiều connections + nhiều on-premises locations + nhiều DX locations. High resiliency (99.9%): 2 connections đến 2 locations khác nhau. DX + VPN backup là Tier 3."
+    },
+    // === LOAD BALANCING ===
+    {
+        topic: "Load Balancing",
+        question: "ALB hoạt động ở Layer nào của OSI model?",
+        options: ["Layer 3 (Network)", "Layer 4 (Transport)", "Layer 7 (Application)", "Layer 2 (Data Link)"],
+        correct: 2,
+        explanation: "ALB hoạt động ở Layer 7 (Application) — đọc được HTTP headers, path, query string, host để quyết định routing. NLB hoạt động ở Layer 4 (chỉ nhìn IP + port)."
+    },
+    {
+        topic: "Load Balancing",
+        question: "Khi nào nên chọn NLB thay vì ALB?",
+        options: [
+            "Web application với path-based routing",
+            "Microservices cần route theo HTTP header",
+            "Real-time app cần latency cực thấp hoặc static IP",
+            "Container workload trên ECS"
+        ],
+        correct: 2,
+        explanation: "NLB chọn khi: cần latency cực thấp (~µs), cần static IP để whitelist, non-HTTP protocol (MQTT, gRPC, game server), hoặc database connections."
+    },
+    {
+        topic: "Load Balancing",
+        question: "GWLB (Gateway Load Balancer) dùng cho use case nào?",
+        options: [
+            "Web application load balancing",
+            "Database connection pooling",
+            "Route traffic qua virtual network appliances (firewall, IDS/IPS)",
+            "DNS load balancing"
+        ],
+        correct: 2,
+        explanation: "GWLB dùng để route traffic qua virtual appliances (third-party firewall, IDS/IPS) trước khi vào hệ thống. Ví dụ: Internet → GWLB → Palo Alto Firewall → ALB → App."
+    },
+    // === API GATEWAY vs ALB ===
+    {
+        topic: "API Gateway & ALB",
+        question: "API Gateway có timeout tối đa bao lâu?",
+        options: ["5 giây", "29 giây", "300 giây", "4000 giây"],
+        correct: 1,
+        explanation: "API Gateway timeout tối đa 29 giây. ALB timeout lên tới 4000 giây. Nếu backend cần xử lý lâu hơn 29s, phải dùng ALB hoặc async pattern."
+    },
+    {
+        topic: "API Gateway & ALB",
+        question: "Khi nào nên chọn API Gateway thay vì ALB?",
+        options: [
+            "Backend là EC2 instances cần persistent connections",
+            "Backend là Lambda, cần API versioning và throttling",
+            "Payload request lớn hơn 10MB",
+            "WebSocket high-throughput"
+        ],
+        correct: 1,
+        explanation: "API Gateway lý tưởng cho: Lambda backend, API management (versioning, keys, throttling), auth tích hợp (Cognito), traffic không đều (pay-per-request). ALB cho EC2/ECS, payload lớn, latency tối ưu."
+    },
+    // === ELASTIC IP ===
+    {
+        topic: "Elastic IP & ENI",
+        question: "Elastic IP tính phí khi nào?",
+        options: [
+            "Luôn luôn tính phí",
+            "Khi allocate mà không gắn vào running instance nào",
+            "Chỉ khi có traffic đi qua",
+            "Miễn phí hoàn toàn"
+        ],
+        correct: 1,
+        explanation: "EIP miễn phí khi đang gắn vào running instance. Tính phí khi allocate mà không associate với instance nào — vì bạn đang giữ public IP mà không dùng (lãng phí IPv4)."
+    },
+    {
+        topic: "Elastic IP & ENI",
+        question: "ENI (Elastic Network Interface) là gì?",
+        options: [
+            "Một loại load balancer",
+            "Card mạng ảo — điểm kết nối của resource vào subnet",
+            "Firewall rule set",
+            "VPN tunnel endpoint"
+        ],
+        correct: 1,
+        explanation: "ENI là card mạng ảo trong AWS. Mỗi EC2, Lambda trong VPC, hay Interface Endpoint đều có ENI để kết nối vào subnet. Security Group thực ra gắn vào ENI (không phải trực tiếp vào instance)."
+    },
+    // === ENVIRONMENTS & ARCHITECTURE ===
+    {
+        topic: "Architecture Patterns",
+        question: "Tại sao không gộp Production và Staging vào 1 VPC?",
+        options: [
+            "AWS không cho phép",
+            "Vì isolation giới hạn blast radius, phân quyền rõ ràng, và đáp ứng compliance",
+            "Chi phí cao hơn",
+            "Performance kém hơn"
+        ],
+        correct: 1,
+        explanation: "Tách VPC cho: blast radius (1 VPC compromise không ảnh hưởng cái kia), phân quyền rõ ràng theo team/account, và compliance requirements (ngân hàng, y tế yêu cầu tách biệt)."
+    },
+    {
+        topic: "Architecture Patterns",
+        question: "Trong Security Group chain cho multi-tier architecture, Database SG inbound nên allow traffic từ đâu?",
+        options: [
+            "0.0.0.0/0 port 3306",
+            "ALB Security Group",
+            "Web/App Server Security Group",
+            "Internet Gateway"
+        ],
+        correct: 2,
+        explanation: "Mỗi tier chỉ nhận traffic từ tier ngay trên nó. Database SG inbound chỉ allow từ Web/App Server SG — không allow từ ALB SG (ALB chỉ nói chuyện với web server, không trực tiếp với DB)."
+    }
+];
+
+let currentQuestion = 0;
+let answers = new Array(questions.length).fill(null);
+let score = 0;
+
+function init() {
+    const container = document.getElementById('quizContainer');
+    questions.forEach((q, i) => {
+        const card = document.createElement('div');
+        card.className = 'question-card' + (i === 0 ? ' active' : '');
+        card.id = `question-${i}`;
+
+        const letters = ['A', 'B', 'C', 'D'];
+        const optionsHTML = q.options.map((opt, j) => `
+            <div class="option" id="opt-${i}-${j}" onclick="selectAnswer(${i}, ${j})">
+                <span class="option-letter">${letters[j]}</span>
+                <span class="option-text">${opt}</span>
+            </div>
+        `).join('');
+
+        card.innerHTML = `
+            <div class="question-number">Question ${i + 1} — ${q.topic}</div>
+            <div class="question-text">${q.question}</div>
+            <div class="options">${optionsHTML}</div>
+            <div class="explanation" id="exp-${i}">${q.explanation}</div>
+        `;
+        container.appendChild(card);
+    });
+    updateUI();
+}
+
+function selectAnswer(qIndex, optIndex) {
+    if (answers[qIndex] !== null) return;
+
+    answers[qIndex] = optIndex;
+    const q = questions[qIndex];
+    const isCorrect = optIndex === q.correct;
+
+    if (isCorrect) score++;
+
+    const options = document.querySelectorAll(`#question-${qIndex} .option`);
+    options.forEach((opt, j) => {
+        opt.classList.add('disabled');
+        if (j === q.correct) opt.classList.add('correct');
+        if (j === optIndex && !isCorrect) opt.classList.add('incorrect');
+    });
+
+    document.getElementById(`exp-${qIndex}`).classList.add('show');
+    updateUI();
+}
+
+function navigate(dir) {
+    document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+    currentQuestion += dir;
+
+    if (currentQuestion >= questions.length) {
+        showResults();
+        return;
+    }
+
+    document.getElementById(`question-${currentQuestion}`).classList.add('active');
+    updateUI();
+}
+
+function updateUI() {
+    const totalAnswered = answers.filter(a => a !== null).length;
+    document.getElementById('progressFill').style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+    document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} / ${questions.length}`;
+    document.getElementById('scoreDisplay').textContent = score;
+    document.getElementById('totalAnswered').textContent = totalAnswered;
+    document.getElementById('prevBtn').disabled = currentQuestion === 0;
+    document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Finish' : 'Next';
+}
+
+function showResults() {
+    document.querySelector('.nav-buttons').style.display = 'none';
+    document.querySelector('.progress-bar').style.display = 'none';
+    document.querySelector('.progress-text').style.display = 'none';
+    document.querySelector('.score-display').style.display = 'none';
+
+    const results = document.getElementById('results');
+    results.style.display = 'block';
+
+    const pct = Math.round((score / questions.length) * 100);
+    const scoreEl = document.getElementById('finalScore');
+    scoreEl.textContent = `${pct}%`;
+    scoreEl.className = 'final-score ' + (pct >= 80 ? 'excellent' : pct >= 60 ? 'good' : 'needs-work');
+
+    const msg = document.getElementById('resultMessage');
+    if (pct >= 80) msg.textContent = `${score}/${questions.length} correct. Excellent understanding of AWS Networking!`;
+    else if (pct >= 60) msg.textContent = `${score}/${questions.length} correct. Good progress — review the topics below.`;
+    else msg.textContent = `${score}/${questions.length} correct. Needs more study — focus on weak topics.`;
+
+    const topics = {};
+    questions.forEach((q, i) => {
+        if (!topics[q.topic]) topics[q.topic] = { correct: 0, total: 0 };
+        topics[q.topic].total++;
+        if (answers[i] === q.correct) topics[q.topic].correct++;
+    });
+
+    const breakdown = document.getElementById('topicBreakdown');
+    breakdown.innerHTML = '<h3>Topic Breakdown</h3>';
+    Object.entries(topics).forEach(([topic, data]) => {
+        const topicPct = Math.round((data.correct / data.total) * 100);
+        breakdown.innerHTML += `
+            <div class="topic-row">
+                <span class="topic-name">${topic}</span>
+                <span class="topic-score ${topicPct >= 70 ? 'good' : 'bad'}">${data.correct}/${data.total} (${topicPct}%)</span>
+            </div>
+        `;
+    });
+}
+
+function resetQuiz() {
+    currentQuestion = 0;
+    answers = new Array(questions.length).fill(null);
+    score = 0;
+
+    document.getElementById('results').style.display = 'none';
+    document.querySelector('.nav-buttons').style.display = 'flex';
+    document.querySelector('.progress-bar').style.display = 'block';
+    document.querySelector('.progress-text').style.display = 'block';
+    document.querySelector('.score-display').style.display = 'block';
+
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    init();
+}
+
+init();
+    </script>
+</body>
+</html>

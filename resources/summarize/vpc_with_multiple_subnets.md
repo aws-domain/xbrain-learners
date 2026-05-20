@@ -2,7 +2,7 @@
 
 > Source: AWS Documentation — Amazon VPC User Guide
 
----
+***
 
 ## MODULE 1: Amazon VPC Deployment
 
@@ -13,6 +13,7 @@ VPC là một mạng ảo **logically isolated** trong AWS Cloud — bạn toàn
 ### Các thành phần cốt lõi khi deploy VPC
 
 **1. CIDR Block**
+
 - Khi tạo VPC, bạn chọn một IPv4 CIDR block (ví dụ: `10.0.0.0/16`)
 - CIDR của các VPC khác nhau **không được overlap** nếu cần kết nối với nhau
 - Hỗ trợ IPv4-only, IPv6-only, hoặc dual-stack
@@ -23,12 +24,12 @@ Subnet là một dải IP con nằm trong VPC. Mỗi subnet phải nằm hoàn t
 
 Có 4 loại subnet phân loại theo routing:
 
-| Loại | Đặc điểm |
-|------|----------|
-| **Public subnet** | Có direct route đến Internet Gateway — resource có thể access internet |
-| **Private subnet** | Không có route đến IGW — cần NAT device để ra internet |
-| **VPN-only subnet** | Route qua Virtual Private Gateway (Site-to-Site VPN), không có IGW |
-| **Isolated subnet** | Không có route ra ngoài VPC — chỉ giao tiếp nội bộ VPC |
+| Loại                | Đặc điểm                                                               |
+| ------------------- | ---------------------------------------------------------------------- |
+| **Public subnet**   | Có direct route đến Internet Gateway — resource có thể access internet |
+| **Private subnet**  | Không có route đến IGW — cần NAT device để ra internet                 |
+| **VPN-only subnet** | Route qua Virtual Private Gateway (Site-to-Site VPN), không có IGW     |
+| **Isolated subnet** | Không có route ra ngoài VPC — chỉ giao tiếp nội bộ VPC                 |
 
 > **Lưu ý:** AWS reserved 5 IP đầu tiên trong mỗi subnet (network address, VPC router, DNS, future use, broadcast) — không dùng được cho resource.
 
@@ -36,7 +37,7 @@ Có 4 loại subnet phân loại theo routing:
 
 Mỗi subnet phải được associate với một route table. Route table quyết định traffic đi đâu:
 
-```
+```text
 Route table cho Public Subnet:
   10.0.0.0/16  →  local          (traffic nội bộ VPC)
   0.0.0.0/0    →  igw-xxxxxxx    (traffic ra internet)
@@ -56,13 +57,14 @@ Route table cho Private Subnet:
 - Đặt trong **public subnet**, dùng Elastic IP
 - Cho phép resource trong **private subnet** initiate traffic ra internet, nhưng internet không thể initiate vào
 
----
+***
 
 ## MODULE 2: Securing and Configuring High Availability
 
 ### IAM trong VPC Context
 
 IAM kiểm soát **ai được làm gì** với VPC resources:
+
 - Ai được tạo/xóa VPC, subnet, security group
 - Ai được modify route table
 - Best practice: dùng IAM roles thay vì IAM users cho EC2 instances
@@ -88,30 +90,30 @@ VPC có 2 lớp bảo mật chính hoạt động song song:
 
 #### So sánh Security Group vs NACL
 
-| Đặc điểm | Security Group | Network ACL |
-|----------|---------------|-------------|
-| Cấp độ | Instance | Subnet |
-| Rule type | Allow only | Allow + Deny |
-| Stateful/Stateless | **Stateful** | **Stateless** |
-| Evaluate | Tất cả rules | Theo thứ tự số, dừng khi match |
-| Return traffic | Tự động allowed | Phải explicitly allow |
+| Đặc điểm           | Security Group  | Network ACL                    |
+| ------------------ | --------------- | ------------------------------ |
+| Cấp độ             | Instance        | Subnet                         |
+| Rule type          | Allow only      | Allow + Deny                   |
+| Stateful/Stateless | **Stateful**    | **Stateless**                  |
+| Evaluate           | Tất cả rules    | Theo thứ tự số, dừng khi match |
+| Return traffic     | Tự động allowed | Phải explicitly allow          |
 
 > **AWS khuyến nghị:** Dùng Security Group là primary control. NACL là secondary — dùng để deny một subset traffic cụ thể hoặc làm subnet-level guardrail.
 
 #### Các công cụ bảo mật bổ sung
 
-| Công cụ | Tác dụng |
-|---------|----------|
-| **VPC Flow Logs** | Monitor IP traffic vào/ra VPC, subnet, hoặc network interface |
-| **AWS Network Firewall** | Stateful firewall bảo vệ subnet khỏi network threats |
-| **Amazon GuardDuty** | Threat detection — phân tích VPC Flow Logs để phát hiện anomaly |
-| **Network Access Analyzer** | Phát hiện unintended network access vào resources |
+| Công cụ                     | Tác dụng                                                        |
+| --------------------------- | --------------------------------------------------------------- |
+| **VPC Flow Logs**           | Monitor IP traffic vào/ra VPC, subnet, hoặc network interface   |
+| **AWS Network Firewall**    | Stateful firewall bảo vệ subnet khỏi network threats            |
+| **Amazon GuardDuty**        | Threat detection — phân tích VPC Flow Logs để phát hiện anomaly |
+| **Network Access Analyzer** | Phát hiện unintended network access vào resources               |
 
 ### Adding High Availability
 
 **Nguyên tắc cốt lõi:** Deploy resources trải đều trên **ít nhất 2 Availability Zones**.
 
-```
+```text
 Region
 ├── AZ-1
 │   ├── Public Subnet  (10.0.1.0/24)  ← Web servers
@@ -125,13 +127,13 @@ Region
 
 AZ là **infrastructure vật lý do AWS xây sẵn** — bạn không tự tạo thêm được, chỉ chọn dùng AZ nào. Mỗi Region có **ít nhất 3 AZ**, nhiều Region có 4–6 AZ:
 
-| Region | Số AZ |
-|--------|-------|
-| us-east-1 (N. Virginia) | 6 |
-| us-west-2 (Oregon) | 4 |
-| ap-southeast-1 (Singapore) | 3 |
-| ap-northeast-1 (Tokyo) | 4 |
-| eu-west-1 (Ireland) | 3 |
+| Region                     | Số AZ |
+| -------------------------- | ----- |
+| us-east-1 (N. Virginia)    | 6     |
+| us-west-2 (Oregon)         | 4     |
+| ap-southeast-1 (Singapore) | 3     |
+| ap-northeast-1 (Tokyo)     | 4     |
+| eu-west-1 (Ireland)        | 3     |
 
 - Mỗi AZ có independent power, cooling, physical security
 - Nếu một AZ fail, AZ còn lại tiếp tục phục vụ traffic
@@ -141,7 +143,7 @@ AZ là **infrastructure vật lý do AWS xây sẵn** — bạn không tự tạ
 
 > **Lưu ý chi phí:** Data transfer giữa các AZ trong cùng Region tính phí (~$0.01/GB mỗi chiều). Càng nhiều AZ, traffic cross-AZ càng nhiều — phần lớn workload dùng 2–3 AZ là đủ.
 
----
+***
 
 ## MODULE 3: Multi-Tier Architecture
 
@@ -149,7 +151,7 @@ AZ là **infrastructure vật lý do AWS xây sẵn** — bạn không tự tạ
 
 Đây là pattern chuẩn cho production workload:
 
-```
+```text
 Internet
     ↓
 [Internet Gateway]
@@ -177,7 +179,7 @@ Internet
 
 Mỗi tier chỉ nhận traffic từ tier ngay trên nó — không expose trực tiếp ra internet:
 
-```
+```typescript
 ALB Security Group:
   Inbound:  0.0.0.0/0 → port 80, 443   (từ internet)
   Outbound: sg-webserver → port 80, 443
@@ -193,7 +195,7 @@ Database Security Group:
 
 ### Route Table cho từng tier
 
-```
+```text
 Public Subnet Route Table:
   10.0.0.0/16  →  local
   0.0.0.0/0    →  igw-id          ← ra internet trực tiếp
@@ -208,22 +210,22 @@ Private Subnet Route Table:
 
 Database servers trong private subnet cần access S3 (backup, logs) mà không muốn traffic đi ra internet:
 
-```
+```text
 Private Subnet → VPC Gateway Endpoint → S3
                  (traffic ở trong AWS network, không qua internet)
 ```
 
----
+***
 
 ## Tổng kết — Checklist Production VPC
 
-| Hạng mục | Yêu cầu |
-|----------|---------|
-| AZ coverage | Tối thiểu 2 AZ |
-| Subnet separation | Public (ALB/NAT) + Private App + Private DB |
-| Internet access | IGW cho public, NAT Gateway cho private |
-| Security | Security Group (primary) + NACL (secondary) |
-| Monitoring | VPC Flow Logs bật |
-| DB access | Chỉ từ App tier security group |
-| AWS service access | VPC Endpoint thay vì qua internet |
-| IAM | Least privilege cho mọi resource |
+| Hạng mục           | Yêu cầu                                     |
+| ------------------ | ------------------------------------------- |
+| AZ coverage        | Tối thiểu 2 AZ                              |
+| Subnet separation  | Public (ALB/NAT) + Private App + Private DB |
+| Internet access    | IGW cho public, NAT Gateway cho private     |
+| Security           | Security Group (primary) + NACL (secondary) |
+| Monitoring         | VPC Flow Logs bật                           |
+| DB access          | Chỉ từ App tier security group              |
+| AWS service access | VPC Endpoint thay vì qua internet           |
+| IAM                | Least privilege cho mọi resource            |

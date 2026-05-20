@@ -1,6 +1,6 @@
 # Course Tracker — W1 → W6
 
-> Cập nhật: 02/05/2026
+> Cập nhật: 13/05/2026 (theo syllabus 7-May)
 > 🧪 = có Lab thực hành (SimuLearn / Builder Lab)
 > Tổ chức theo **Topic** — xem tuần gốc ở cột Tuần
 
@@ -14,9 +14,8 @@
 |---|--------|------|------|-----------|------|
 | 1 | AWS Technical Essentials | W1 | Wed | 4h | 📖 Digital Course |
 | 2 | AWS Solutions Architect - Fundamentals of Architecting on AWS | W2 | Wed | 5h | 📖 Digital Course |
-| 3 | Introduction to the AWS Cloud Adoption Framework (CAF) | W6 | Wed | 1h | 📖 Digital Course |
 
-> **Ghi chú:** Học theo thứ tự — Technical Essentials là nền tảng, Solutions Architect mở rộng, CAF học cuối khi cần migration context.
+> **Ghi chú:** Học theo thứ tự — Technical Essentials là nền tảng, Solutions Architect mở rộng.
 
 ---
 
@@ -24,17 +23,15 @@
 
 | # | Course | Tuần | Ngày | Thời lượng | Loại |
 |---|--------|------|------|-----------|------|
-| 1 | Amazon Elastic Block Store (Amazon EBS) Primer | W2 | Tue | 1.30h | 📖 Digital Course |
-| 2 | AWS SimuLearn: Cloud First Steps 🧪 | W2 | Tue | 1h | 🧪 Lab |
-| 3 | AWS SimuLearn: Computing Solutions 🧪 | W2 | Tue | 1h | 🧪 Lab |
-| 4 | Amazon Elastic File System (Amazon EFS) Primer | W5 | Tue | 0.30h | 📖 Digital Course |
-| 5 | AWS SimuLearn: File Systems in the Cloud 🧪 | W5 | Tue | 1h | 🧪 Lab |
-| 6 | AWS File Storage Services Getting Started | W5 | Wed | 2h | 📖 Digital Course |
-| 7 | AWS SimuLearn: Auto-Healing and Scaling Applications 🧪 | W6 | Mon | 1h | 🧪 Lab |
-| 8 | AWS SimuLearn: Highly Available Web Applications 🧪 | W6 | Mon | 1h | 🧪 Lab |
-| 9 | Deep Dive: Amazon Elastic Block Store (Amazon EBS) Cost Optimization | W6 | Mon | 0.30h | 📖 Digital Course |
-
-> **Ghi chú:** EBS Primer trước → Labs Cloud First Steps + Computing Solutions → EFS Primer → Lab File Systems → File Storage Getting Started → Labs HA/Auto-Scaling → EBS Cost Optimization cuối.
+| 1 | AWS SimuLearn: Cloud First Steps 🧪 | W2 | Tue | 1h | 🧪 Lab |
+| 2 | AWS SimuLearn: Computing Solutions 🧪 | W2 | Tue | 1h | 🧪 Lab |
+| 3 | Amazon Elastic File System (Amazon EFS) Primer | W5 | Tue | 0.30h | 📖 Digital Course |
+| 4 | AWS SimuLearn: File Systems in the Cloud 🧪 | W5 | Tue | 1h | 🧪 Lab |
+| 5 | AWS File Storage Services Getting Started | W5 | Tue | 2h | 📖 Digital Course |
+| 6 | AWS SimuLearn: Auto-Healing and Scaling Applications 🧪 | W6 | Mon | 1h | 🧪 Lab |
+| 7 | AWS SimuLearn: Highly Available Web Applications 🧪 | W6 | Mon | 1h | 🧪 Lab |
+| 8 | Deep Dive: Amazon EBS Cost Optimization | W6 | Mon | 0.30h | 📖 Digital Course |
+| 9 | Deep Dive: Amazon EBS Performance Optimization | W6 | Mon | 1h | 📖 Digital Course |
 
 ---
 
@@ -51,8 +48,6 @@
 | 7 | Data Modeling for Amazon ElastiCache for Redis | W4 | Wed | 1h | 📖 Digital Course |
 | 8 | Amazon Connect Data Streaming Intermediate | W4 | Wed | 1h | 📖 Digital Course |
 
-> **Ghi chú:** DynamoDB Lab + Data Modeling trước (NoSQL foundation) → Aurora (relational upgrade) → Redshift (warehouse) → OpenSearch (search/analytics) → Neptune + ElastiCache (specialized) → Connect cuối (niche use case).
-
 ---
 
 ### 🤖 AI / Bedrock / ML
@@ -66,15 +61,13 @@
 | 5 | Multi-Agent Collaboration with Amazon Bedrock Agents | W3 | Mon | 1h | 📖 Digital Course |
 | 6 | Build with Amazon S3 Vectors and Amazon Bedrock Knowledge Bases | W3 | Mon | 1h | 📖 Digital Course |
 | 7 | AWS SimuLearn: Explore the Amazon Bedrock Playgrounds 🧪 | W3 | Mon | 1h | 🧪 Lab |
-| 8 | Introduction to Machine Learning: Art of the Possible | W4 | Wed | 0.30h | 📖 Digital Course |
-| 9 | Machine Learning Essentials for Business and Technical Decision Makers | W4 | Wed | 1.30h | 📖 Digital Course |
-| 10 | Machine Learning Exam Basics | W4 | Wed | 2h | 📖 Digital Course |
-| 11 | Developing Machine Learning Solutions | W4 | Wed | 1h | 📖 Digital Course |
-| 12 | Amazon Bedrock AgentCore Tools Tutorial | W4 | Mon | 1h | 📖 Digital Course |
-| 13 | Amazon Bedrock AgentCore Gateway Tutorial | W5 | Tue | 3h | 📖 Digital Course |
-| 14 | AWS SimuLearn: Design Modern Data Architectures with Agentic AI 🧪 | W6 | Wed | 1h | 🧪 Lab |
-
-> **Ghi chú:** Bedrock Getting Started → Foundation Models → Integrating AI → MultiModal KB → Multi-Agent → S3 Vectors → Lab Playgrounds → ML Art of Possible → ML Essentials → ML Exam Basics → Developing ML → AgentCore Tools → AgentCore Gateway → Lab Agentic AI cuối.
+| 8 | Amazon Bedrock AgentCore Getting Started | W4 | Mon | 1h | 📖 Digital Course |
+| 9 | Amazon Bedrock AgentCore Tools Tutorial | W4 | Mon | 1.30h | 📖 Digital Course |
+| 10 | Responsible Artificial Intelligence Practices | W4 | Tue | 1h | 📖 Digital Course |
+| 11 | Introduction to Machine Learning: Art of the Possible | W4 | Wed | 0.30h | 📖 Digital Course |
+| 12 | Machine Learning Essentials for Business and Technical Decision Makers | W4 | Wed | 1.30h | 📖 Digital Course |
+| 13 | Machine Learning Exam Basics | W4 | Wed | 2h | 📖 Digital Course |
+| 14 | Developing Machine Learning Solutions | W4 | Wed | 1h | 📖 Digital Course |
 
 ---
 
@@ -82,7 +75,7 @@
 
 | # | Course | Tuần | Ngày | Thời lượng | Loại |
 |---|--------|------|------|-----------|------|
-| 1 | Data Engineering on AWS - Foundations | W4 | Tue | 4h | 📖 Digital Course |
+| 1 | Data Engineering on AWS - Foundations | W4 | Mon | 4h | 📖 Digital Course |
 | 2 | Amazon Kinesis Data Streams - Getting Started | W4 | Tue | 1h | 📖 Digital Course |
 | 3 | AWS Glue Getting Started | W4 | Tue | 1h | 📖 Digital Course |
 | 4 | Introduction to Amazon Athena | W4 | Tue | 1h | 📖 Digital Course |
@@ -90,20 +83,17 @@
 | 6 | Sensitive Data Detection with Amazon Macie | W4 | Wed | 1h | 📖 Digital Course |
 | 7 | Serverless Analytics | W5 | Wed | 0.25h | 📖 Digital Course |
 
-> **Ghi chú:** Foundations trước (hiểu toàn bộ pipeline) → Kinesis (ingestion) → Glue (ETL) → Athena (query) → EMR (batch) → Macie (data security) → Serverless Analytics cuối (tổng hợp).
-
 ---
 
 ### 🌐 Networking
 
 | # | Course | Tuần | Ngày | Thời lượng | Loại |
 |---|--------|------|------|-----------|------|
-| 1 | AWS SimuLearn: Connecting VPCs 🧪 | W5 | Mon | 1h | 🧪 Lab |
-| 2 | AWS Network Connectivity Options | W5 | Mon | 2.30h | 📖 Digital Course |
+| 1 | AWS Network Connectivity Options | W5 | Mon | 2.30h | 📖 Digital Course |
+| 2 | AWS SimuLearn: Connecting VPCs 🧪 | W5 | Mon | 1h | 🧪 Lab |
 | 3 | AWS Network – Monitoring and Troubleshooting | W5 | Mon | 1h | 📖 Digital Course |
-| 4 | Introduction to Amazon API Gateway (deep dive) 🧪 | W5 | Mon | 1h | 🧪 Lab |
-
-> **Ghi chú:** VPC Multi-Subnet (đi sâu sau VPC intro) → Connecting VPCs Lab (hands-on peering) → Network Connectivity Options (VPN/Direct Connect) → Monitoring & Troubleshooting → API Gateway deep dive cuối.
+| 4 | AWS Network Firewall Getting Started | W5 | Mon | 1h | 📖 Digital Course |
+| 5 | Introduction to Amazon API Gateway 🧪 | W5 | Wed | 1h | 🧪 Lab |
 
 ---
 
@@ -117,8 +107,6 @@
 | 4 | Architecting Serverless Applications | W5 | Wed | 2h | 📖 Digital Course |
 | 5 | Scaling Serverless Architectures | W5 | Wed | 1.30h | 📖 Digital Course |
 
-> **Ghi chú:** Lambda Lab (hands-on trước) → CloudFormation (IaC foundation) → Connect basic services Lab (tổng hợp W3) → Architecting Serverless (patterns) → Scaling Serverless (advanced, học sau khi hiểu patterns).
-
 ---
 
 ### 🔒 Security & IAM
@@ -126,14 +114,12 @@
 | # | Course | Tuần | Ngày | Thời lượng | Loại |
 |---|--------|------|------|-----------|------|
 | 1 | AWS Security Fundamentals Second Edition | W2 | Wed | 2h | 📖 Digital Course |
-| 2 | Protecting Your Instance with Security Groups | W6 | Tue | 1h | 📖 Digital Course |
-| 3 | Securing and Protecting Your Data in Amazon Simple Storage Service | W6 | Tue | 1.40h | 📖 Digital Course |
-| 4 | AWS Security Best Practices: Monitoring and Alerting | W6 | Wed | 2h | 📖 Digital Course |
-| 5 | AWS SimuLearn: Core Security Concepts 🧪 | W6 | Wed | 1h | 🧪 Lab |
-| 6 | Performing a Basic Audit of your AWS Environment 🧪 | W6 | Wed | 1h | 🧪 Lab |
-| 7 | Introduction to AWS Key Management Service 🧪 | W6 | Wed | 1h | 🧪 Lab |
-
-> **Ghi chú:** Security Fundamentals trước (big picture) → Security Groups (network layer) → S3 Data Protection (data layer) → Monitoring & Alerting (observability) → Core Security Lab → Audit Lab → KMS Lab cuối (encryption deep dive).
+| 2 | AWS Security Best Practices: Monitoring and Alerting | W6 | Wed | 2h | 📖 Digital Course |
+| 3 | AWS SimuLearn: Core Security Concepts 🧪 | W6 | Wed | 1h | 🧪 Lab |
+| 4 | Performing a Basic Audit of your AWS Environment 🧪 | W6 | Wed | 1h | 🧪 Lab |
+| 5 | Introduction to AWS Key Management Service 🧪 | W6 | Wed | 1h | 🧪 Lab |
+| 6 | Build with AWS Config: Enabling Security Controls and Incident Response | W6 | Wed | 1.50h | 📖 Digital Course |
+| 7 | Auditing Your Security with AWS Trusted Advisor 🧪 | W6 | Tue | 1h | 🧪 Lab |
 
 ---
 
@@ -142,25 +128,20 @@
 | # | Course | Tuần | Ngày | Thời lượng | Loại |
 |---|--------|------|------|-----------|------|
 | 1 | Amazon CloudWatch Getting Started | W6 | Tue | 1h | 📖 Digital Course |
-| 2 | AWS Organizations Getting Started | W6 | Tue | 1h | 📖 Digital Course |
-
-> **Ghi chú:** CloudWatch trước (monitoring foundation) → Organizations (multi-account management).
+| 2 | Getting Started with AWS Systems Manager 🧪 | W6 | Tue | 1h | 🧪 Lab |
 
 ---
 
-### 💰 Cost & Storage Management
+### 💰 Cost & Governance
 
 | # | Course | Tuần | Ngày | Thời lượng | Loại |
 |---|--------|------|------|-----------|------|
 | 1 | AWS Backup Getting Started | W5 | Tue | 1h | 📖 Digital Course |
 | 2 | Amazon Simple Storage Service (Amazon S3) Cost Optimization | W6 | Mon | 1h | 📖 Digital Course |
-| 3 | Deep Dive: Amazon Elastic Block Store (Amazon EBS) Cost Optimization | W6 | Mon | 0.30h | 📖 Digital Course |
+| 3 | Deep Dive: Amazon EBS Cost Optimization | W6 | Mon | 0.30h | 📖 Digital Course |
 | 4 | AWS SimuLearn: Cloud Economics 🧪 | W6 | Mon | 1h | 🧪 Lab |
-| 5 | AWS Storage Gateway Deep Dive: Volume Gateway | W6 | Mon | 1.15h | 📖 Digital Course |
-| 6 | AWS Storage Gateway Deep Dive: Amazon S3 File Gateway | W6 | Tue | 1h | 📖 Digital Course |
-| 7 | AWS Backup Primer | W6 | Tue | 1.10h | 📖 Digital Course |
-
-> **Ghi chú:** Backup Getting Started (foundation) → S3 Cost Optimization → EBS Cost Optimization → Cloud Economics Lab (tổng hợp cost) → Storage Gateway Volume → Storage Gateway S3 File → Backup Primer (deep dive cuối).
+| 5 | Optimize Your Cloud Governance: Balance Security and Cost | W6 | Tue | 3h | 📖 Digital Course |
+| 6 | AWS Cloud Financial Management for Builders | W6 | Tue | 1.50h | 📖 Digital Course |
 
 ---
 
@@ -225,14 +206,14 @@
 
 | Topic | Pending | Done |
 |-------|---------|------|
-| Cloud Foundations & Architecture | 3 | 2 |
+| Cloud Foundations & Architecture | 2 | 2 |
 | Compute & Storage | 9 | 5 |
 | Database | 8 | 5 |
 | AI / Bedrock / ML | 14 | 0 |
 | Data Engineering & Analytics | 7 | 0 |
-| Networking | 4 | 8 |
+| Networking | 5 | 8 |
 | Serverless & IaC | 5 | 1 |
 | Security & IAM | 7 | 2 |
 | Observability & Operations | 2 | 0 |
-| Cost & Storage Management | 7 | 0 |
-| **Total** | **66** | **22** |
+| Cost & Governance | 6 | 0 |
+| **Total** | **65** | **23** |

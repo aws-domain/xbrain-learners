@@ -5,20 +5,23 @@
 ## AWS Pricing Fundamentals
 
 AWS có 3 nguyên tắc pricing cơ bản:
+
 1. **Pay for what you use** — không có upfront commitment (trừ Reserved)
 2. **Pay less when you reserve** — cam kết dài hạn = giảm giá
 3. **Pay less with more usage** — volume discounts (tiered pricing)
 
----
+***
 
 ## Compute Purchasing Options
 
 ### On-Demand Instances
+
 - Trả theo **giờ hoặc giây**, không cam kết
 - Linh hoạt nhất, đắt nhất
 - **Khi nào dùng:** Dev/test, unpredictable workloads, short-term needs
 
 ### Reserved Instances (RI)
+
 - Cam kết **1 hoặc 3 năm** → tiết kiệm 40-75%
 - **Payment options:**
   - All Upfront — trả hết trước, tiết kiệm nhiều nhất
@@ -30,11 +33,13 @@ AWS có 3 nguyên tắc pricing cơ bản:
 - **Khi nào dùng:** Steady-state workloads, production databases, web servers
 
 **RI trong AWS Organizations:**
+
 - RI có thể được **shared** giữa các accounts trong Organization
 - Nếu account mua RI không dùng hết, capacity tự động apply cho accounts khác
 - Quản lý qua **management account**
 
 ### Spot Instances
+
 - Dùng **unused EC2 capacity** của AWS
 - Tiết kiệm **60-90%** so với On-Demand
 - AWS có thể **terminate với 2 phút notice** khi cần capacity
@@ -42,6 +47,7 @@ AWS có 3 nguyên tắc pricing cơ bản:
 - **Không dùng cho:** Databases, critical applications, stateful workloads
 
 ### AWS Savings Plans
+
 - Cam kết **spend một lượng $/hour** trong 1-3 năm
 - Linh hoạt hơn Reserved Instances
 - **Types:**
@@ -50,42 +56,47 @@ AWS có 3 nguyên tắc pricing cơ bản:
   - **SageMaker Savings Plans** — cho SageMaker
 
 ### Dedicated Hosts
+
 - **Server vật lý riêng** dành cho bạn
 - Kiểm soát instance placement
 - **Dùng cho:** BYOL (Bring Your Own License) — Windows Server, SQL Server, Oracle
 - Đắt nhất trong các options
 
 ### Dedicated Instances
+
 - Instances chạy trên **hardware riêng** (không share với customers khác)
 - Khác Dedicated Hosts: không kiểm soát được physical server
 - **Dùng cho:** Compliance requirements, isolation
 
 ### Capacity Reservations
+
 - **Reserve EC2 capacity** trong một AZ cụ thể
 - Không có discount — trả On-Demand price
 - Đảm bảo có capacity khi cần (ví dụ: disaster recovery)
 - Kết hợp với Savings Plans hoặc RI để có discount
 
----
+***
 
 ## Storage Pricing
 
 ### S3 Pricing Factors
+
 - **Storage** — GB/month theo storage class
 - **Requests** — GET, PUT, COPY, POST, LIST requests
 - **Data transfer** — outbound data transfer (inbound miễn phí)
 - **Management features** — S3 Inventory, Analytics, Object Tagging
 
 ### Data Transfer Costs
-| Transfer | Cost |
-|----------|------|
-| **Inbound** (vào AWS) | Miễn phí |
-| **Outbound** (ra internet) | Tính phí theo GB |
-| **Between AZs** (cùng Region) | Tính phí nhỏ |
-| **Between Regions** | Tính phí |
-| **CloudFront → Internet** | Thấp hơn EC2 → Internet |
 
----
+| Transfer                      | Cost                    |
+| ----------------------------- | ----------------------- |
+| **Inbound** (vào AWS)         | Miễn phí                |
+| **Outbound** (ra internet)    | Tính phí theo GB        |
+| **Between AZs** (cùng Region) | Tính phí nhỏ            |
+| **Between Regions**           | Tính phí                |
+| **CloudFront → Internet**     | Thấp hơn EC2 → Internet |
+
+***
 
 ## Exam Tips
 
