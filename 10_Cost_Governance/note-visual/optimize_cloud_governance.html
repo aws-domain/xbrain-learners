@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tối ưu hóa Quản trị Đám mây | Optimize Your Cloud Governance</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --------------------------------------------------
+       DESIGN SYSTEM TOKENS & UTILITIES (Ref: DESIGN.md)
+       -------------------------------------------------- */
+    :root {
+      /* Brand & Accents */
+      --primary: #cc785c;
+      --primary-active: #a9583e;
+      --primary-disabled: #e6dfd8;
+      --accent-teal: #5db8a6;
+      --accent-amber: #e8a55a;
+      
+      /* Surfaces */
+      --canvas: #faf9f5;
+      --surface-soft: #f5f0e8;
+      --surface-card: #efe9de;
+      --surface-cream-strong: #e8e0d2;
+      --surface-dark: #181715;
+      --surface-dark-elevated: #252320;
+      --surface-dark-soft: #1f1e1b;
+      --hairline: #e6dfd8;
+      --hairline-soft: #ebe6df;
+      
+      /* Text */
+      --ink: #141413;
+      --body-strong: #252523;
+      --body: #3d3d3a;
+      --muted: #6c6a64;
+      --muted-soft: #8e8b82;
+      --on-primary: #ffffff;
+      --on-dark: #faf9f5;
+      --on-dark-soft: #a09d96;
+      
+      /* Semantic states */
+      --success: #5db872;
+      --warning: #d4a017;
+      --error: #c64545;
+      
+      /* Typography */
+      --font-display: 'Cormorant Garamond', Garamond, 'Times New Roman', serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-code: 'JetBrains Mono', ui-monospace, monospace;
+      
+      /* Border Radii */
+      --rounded-xs: 4px;
+      --rounded-sm: 6px;
+      --rounded-md: 8px;
+      --rounded-lg: 12px;
+      --rounded-xl: 16px;
+      --rounded-pill: 9999px;
+      
+      /* Spacings */
+      --spacing-xxs: 4px;
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-xxl: 48px;
+      --spacing-section: 96px;
+    }
+
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--body);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      padding-top: 64px; /* Space for fixed nav */
+    }
+
+    h1, h2, h3, h4 {
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 3rem;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: 2.25rem;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-md);
+    }
+
+    h3 {
+      font-size: 1.75rem;
+      line-height: 1.25;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: var(--primary-active);
+      text-decoration: underline;
+    }
+
+    /* Fixed Top Navigation */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background-color: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-xl);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-spike {
+      fill: var(--ink);
+      width: 18px;
+      height: 18px;
+      animation: pulse-spike 4s infinite ease-in-out;
+    }
+
+    @keyframes pulse-spike {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15) rotate(45deg); opacity: 0.85; }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .nav-link {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      padding: var(--spacing-xxs) 0;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-link:hover::after, .nav-link.active::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .badge-topic {
+      background-color: var(--surface-card);
+      color: var(--ink);
+      padding: 4px 12px;
+      border-radius: var(--rounded-pill);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid var(--hairline);
+    }
+
+    .button-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 18px;
+      height: 40px;
+      border-radius: var(--rounded-md);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .button-primary:hover {
+      background-color: var(--primary-active);
+    }
+
+    .button-primary:active {
+      transform: scale(0.98);
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 18px;
+      height: 40px;
+      border-radius: var(--rounded-md);
+      border: 1px solid var(--hairline);
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .button-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--muted-soft);
+    }
+
+    /* Hero Band Layout */
+    .hero-band {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-xxl) var(--spacing-xl) var(--spacing-section);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--spacing-xxl);
+      align-items: center;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      animation: slide-up-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hero-pretitle {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      line-height: 1.05;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .hero-description {
+      font-size: 1.15rem;
+      color: var(--body-strong);
+      margin-bottom: var(--spacing-md);
+      font-family: var(--font-sans);
+      font-weight: 400;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .hero-illustration {
+      background-color: var(--surface-card);
+      border-radius: var(--rounded-xl);
+      border: 1px solid var(--hairline);
+      aspect-ratio: 4/3;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fade-in-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .scale-diagram {
+      width: 70%;
+      height: 70%;
+    }
+
+    @keyframes slide-up-reveal {
+      0% { transform: translateY(40px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fade-in-reveal {
+      0% { opacity: 0; transform: scale(0.97); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Container Standard */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-xl);
+    }
+
+    .section-separator {
+      height: 1px;
+      background-color: var(--hairline);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Standardized Modular Grid Section */
+    .module-section {
+      padding: var(--spacing-section) 0;
+    }
+
+    .module-header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xxs);
+      margin-bottom: var(--spacing-xxl);
+      max-width: 800px;
+    }
+
+    .module-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .module-title {
+      font-size: 2.25rem;
+      line-height: 1.15;
+    }
+
+    .module-summary {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin-top: var(--spacing-xxs);
+    }
+
+    /* Feature Cards (Ref: DESIGN.md feature-card) */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-lg);
+    }
+
+    .feature-card {
+      background-color: var(--surface-card);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-xl);
+      border: 1px solid transparent;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--hairline);
+    }
+
+    .feature-icon-wrapper {
+      margin-bottom: var(--spacing-md);
+      width: 48px;
+      height: 48px;
+      background-color: var(--canvas);
+      border-radius: var(--rounded-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--hairline-soft);
+    }
+
+    .feature-icon {
+      stroke: var(--primary);
+      stroke-width: 1.5;
+      fill: none;
+      width: 24px;
+      height: 24px;
+    }
+
+    .feature-card-title {
+      font-size: 1.35rem;
+      margin-bottom: var(--spacing-xs);
+      font-family: var(--font-display);
+    }
+
+    .feature-card-desc {
+      font-size: 15px;
+      color: var(--body);
+      line-height: 1.5;
+    }
+
+    /* SPECIALIZED CODE WINDOW CARD */
+    .code-window-card {
+      background-color: var(--surface-dark);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      color: var(--on-dark);
+      font-family: var(--font-code);
+      font-size: 13px;
+      border: 1px solid var(--surface-dark-elevated);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-window-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--surface-dark-elevated);
+      padding-bottom: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      font-family: var(--font-sans);
+    }
+
+    .code-window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .code-window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--surface-dark-elevated);
+    }
+
+    .code-window-dot.red { background-color: var(--error); }
+    .code-window-dot.yellow { background-color: var(--warning); }
+    .code-window-dot.green { background-color: var(--success); }
+
+    .code-window-title {
+      font-size: 12px;
+      color: var(--on-dark-soft);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .code-window-copy {
+      font-size: 11px;
+      color: var(--on-dark-soft);
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.2s ease;
+    }
+
+    .code-window-copy:hover {
+      color: var(--on-dark);
+    }
+
+    .code-window-body {
+      background-color: var(--surface-dark-soft);
+      border-radius: var(--rounded-md);
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      max-height: 400px;
+      line-height: 1.6;
+      border: 1px solid #100f0e;
+    }
+
+    .code-window-body pre {
+      margin: 0;
+    }
+
+    /* Monospace Syntax Highlighting */
+    .st-key { color: #f5f0e8; }
+    .st-prop { color: #e8a55a; }
+    .st-string { color: #5db8a6; }
+    .st-comment { color: #8e8b82; }
+    .st-number { color: #cc785c; }
+
+    /* SCP vs RCP Interactive Area */
+    .split-layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: var(--spacing-xxl);
+      align-items: start;
+    }
+
+    .perimeter-control-box {
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-xl);
+      border: 1px solid var(--hairline);
+    }
+
+    .perimeter-selector {
+      display: flex;
+      background-color: var(--surface-card);
+      border-radius: var(--rounded-md);
+      padding: 4px;
+      margin-bottom: var(--spacing-lg);
+      border: 1px solid var(--hairline-soft);
+    }
+
+    .perimeter-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: var(--rounded-sm);
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      color: var(--muted);
+    }
+
+    .perimeter-tab.active {
+      background-color: var(--canvas);
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(20,20,19,0.06);
+    }
+
+    .perimeter-desc {
+      font-size: 15px;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .perimeter-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .perimeter-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+
+    .perimeter-check {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2;
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .perimeter-item-title {
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .perimeter-item-body {
+      font-size: 14px;
+      color: var(--body);
+    }
+
+    /* Interactive Data Perimeter Visualization */
+    .perimeter-visual-container {
+      background-color: var(--surface-dark);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-xl);
+      border: 1px solid var(--surface-dark-elevated);
+      position: relative;
+      height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .perimeter-visual-title {
+      color: var(--on-dark);
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .perimeter-visual-canvas {
+      flex-grow: 1;
+      position: relative;
+      border: 1px dashed var(--surface-dark-elevated);
+      border-radius: var(--rounded-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .visual-network-box {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-teal);
+      background-color: rgba(93, 184, 166, 0.05);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--on-dark);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .visual-network-pulse {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-teal);
+      animation: pulse-ring 2s infinite ease-out;
+      opacity: 0;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .visual-node {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--surface-dark-elevated);
+      border: 1px solid var(--on-dark-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      z-index: 5;
+    }
+
+    .visual-node.identity-ok {
+      left: 10%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .visual-node.identity-bad {
+      right: 10%;
+      top: 30%;
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .visual-node.resource {
+      z-index: 12;
+      background-color: var(--surface-dark);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .visual-connection-line {
+      position: absolute;
+      height: 1px;
+      background-color: var(--on-dark-soft);
+      opacity: 0.3;
+      z-index: 2;
+    }
+
+    .visual-connection-line.blocked {
+      background-color: var(--error);
+      opacity: 0.8;
+      height: 2px;
+      stroke-dasharray: 4;
+      animation: dash 1s linear infinite;
+    }
+
+    .visual-connection-line.allowed {
+      background-color: var(--success);
+      opacity: 0.8;
+      height: 2px;
+    }
+
+    .perimeter-legend {
+      display: flex;
+      gap: var(--spacing-md);
+      font-size: 11px;
+      color: var(--on-dark-soft);
+      margin-top: var(--spacing-sm);
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .legend-color.teal { background-color: var(--accent-teal); }
+    .legend-color.coral { background-color: var(--primary); }
+    .legend-color.green { background-color: var(--success); }
+    .legend-color.red { background-color: var(--error); }
+
+
+    /* MODULE 3: Config Rules Interactive Checker */
+    .config-rules-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: var(--spacing-xxl);
+    }
+
+    .config-interactive-panel {
+      background-color: var(--surface-card);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-xl);
+      border: 1px solid var(--hairline);
+    }
+
+    .config-rules-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .config-rule-row {
+      background-color: var(--canvas);
+      border-radius: var(--rounded-md);
+      padding: var(--spacing-md);
+      border: 1px solid var(--hairline-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .config-rule-row:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--hairline);
+    }
+
+    .config-rule-row.active {
+      border-left: 4px solid var(--primary);
+      background-color: var(--surface-cream-strong);
+    }
+
+    .config-rule-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .config-rule-name {
+      font-family: var(--font-code);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .config-rule-summary {
+      font-size: 13px;
+      color: var(--body);
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: var(--rounded-pill);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.compliant {
+      background-color: rgba(93, 184, 114, 0.15);
+      color: var(--success);
+    }
+
+    .status-badge.non-compliant {
+      background-color: rgba(198, 69, 69, 0.15);
+      color: var(--error);
+    }
+
+
+    /* MODULE 4: Tag Category Matrix */
+    .tag-matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-lg);
+    }
+
+    .tag-category-box {
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--hairline);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tag-category-box.technical { background-color: #f7f9fa; border-top: 4px solid var(--accent-teal); }
+    .tag-category-box.business { background-color: #faf9f5; border-top: 4px solid var(--accent-amber); }
+    .tag-category-box.security { background-color: #faf7f8; border-top: 4px solid var(--primary); }
+    .tag-category-box.automation { background-color: #f7faf8; border-top: 4px solid var(--success); }
+
+    .tag-category-name {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .tag-examples-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      margin-top: auto;
+    }
+
+    .tag-pill {
+      background-color: var(--canvas);
+      padding: 6px 10px;
+      border-radius: var(--rounded-sm);
+      font-family: var(--font-code);
+      font-size: 12px;
+      border: 1px solid var(--hairline-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tag-pill-key { color: var(--muted); }
+    .tag-pill-val { color: var(--ink); font-weight: 500; }
+
+
+    /* MODULE 5: Animated Remediation Flowchart */
+    .remediation-flowchart-card {
+      background-color: var(--surface-dark);
+      border-radius: var(--rounded-xl);
+      padding: var(--spacing-xl);
+      color: var(--on-dark);
+      border: 1px solid var(--surface-dark-elevated);
+      overflow: hidden;
+      margin-top: var(--spacing-xl);
+    }
+
+    .flowchart-nodes {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      padding: var(--spacing-xl) 0;
+    }
+
+    /* Draw lines connecting steps */
+    .flowchart-nodes::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(to right, var(--error), var(--accent-amber), var(--accent-teal), var(--success));
+      z-index: 1;
+    }
+
+    .flow-step-box {
+      background-color: var(--surface-dark-elevated);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-md);
+      width: 180px;
+      border: 1px solid var(--surface-dark-soft);
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .flow-step-box:hover {
+      transform: translateY(-2px);
+      border-color: var(--on-dark-soft);
+    }
+
+    .flow-step-num {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--on-dark-soft);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .flow-step-title {
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--on-dark);
+    }
+
+    .flow-step-icon {
+      width: 32px;
+      height: 32px;
+      stroke: var(--accent-amber);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .flow-step-box.step-red .flow-step-icon { stroke: var(--error); }
+    .flow-step-box.step-amber .flow-step-icon { stroke: var(--accent-amber); }
+    .flow-step-box.step-teal .flow-step-icon { stroke: var(--accent-teal); }
+    .flow-step-box.step-green .flow-step-icon { stroke: var(--success); }
+
+
+    /* Unified Callout Card */
+    .callout-card-coral {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-xxl) var(--spacing-xl);
+      text-align: center;
+      max-width: 1200px;
+      margin: var(--spacing-section) auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .callout-title {
+      color: var(--on-primary);
+      font-size: 2.25rem;
+      font-family: var(--font-display);
+    }
+
+    .callout-desc {
+      font-size: 1.1rem;
+      max-width: 700px;
+      opacity: 0.9;
+    }
+
+    .callout-btn {
+      background-color: var(--canvas);
+      color: var(--ink);
+      border: none;
+      padding: 12px 24px;
+      font-weight: 500;
+      border-radius: var(--rounded-md);
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .callout-btn:hover {
+      background-color: var(--surface-soft);
+    }
+
+    .callout-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--surface-dark);
+      color: var(--on-dark-soft);
+      padding: var(--spacing-xxl) var(--spacing-xl);
+      border-top: 1px solid var(--surface-dark-elevated);
+      font-size: 14px;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      color: var(--on-dark);
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+    }
+
+    .footer-brand-spike {
+      fill: var(--on-dark);
+      width: 14px;
+      height: 14px;
+    }
+
+    .footer-credits {
+      text-align: right;
+    }
+
+    .footer-credits p {
+      margin-bottom: 2px;
+    }
+
+
+    /* RESPONSIVE BEHAVIOR */
+    @media (max-width: 1024px) {
+      .hero-band {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: var(--spacing-xl);
+        padding-bottom: var(--spacing-xxl);
+      }
+
+      .hero-cta-row {
+        justify-content: center;
+      }
+
+      .hero-illustration {
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .split-layout-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+
+      .config-rules-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+
+      .tag-matrix-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .flowchart-nodes {
+        flex-direction: column;
+        gap: var(--spacing-lg);
+        padding: 0;
+      }
+
+      .flowchart-nodes::before {
+        display: none;
+      }
+
+      .flow-step-box {
+        width: 100%;
+        max-width: 400px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .top-nav {
+        padding: 0 var(--spacing-md);
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero-title {
+        font-size: 2.75rem;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tag-matrix-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+      }
+
+      .footer-credits {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FIXED TOP NAVIGATION -->
+  <nav class="top-nav">
+    <div class="brand">
+      <svg class="brand-spike" viewBox="0 0 24 24">
+        <path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      xBrain.Governance
+    </div>
+    <div class="nav-links">
+      <a class="nav-link active" onclick="scrollToSection('hero')">Nền tảng</a>
+      <a class="nav-link" onclick="scrollToSection('module2')">Multi-Account</a>
+      <a class="nav-link" onclick="scrollToSection('module3')">AWS Config</a>
+      <a class="nav-link" onclick="scrollToSection('module4')">Tagging</a>
+      <a class="nav-link" onclick="scrollToSection('module5')">Cân bằng Bảo mật</a>
+    </div>
+    <div class="nav-actions">
+      <span class="badge-topic">W6: Cost Governance</span>
+      <button class="button-primary" onclick="scrollToSection('coral-cta')">
+        FinOps Framework
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO BAND (6/6 Split Layout) -->
+  <header id="hero" class="hero-band">
+    <div class="hero-content">
+      <span class="hero-pretitle">Tài liệu học tập trực quan (Study Artifact)</span>
+      <h1 class="hero-title">Tối ưu hóa Quản trị Đám mây</h1>
+      <p class="hero-description">
+        Sổ tay trực quan cao cấp hướng dẫn kỹ sư đám mây cân bằng giữa các giới hạn bảo mật và các tham số hiệu quả tài chính trên AWS Organizations, Config và Security Hub.
+      </p>
+      <div class="hero-cta-row">
+        <button class="button-primary" onclick="scrollToSection('module2')">Khám phá các Module</button>
+        <button class="button-secondary" onclick="window.open('../notes/optimize_cloud_governance.md', '_blank')">Xem bản Markdown đầy đủ</button>
+      </div>
+    </div>
+    
+    <div class="hero-illustration">
+      <!-- Decorative Line-Art Balance Graphic -->
+      <svg class="scale-diagram" viewBox="0 0 200 150">
+        <!-- Base scale post -->
+        <path d="M100 120 V50" stroke="#141413" stroke-width="3" stroke-linecap="round"/>
+        <path d="M80 120 H120" stroke="#141413" stroke-width="4" stroke-linecap="round"/>
+        
+        <!-- Balance beam (oscillating simulation) -->
+        <g id="balance-beam" style="transform-origin: 100px 50px; animation: balance-sway 6s infinite ease-in-out;">
+          <line x1="40" y1="50" x2="160" y2="50" stroke="#141413" stroke-width="3"/>
+          <circle cx="100" cy="50" r="4" fill="#cc785c"/>
+          
+          <!-- Left side scale container (Security) -->
+          <line x1="40" y1="50" x2="25" y2="90" stroke="#6c6a64" stroke-width="1.5"/>
+          <line x1="40" y1="50" x2="55" y2="90" stroke="#6c6a64" stroke-width="1.5"/>
+          <path d="M20 90 H60" stroke="#141413" stroke-width="2.5"/>
+          <rect x="32" y="72" width="16" height="18" rx="2" fill="#5db8a6" stroke="#141413" stroke-width="1.5"/>
+          <text x="40" y="84" font-family="sans-serif" font-size="7" font-weight="bold" fill="#faf9f5" text-anchor="middle">SEC</text>
+          
+          <!-- Right side scale container (Cost) -->
+          <line x1="160" y1="50" x2="145" y2="90" stroke="#6c6a64" stroke-width="1.5"/>
+          <line x1="160" y1="50" x2="175" y2="90" stroke="#6c6a64" stroke-width="1.5"/>
+          <path d="M140 90 H180" stroke="#141413" stroke-width="2.5"/>
+          <rect x="152" y="72" width="16" height="18" rx="2" fill="#e8a55a" stroke="#141413" stroke-width="1.5"/>
+          <text x="160" y="84" font-family="sans-serif" font-size="7" font-weight="bold" fill="#faf9f5" text-anchor="middle">COST</text>
+        </g>
+      </svg>
+      <style>
+        @keyframes balance-sway {
+          0%, 100% { transform: rotate(4deg); }
+          50% { transform: rotate(-4deg); }
+        }
+      </style>
+    </div>
+  </header>
+
+  <div class="section-separator"></div>
+
+  <!-- MODULE 1: FOUNDATIONS -->
+  <main class="container">
+    <section class="module-section">
+      <div class="module-header">
+        <span class="module-num">Module 01</span>
+        <h2 class="module-title">Nền tảng của Cost-Aware Cloud Governance</h2>
+        <p class="module-summary">Thấu hiểu sự liên kết chiến lược giữa Quản lý Tài chính Đám mây (FinOps) và việc duy trì trạng thái bảo mật (security posture) mạnh mẽ.</p>
+      </div>
+
+      <div class="feature-grid">
+        <!-- Card 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg class="feature-icon" viewBox="0 0 24 24">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">Tích hợp FinOps</h3>
+          <p class="feature-card-desc">Thiết lập cầu nối văn hóa và vận hành giữa bộ phận kỹ thuật, tài chính và sản phẩm nhằm thúc đẩy trách nhiệm giải trình linh hoạt đối với chi tiêu đám mây doanh nghiệp.</p>
+        </div>
+        <!-- Card 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg class="feature-icon" viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">Mô hình Tiêu dùng</h3>
+          <p class="feature-card-desc">Dịch chuyển trọng tâm kỹ thuật từ việc cung cấp thừa (over-provisioning) cố định sang các cấu hình linh hoạt, co giãn theo nhu cầu thực tế để loại bỏ chi phí nhàn rỗi.</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg class="feature-icon" viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7s0 6 8 10z"/>
+            </svg>
+          </div>
+          <h3 class="feature-card-title">Hệ thống Kiểm soát</h3>
+          <p class="feature-card-desc">Triển khai hệ thống tích hợp gồm các biện pháp ngăn chặn chủ động (preventive), giám sát phát hiện liên tục (detective) và tự động khắc phục (responsive) để tối ưu hóa môi trường.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="section-separator"></div>
+
+  <!-- MODULE 2: AWS ORGANIZATIONS & MULTI ACCOUNT -->
+  <section id="module2" class="module-section" style="background-color: var(--surface-soft);">
+    <div class="container">
+      <div class="module-header">
+        <span class="module-num">Module 02</span>
+        <h2 class="module-title">AWS Organizations và Multi-Account Governance</h2>
+        <p class="module-summary">Quản trị tập trung các ranh giới quyền hạn tối đa (SCPs) và ranh giới truy cập tài nguyên (RCPs) trên toàn bộ các OU.</p>
+      </div>
+
+      <div class="split-layout-grid">
+        <!-- Interactive Controller -->
+        <div class="perimeter-control-box">
+          <div class="perimeter-selector">
+            <div id="tab-scp" class="perimeter-tab active" onclick="switchPerimeter('scp')">Service Control Policies (SCP)</div>
+            <div id="tab-rcp" class="perimeter-tab" onclick="switchPerimeter('rcp')">Resource Control Policies (RCP)</div>
+          </div>
+          
+          <div id="perimeter-info">
+            <p class="perimeter-desc">
+              SCPs là các cơ chế kiểm soát ranh giới **lấy principal làm trung tâm (principal-centric)**. Chúng thiết lập tập trung các giới hạn quyền tối đa trên các OU của tổ chức.
+            </p>
+            <div class="perimeter-list">
+              <div class="perimeter-item">
+                <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <h4 class="perimeter-item-title">Ngăn chặn Region ngoại lệ</h4>
+                  <p class="perimeter-item-body">Chặn các nhà phát triển khởi tạo dịch vụ chi phí cao bên ngoài các region địa phương được phê duyệt.</p>
+                </div>
+              </div>
+              <div class="perimeter-item">
+                <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <h4 class="perimeter-item-title">Khóa kích thước Instance</h4>
+                  <p class="perimeter-item-body">Ngăn chặn các nhà phát triển khởi tạo các instance size khổng lồ trong các OU Dev và Sandbox.</p>
+                </div>
+              </div>
+              <div class="perimeter-item">
+                <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <h4 class="perimeter-item-title">Bảo vệ hệ thống Telemetry</h4>
+                  <p class="perimeter-item-body">Từ chối quyền xóa hoặc dừng hoạt động ghi log của AWS Config hoặc CloudTrail đối với các member account.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Code Window -->
+        <div id="perimeter-graphic-container">
+          <div class="code-window-card">
+            <div class="code-window-header">
+              <div class="code-window-dots">
+                <div class="code-window-dot red"></div>
+                <div class="code-window-dot yellow"></div>
+                <div class="code-window-dot green"></div>
+              </div>
+              <span class="code-window-title" id="code-title">scp-cost-governance-guardrail.json</span>
+              <button class="code-window-copy" onclick="copyCode()">Copy JSON</button>
+            </div>
+            <div class="code-window-body">
+<pre id="code-snippet"><span class="st-comment">// Enforcing Cost Boundaries globally via SCP</span>
+{
+  <span class="st-prop">"Version"</span>: <span class="st-string">"2012-10-17"</span>,
+  <span class="st-prop">"Statement"</span>: [
+    {
+      <span class="st-prop">"Sid"</span>: <span class="st-string">"DenyExpensiveInstanceTypes"</span>,
+      <span class="st-prop">"Effect"</span>: <span class="st-string">"Deny"</span>,
+      <span class="st-prop">"Action"</span>: [<span class="st-string">"ec2:RunInstances"</span>],
+      <span class="st-prop">"Resource"</span>: <span class="st-string">"arn:aws:ec2:*:*:instance/*"</span>,
+      <span class="st-prop">"Condition"</span>: {
+        <span class="st-prop">"StringNotLike"</span>: {
+          <span class="st-prop">"ec2:InstanceType"</span>: [
+            <span class="st-string">"t2.*"</span>, <span class="st-string">"t3.*"</span>,
+            <span class="st-string">"m5.large"</span>, <span class="st-string">"c5.large"</span>
+          ]
+        }
+      }
+    }
+  ]
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODULE 3: AWS CONFIG -->
+  <main class="container">
+    <section id="module3" class="module-section">
+      <div class="module-header">
+        <span class="module-num">Module 03</span>
+        <h2 class="module-title">AWS Config cho Cost Optimization Governance</h2>
+        <p class="module-summary">Liên tục ghi lại các tài sản đám mây đang hoạt động, so sánh trạng thái cấu hình với ngân sách baseline và kiểm toán lệch cấu hình.</p>
+      </div>
+
+      <div class="config-rules-grid">
+        <!-- Interactive Rule Rows -->
+        <div class="config-interactive-panel">
+          <h3 style="font-size: 1.5rem; margin-bottom: var(--spacing-md);">Danh sách kiểm tra Tuân thủ Managed Rule</h3>
+          <div class="config-rules-list">
+            
+            <div class="config-rule-row active" onclick="showConfigRuleCode('volume-unused')">
+              <div class="config-rule-info">
+                <span class="config-rule-name">volume-unused-check</span>
+                <span class="config-rule-summary">Kiểm tra cấu hình gắn kết của EBS volume.</span>
+              </div>
+              <span class="status-badge non-compliant">Không tuân thủ</span>
+            </div>
+
+            <div class="config-rule-row" onclick="showConfigRuleCode('eip-attached')">
+              <div class="config-rule-info">
+                <span class="config-rule-name">eip-attached</span>
+                <span class="config-rule-summary">Phát hiện các Elastic IP chưa liên kết.</span>
+              </div>
+              <span class="status-badge compliant">Tuân thủ</span>
+            </div>
+
+            <div class="config-rule-row" onclick="showConfigRuleCode('rds-idle')">
+              <div class="config-rule-info">
+                <span class="config-rule-name">rds-instance-idle-check</span>
+                <span class="config-rule-summary">Kiểm tra các database không có kết nối hoạt động.</span>
+              </div>
+              <span class="status-badge non-compliant">Không tuân thủ</span>
+            </div>
+            
+          </div>
+        </div>
+
+        <!-- Injected YAML template box -->
+        <div class="code-window-card">
+          <div class="code-window-header">
+            <div class="code-window-dots">
+              <div class="code-window-dot red"></div>
+              <div class="code-window-dot yellow"></div>
+              <div class="code-window-dot green"></div>
+            </div>
+            <span class="code-window-title">unused-volume-remediation.yaml</span>
+          </div>
+          <div class="code-window-body">
+<pre id="config-yaml-snippet"><span class="st-comment"># Operational Best Practices Conformance Pack</span>
+<span class="st-prop">Resources</span>:
+  <span class="st-prop">EBSVolumeUnusedCheck</span>:
+    <span class="st-prop">Type</span>: <span class="st-string">AWS::Config::ConfigRule</span>
+    <span class="st-prop">Properties</span>:
+      <span class="st-prop">ConfigRuleName</span>: <span class="st-string">volume-unused-check</span>
+      <span class="st-prop">Source</span>:
+        <span class="st-prop">Owner</span>: <span class="st-string">AWS</span>
+        <span class="st-prop">SourceIdentifier</span>: <span class="st-string">VOLUME_UNUSED_CHECK</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="section-separator"></div>
+
+  <!-- MODULE 4: COST ALLOCATION MATRIX -->
+  <section id="module4" class="module-section" style="background-color: var(--surface-soft);">
+    <div class="container">
+      <div class="module-header">
+        <span class="module-num">Module 04</span>
+        <h2 class="module-title">Cost Allocation và Tagging Governance</h2>
+        <p class="module-summary">Chuẩn hóa các key, quy tắc viết hoa/thường và các giá trị được phép trên toàn bộ tổ chức thông qua các Tag Policy dạng khai báo.</p>
+      </div>
+
+      <div class="tag-matrix-grid">
+        <!-- Box 1 -->
+        <div class="tag-category-box technical">
+          <span class="tag-category-name">Technical Tags</span>
+          <p style="font-size: 13px; color: var(--body); margin-bottom: var(--spacing-sm);">Xác định các thành phần kiến trúc workload để phục vụ lập bản đồ dịch vụ.</p>
+          <div class="tag-examples-list">
+            <div class="tag-pill"><span class="tag-pill-key">ApplicationID</span><span class="tag-pill-val">APP-708</span></div>
+            <div class="tag-pill"><span class="tag-pill-key">Environment</span><span class="tag-pill-val">Production</span></div>
+          </div>
+        </div>
+        <!-- Box 2 -->
+        <div class="tag-category-box business">
+          <span class="tag-category-name">Business Tags</span>
+          <p style="font-size: 13px; color: var(--body); margin-bottom: var(--spacing-sm);">Thiết lập cấu trúc chargeback kế toán và quyền sở hữu vận hành.</p>
+          <div class="tag-examples-list">
+            <div class="tag-pill"><span class="tag-pill-key">CostCenter</span><span class="tag-pill-val">CC-Eng-200</span></div>
+            <div class="tag-pill"><span class="tag-pill-key">Owner</span><span class="tag-pill-val">devops-lead@</span></div>
+          </div>
+        </div>
+        <!-- Box 3 -->
+        <div class="tag-category-box security">
+          <span class="tag-category-name">Security Tags</span>
+          <p style="font-size: 13px; color: var(--body); margin-bottom: var(--spacing-sm);">Định hướng các ranh giới bảo vệ dữ liệu và yêu cầu kiểm toán.</p>
+          <div class="tag-examples-list">
+            <div class="tag-pill"><span class="tag-pill-key">DataClass</span><span class="tag-pill-val">Confidential</span></div>
+            <div class="tag-pill"><span class="tag-pill-key">Compliance</span><span class="tag-pill-val">PCI-DSS</span></div>
+          </div>
+        </div>
+        <!-- Box 4 -->
+        <div class="tag-category-box automation">
+          <span class="tag-category-name">Automation Tags</span>
+          <p style="font-size: 13px; color: var(--body); margin-bottom: var(--spacing-sm);">Gắn cờ các tài nguyên đang hoạt động cho các tác vụ tự động hóa hoặc tắt giảm chi phí.</p>
+          <div class="tag-examples-list">
+            <div class="tag-pill"><span class="tag-pill-key">AutoStop</span><span class="tag-pill-val">True</span></div>
+            <div class="tag-pill"><span class="tag-pill-key">PatchGroup</span><span class="tag-pill-val">Linux-T3</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODULE 5: SECURITY-COST BALANCE -->
+  <main class="container">
+    <section id="module5" class="module-section">
+      <div class="module-header">
+        <span class="module-num">Module 05</span>
+        <h2 class="module-title">Tích hợp Security và Cost Governance</h2>
+        <p class="module-summary">Đạt được sự cân bằng vận hành giữa kiểm toán tuân thủ liên tục và chi phí thu thập log telemetry.</p>
+      </div>
+
+      <div style="max-width: 800px; margin-bottom: var(--spacing-lg);">
+        <p style="font-size: 1.05rem;">
+          Việc quét bảo mật liên tục và kiểm toán packet làm phát sinh chi phí lưu trữ log. Tuy nhiên, các automated control mạnh mẽ chính là chốt chặn bảo vệ tối thượng chống lại các đột biến hóa đơn thảm họa khi bị xâm nhập (ví dụ: các cụm đào tiền ảo trái phép).
+        </p>
+      </div>
+
+      <!-- Animated Remediation Flowchart -->
+      <h3 style="font-size: 1.5rem; margin-top: var(--spacing-lg);">Quy trình Phản ứng Sự cố Tự động hóa kết hợp Security-Cost</h3>
+      <div class="remediation-flowchart-card">
+        <div class="flowchart-nodes">
+          <!-- Step 1 -->
+          <div class="flow-step-box step-red">
+            <span class="flow-step-num">Bước 01</span>
+            <svg class="flow-step-icon" viewBox="0 0 24 24">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span class="flow-step-title">Phát hiện đe dọa (Threat Detection)</span>
+            <p style="font-size: 11px; color: var(--on-dark-soft);">GuardDuty kích hoạt khi phát hiện traffic EC2 bất thường.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flow-step-box step-amber">
+            <span class="flow-step-num">Bước 02</span>
+            <svg class="flow-step-icon" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span class="flow-step-title">Điều phối sự kiện (Event Brokerage)</span>
+            <p style="font-size: 11px; color: var(--on-dark-soft);">EventBridge xử lý payload JSON của finding.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flow-step-box step-teal">
+            <span class="flow-step-num">Bước 03</span>
+            <svg class="flow-step-icon" viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <span class="flow-step-title">Kịch bản tự động (Orchestrated Script)</span>
+            <p style="font-size: 11px; color: var(--on-dark-soft);">Step Functions chặn port và dừng các instance.</p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flow-step-box step-green">
+            <span class="flow-step-num">Bước 04</span>
+            <svg class="flow-step-icon" viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <span class="flow-step-title">Cảnh báo thời gian thực (Real-Time Alert)</span>
+            <p style="font-size: 11px; color: var(--on-dark-soft);">SNS gửi email khẩn cấp và thông báo Slack.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- CORAL Pre-Footer CTA -->
+  <section id="coral-cta" class="callout-card-coral">
+    <h2 class="callout-title">Làm chủ Cloud FinOps Governance</h2>
+    <p class="callout-desc">
+      Cân bằng giữa cấu trúc tuân thủ nghiêm ngặt và các tham số hiệu quả tài nguyên. Triển khai hạ tầng an toàn, dễ truy vết và được tối ưu hóa tối đa.
+    </p>
+    <button class="callout-btn" onclick="alert('Bắt đầu chuyển hướng tới FinOps Practitioner Checklist!')">Mở danh sách kiểm tra của FinOps Practitioner</button>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <svg class="footer-brand-spike" viewBox="0 0 24 24">
+          <path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        xBrain.Governance
+      </div>
+      <div class="footer-credits">
+        <p>W6: Tài liệu học tập Optimize Your Cloud Governance</p>
+        <p style="color: var(--on-dark-soft); font-size: 12px;">© 2026 xBrain Learners. Thiết kế Warm Cream.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC BEHAVIOR SCRIPTS -->
+  <script>
+    // Smooth Scroll Helper
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        const offset = 64; 
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = el.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+
+        const links = document.querySelectorAll('.nav-link');
+        links.forEach(l => l.classList.remove('active'));
+        
+        if (id === 'hero') {
+          links[0].classList.add('active');
+        } else if (id === 'module2') {
+          links[1].classList.add('active');
+        } else if (id === 'module3') {
+          links[2].classList.add('active');
+        } else if (id === 'module4') {
+          links[3].classList.add('active');
+        } else if (id === 'module5') {
+          links[4].classList.add('active');
+        }
+      }
+    }
+
+    // Dynamic SCP vs RCP Controller
+    function switchPerimeter(type) {
+      const tabScp = document.getElementById('tab-scp');
+      const tabRcp = document.getElementById('tab-rcp');
+      const infoBox = document.getElementById('perimeter-info');
+      const codeSnippet = document.getElementById('code-snippet');
+      const codeTitle = document.getElementById('code-title');
+
+      if (type === 'scp') {
+        tabScp.classList.add('active');
+        tabRcp.classList.remove('active');
+        codeTitle.innerText = "scp-cost-governance-guardrail.json";
+        
+        infoBox.innerHTML = `
+          <p class="perimeter-desc">
+            SCPs là các cơ chế kiểm soát ranh giới **lấy principal làm trung tâm (principal-centric)**. Chúng thiết lập tập trung các giới hạn quyền tối đa trên các OU của tổ chức.
+          </p>
+          <div class="perimeter-list">
+            <div class="perimeter-item">
+              <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <h4 class="perimeter-item-title">Ngăn chặn Region ngoại lệ</h4>
+                <p class="perimeter-item-body">Chặn các nhà phát triển khởi tạo dịch vụ chi phí cao bên ngoài các region địa phương được phê duyệt.</p>
+              </div>
+            </div>
+            <div class="perimeter-item">
+              <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <h4 class="perimeter-item-title">Khóa kích thước Instance</h4>
+                <p class="perimeter-item-body">Ngăn chặn các nhà phát triển khởi tạo các instance size khổng lồ trong các OU Dev và Sandbox.</p>
+              </div>
+            </div>
+            <div class="perimeter-item">
+              <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <h4 class="perimeter-item-title">Bảo vệ hệ thống Telemetry</h4>
+                <p class="perimeter-item-body">Từ chối quyền xóa hoặc dừng hoạt động ghi log của AWS Config hoặc CloudTrail đối với các member account.</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        codeSnippet.innerHTML = `<span class="st-comment">// Enforcing Cost Boundaries globally via SCP</span>
+{
+  <span class="st-prop">"Version"</span>: <span class="st-string">"2012-10-17"</span>,
+  <span class="st-prop">"Statement"</span>: [
+    {
+      <span class="st-prop">"Sid"</span>: <span class="st-string">"DenyExpensiveInstanceTypes"</span>,
+      <span class="st-prop">"Effect"</span>: <span class="st-string">"Deny"</span>,
+      <span class="st-prop">"Action"</span>: [<span class="st-string">"ec2:RunInstances"</span>],
+      <span class="st-prop">"Resource"</span>: <span class="st-string">"arn:aws:ec2:*:*:instance/*"</span>,
+      <span class="st-prop">"Condition"</span>: {
+        <span class="st-prop">"StringNotLike"</span>: {
+          <span class="st-prop">"ec2:InstanceType"</span>: [
+            <span class="st-string">"t2.*"</span>, <span class="st-string">"t3.*"</span>,
+            <span class="st-string">"m5.large"</span>, <span class="st-string">"c5.large"</span>
+          ]
+        }
+      }
+    }
+  ]
+}`;
+      } else {
+        tabScp.classList.remove('active');
+        tabRcp.classList.add('active');
+        codeTitle.innerText = "rcp-perimeter-boundary.json";
+
+        infoBox.innerHTML = `
+          <p class="perimeter-desc">
+            RCPs là các cơ chế kiểm soát ranh giới **lấy tài nguyên làm trung tâm (resource-centric)**. Chúng giới hạn cách thức tài nguyên nội bộ được truy cập, tạo nên một ranh giới dữ liệu (Data Perimeter) an toàn.
+          </p>
+          <div class="perimeter-list">
+            <div class="perimeter-item">
+              <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <h4 class="perimeter-item-title">Chặn rò rỉ dữ liệu (Exfiltration Block)</h4>
+                <p class="perimeter-item-body">Bắt buộc các giới hạn truy cập S3 bucket để tài nguyên từ chối mọi request xuất phát từ ngoài tổ chức.</p>
+              </div>
+            </div>
+            <div class="perimeter-item">
+              <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <h4 class="perimeter-item-title">Bảo mật Shared SQS</h4>
+                <p class="perimeter-item-body">Chặn các external identity gửi message vào SQS của bạn, tránh phát sinh chi phí traffic API.</p>
+              </div>
+            </div>
+            <div class="perimeter-item">
+              <svg class="perimeter-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <h4 class="perimeter-item-title">Bảo vệ KMS Request</h4>
+                <p class="perimeter-item-body">Bảo vệ các decryption key tập trung khỏi các lượt gọi từ các external principal chưa xác thực.</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        codeSnippet.innerHTML = `<span class="st-comment">// Restricting Resource Access globally via RCP</span>
+{
+  <span class="st-prop">"Version"</span>: <span class="st-string">"2012-10-17"</span>,
+  <span class="st-prop">"Statement"</span>: [
+    {
+      <span class="st-prop">"Sid"</span>: <span class="st-string">"EnforceDataPerimeter"</span>,
+      <span class="st-prop">"Effect"</span>: <span class="st-string">"Deny"</span>,
+      <span class="st-prop">"Principal"</span>: <span class="st-string">"*"</span>,
+      <span class="st-prop">"Resource"</span>: <span class="st-string">"*"</span>,
+      <span class="st-prop">"Condition"</span>: {
+        <span class="st-prop">"StringNotEquals"</span>: {
+          <span class="st-prop">"aws:PrincipalOrgID"</span>: [<span class="st-string">"o-abcde12345"</span>]
+        }
+      }
+    }
+  ]
+}`;
+      }
+    }
+
+    // Interactive Config Rules Visualizer
+    function showConfigRuleCode(ruleType) {
+      const rows = document.querySelectorAll('.config-rule-row');
+      rows.forEach(r => r.classList.remove('active'));
+
+      const yamlSnippet = document.getElementById('config-yaml-snippet');
+
+      if (ruleType === 'volume-unused') {
+        event.currentTarget.classList.add('active');
+        yamlSnippet.innerHTML = `<span class="st-comment"># Operational Best Practices Conformance Pack</span>
+<span class="st-prop">Resources</span>:
+  <span class="st-prop">EBSVolumeUnusedCheck</span>:
+    <span class="st-prop">Type</span>: <span class="st-string">AWS::Config::ConfigRule</span>
+    <span class="st-prop">Properties</span>:
+      <span class="st-prop">ConfigRuleName</span>: <span class="st-string">volume-unused-check</span>
+      <span class="st-prop">Source</span>:
+        <span class="st-prop">Owner</span>: <span class="st-string">AWS</span>
+        <span class="st-prop">SourceIdentifier</span>: <span class="st-string">VOLUME_UNUSED_CHECK</span>`;
+      } else if (ruleType === 'eip-attached') {
+        event.currentTarget.classList.add('active');
+        yamlSnippet.innerHTML = `<span class="st-comment"># Check allocated but unassociated IPs</span>
+<span class="st-prop">Resources</span>:
+  <span class="st-prop">UnassociatedElasticIP</span>:
+    <span class="st-prop">Type</span>: <span class="st-string">AWS::Config::ConfigRule</span>
+    <span class="st-prop">Properties</span>:
+      <span class="st-prop">ConfigRuleName</span>: <span class="st-string">eip-attached</span>
+      <span class="st-prop">Source</span>:
+        <span class="st-prop">Owner</span>: <span class="st-string">AWS</span>
+        <span class="st-prop">SourceIdentifier</span>: <span class="st-string">EIP_ATTACHED</span>`;
+      } else if (ruleType === 'rds-idle') {
+        event.currentTarget.classList.add('active');
+        yamlSnippet.innerHTML = `<span class="st-comment"># Identify database nodes with zero connections</span>
+<span class="st-prop">Resources</span>:
+  <span class="st-prop">RDSInstanceIdleCheck</span>:
+    <span class="st-prop">Type</span>: <span class="st-string">AWS::Config::ConfigRule</span>
+    <span class="st-prop">Properties</span>:
+      <span class="st-prop">ConfigRuleName</span>: <span class="st-string">rds-instance-idle-check</span>
+      <span class="st-prop">InputParameters</span>:
+        <span class="st-prop">daysMinIdle</span>: <span class="st-string">'14'</span>
+      <span class="st-prop">Source</span>:
+        <span class="st-prop">Owner</span>: <span class="st-string">AWS</span>
+        <span class="st-prop">SourceIdentifier</span>: <span class="st-string">RDS_INSTANCE_IDLE_CHECK</span>`;
+      }
+    }
+
+    // Copy Action
+    function copyCode() {
+      const code = document.getElementById('code-snippet').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.code-window-copy');
+        btn.innerText = "Đã sao chép!";
+        setTimeout(() => { btn.innerText = "Copy JSON"; }, 2000);
+      });
+    }
+
+    // Smooth Navigation Highlighting on Scroll
+    window.addEventListener('scroll', () => {
+      const sections = ['hero', 'module2', 'module3', 'module4', 'module5'];
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      let currentSection = 'hero';
+      sections.forEach(secId => {
+        const el = document.getElementById(secId);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 120) {
+            currentSection = secId;
+          }
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        const text = link.innerText.toLowerCase();
+        if (currentSection === 'hero' && text.includes('nền tảng')) {
+          link.classList.add('active');
+        } else if (currentSection === 'module2' && text.includes('multi-account')) {
+          link.classList.add('active');
+        } else if (currentSection === 'module3' && text.includes('aws config')) {
+          link.classList.add('active');
+        } else if (currentSection === 'module4' && text.includes('tagging')) {
+          link.classList.add('active');
+        } else if (currentSection === 'module5' && text.includes('cân bằng')) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

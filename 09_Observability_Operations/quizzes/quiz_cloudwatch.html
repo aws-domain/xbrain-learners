@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon CloudWatch Getting Started Quiz | Bài kiểm tra trắc nghiệm</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --------------------------------------------------
+       DESIGN SYSTEM TOKENS & UTILITIES (Ref: DESIGN.md)
+       -------------------------------------------------- */
+    :root {
+      /* Brand & Accents */
+      --primary: #cc785c;
+      --primary-active: #a9583e;
+      --primary-disabled: #e6dfd8;
+      --accent-teal: #5db8a6;
+      --accent-amber: #e8a55a;
+      
+      /* Surfaces */
+      --canvas: #faf9f5;
+      --surface-soft: #f5f0e8;
+      --surface-card: #efe9de;
+      --surface-cream-strong: #e8e0d2;
+      --surface-dark: #181715;
+      --surface-dark-elevated: #252320;
+      --surface-dark-soft: #1f1e1b;
+      --hairline: #e6dfd8;
+      --hairline-soft: #ebe6df;
+      
+      /* Text */
+      --ink: #141413;
+      --body-strong: #252523;
+      --body: #3d3d3a;
+      --muted: #6c6a64;
+      --muted-soft: #8e8b82;
+      --on-primary: #ffffff;
+      --on-dark: #faf9f5;
+      --on-dark-soft: #a09d96;
+      
+      /* Semantic states */
+      --success: #5db872;
+      --success-bg: rgba(93, 184, 114, 0.12);
+      --error: #c64545;
+      --error-bg: rgba(198, 69, 69, 0.12);
+      --warning: #d4a017;
+      
+      /* Typography */
+      --font-display: var(--font-sans);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-code: 'JetBrains Mono', ui-monospace, monospace;
+      
+      /* Border Radii */
+      --rounded-xs: 4px;
+      --rounded-sm: 6px;
+      --rounded-md: 8px;
+      --rounded-lg: 12px;
+      --rounded-xl: 16px;
+      --rounded-pill: 9999px;
+      
+      /* Spacings */
+      --spacing-xxs: 4px;
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-xxl: 48px;
+      --spacing-section: 64px;
+    }
+
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--body);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      padding-top: 64px; /* Space for fixed nav */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, h4 {
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-weight: 600; /* Modern sans-serif headers look premium when semi-bold */
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+
+    p {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* Fixed Top Navigation */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background-color: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-xl);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-spike {
+      fill: var(--ink);
+      width: 18px;
+      height: 18px;
+      animation: pulse-spike 4s infinite ease-in-out;
+    }
+
+    @keyframes pulse-spike {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15) rotate(45deg); opacity: 0.85; }
+    }
+
+    .badge-topic {
+      background-color: var(--surface-card);
+      color: var(--ink);
+      padding: 4px 12px;
+      border-radius: var(--rounded-pill);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid var(--hairline);
+    }
+
+    /* Standardized Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: var(--rounded-md);
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease, border-color 0.2s ease, color 0.2s ease;
+      height: 44px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-active);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      background-color: var(--primary-disabled);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--ink);
+      border: 1px solid var(--hairline);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--muted-soft);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--hairline);
+      color: var(--body);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--surface-soft);
+    }
+
+    /* Layout Containers */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--spacing-section) var(--spacing-xl);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.4s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --------------------------------------------------
+       WELCOME SCREEN STYLING
+       -------------------------------------------------- */
+    .welcome-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-xl);
+      padding: var(--spacing-xxl);
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .welcome-title {
+      font-size: 3rem;
+      margin-bottom: var(--spacing-md);
+      line-height: 1.1;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.15rem;
+      color: var(--body-strong);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-xl);
+    }
+
+    .quiz-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-box {
+      background-color: var(--canvas);
+      border: 1px solid var(--hairline-soft);
+      border-radius: var(--rounded-md);
+      padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .stat-val {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .coverage-card {
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      text-align: left;
+      border: 1px dashed var(--hairline);
+    }
+
+    .coverage-title {
+      font-size: 1.25rem;
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .coverage-list {
+      list-style-type: none;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-xs);
+      font-size: 14px;
+      color: var(--body);
+    }
+
+    @media (min-width: 600px) {
+      .coverage-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .coverage-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .coverage-item::before {
+      content: '✦';
+      color: var(--primary);
+      font-size: 10px;
+    }
+
+    /* --------------------------------------------------
+       QUIZ ACTIVE SCREEN STYLING
+       -------------------------------------------------- */
+    .quiz-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-pill);
+      width: 100%;
+      margin-bottom: var(--spacing-xl);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-code);
+      font-size: 14px;
+      background-color: var(--surface-soft);
+      padding: 4px 10px;
+      border-radius: var(--rounded-sm);
+      color: var(--ink);
+    }
+
+    .timer-icon {
+      stroke: var(--primary);
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .question-card {
+      background-color: var(--canvas);
+      border-radius: var(--rounded-xl);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .question-title {
+      font-size: 1.85rem;
+      line-height: 1.25;
+      color: var(--ink);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .option-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline-soft);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-md) var(--spacing-lg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+      color: var(--body-strong);
+      text-align: left;
+    }
+
+    .option-card:hover {
+      background-color: var(--surface-cream-strong);
+      border-color: var(--muted-soft);
+    }
+
+    .option-card.selected {
+      border: 2px solid var(--primary);
+      background-color: var(--surface-cream-strong);
+      padding: 15px var(--spacing-lg); /* Maintain layout spacing with border shift */
+    }
+
+    .option-letter {
+      font-family: var(--font-code);
+      font-weight: 600;
+      color: var(--primary);
+      background-color: var(--canvas);
+      width: 26px;
+      height: 26px;
+      border-radius: var(--rounded-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--hairline);
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    .option-card.selected .option-letter {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+
+    .option-text {
+      font-size: 15px;
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    /* Validated Answer States */
+    .option-card.correct {
+      border: 2px solid var(--success) !important;
+      background-color: var(--success-bg) !important;
+    }
+
+    .option-card.correct .option-letter {
+      background-color: var(--success) !important;
+      color: var(--on-primary) !important;
+      border-color: var(--success) !important;
+    }
+
+    .option-card.incorrect {
+      border: 2px solid var(--error) !important;
+      background-color: var(--error-bg) !important;
+    }
+
+    .option-card.incorrect .option-letter {
+      background-color: var(--error) !important;
+      color: var(--on-primary) !important;
+      border-color: var(--error) !important;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--spacing-lg);
+    }
+
+    /* --------------------------------------------------
+       EXPLANATION CARD STYLING
+       -------------------------------------------------- */
+    .explanation-card {
+      background-color: var(--surface-soft);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border-left: 4px solid var(--accent-teal);
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .explanation-card.show {
+      max-height: 800px;
+      opacity: 1;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .explanation-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-teal);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .explanation-icon {
+      stroke: var(--accent-teal);
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke-width: 2.5;
+    }
+
+    .explanation-title {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      color: var(--ink);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .explanation-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--body);
+    }
+
+    .explanation-text p {
+      margin-bottom: 8px;
+    }
+
+    .explanation-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* --------------------------------------------------
+       RESULTS DASHBOARD STYLING
+       -------------------------------------------------- */
+    .results-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-xl);
+      padding: var(--spacing-xxl);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.02);
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .results-pretitle {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    .results-title {
+      font-size: 2.5rem;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .score-visualization {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .score-ring-svg {
+      width: 140px;
+      height: 140px;
+      transform: rotate(-90deg);
+    }
+
+    .score-ring-bg {
+      fill: none;
+      stroke: var(--hairline);
+      stroke-width: 8;
+    }
+
+    .score-ring-fill {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 377; /* 2 * PI * 60 */
+      stroke-dashoffset: 377;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+
+    .score-text-overlay {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-percent {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .score-fraction {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .results-summary-text {
+      text-align: center;
+      font-size: 1.05rem;
+      color: var(--body-strong);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-xl);
+      line-height: 1.6;
+    }
+
+    /* Diagnostics breakdown */
+    .diagnostic-container {
+      background-color: var(--canvas);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--hairline-soft);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .diagnostic-title {
+      font-size: 1.35rem;
+      margin-bottom: var(--spacing-md);
+      text-align: left;
+      border-bottom: 1px solid var(--hairline-soft);
+      padding-bottom: var(--spacing-xs);
+    }
+
+    .diagnostic-bar-row {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .diagnostic-bar-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .diagnostic-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--body-strong);
+      margin-bottom: 4px;
+    }
+
+    .diagnostic-track {
+      height: 8px;
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-pill);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .diagnostic-fill {
+      height: 100%;
+      border-radius: var(--rounded-pill);
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .diagnostic-fill.green { background-color: var(--success); }
+    .diagnostic-fill.amber { background-color: var(--accent-amber); }
+    .diagnostic-fill.coral { background-color: var(--primary); }
+
+    /* Review Sheet Accordion */
+    .review-accordion-title {
+      font-size: 1.5rem;
+      margin-top: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+      text-align: left;
+    }
+
+    .review-sheet {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xl);
+      text-align: left;
+    }
+
+    .review-item {
+      border: 1px solid var(--hairline-soft);
+      border-radius: var(--rounded-md);
+      background-color: var(--canvas);
+      overflow: hidden;
+    }
+
+    .review-item-header {
+      padding: var(--spacing-md);
+      background-color: var(--surface-soft);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .review-item-title-text {
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .review-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .review-status-indicator.correct-color { color: var(--success); }
+    .review-status-indicator.incorrect-color { color: var(--error); }
+
+    .review-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .review-status-dot.green { background-color: var(--success); }
+    .review-status-dot.red { background-color: var(--error); }
+
+    .review-item-body {
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--hairline-soft);
+      display: none;
+      background-color: var(--canvas);
+    }
+
+    .review-item.expanded .review-item-body {
+      display: block;
+    }
+
+    .review-question-text {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+      color: var(--ink);
+    }
+
+    .review-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: var(--spacing-md);
+      font-size: 13px;
+    }
+
+    .review-option {
+      padding: 8px 12px;
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--hairline-soft);
+    }
+
+    .review-option.correct {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .review-option.incorrect {
+      background-color: var(--error-bg);
+      border-color: var(--error);
+      color: var(--error);
+      text-decoration: line-through;
+    }
+
+    .review-explanation {
+      font-size: 13px;
+      line-height: 1.5;
+      padding: var(--spacing-md);
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-sm);
+      border-left: 3px solid var(--accent-teal);
+      color: var(--body);
+    }
+
+    /* Footer styling */
+    footer {
+      background-color: var(--surface-dark);
+      color: var(--on-dark-soft);
+      padding: 48px var(--spacing-xl);
+      text-align: center;
+      font-size: 13px;
+      margin-top: auto;
+      border-top: 1px solid var(--surface-dark-elevated);
+    }
+
+    .footer-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      color: var(--on-dark);
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .footer-brand .brand-spike {
+      fill: var(--on-dark);
+      width: 14px;
+      height: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="brand">
+      <svg class="brand-spike" viewBox="0 0 24 24">
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+      </svg>
+      <span>CloudWatch Getting Started</span>
+    </div>
+    <span class="badge-topic">Observability</span>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container">
+    
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="welcome-card fade-in">
+      <h1 class="welcome-title">Kiểm Tra Kiến Thức CloudWatch</h1>
+      <p class="welcome-subtitle">
+        Đánh giá mức độ hiểu biết của bạn về Amazon CloudWatch qua bộ 15 câu hỏi trắc nghiệm dựa trên kịch bản thực tế doanh nghiệp.
+      </p>
+      
+      <div class="quiz-stats-grid">
+        <div class="stat-box">
+          <div class="stat-val">15</div>
+          <div class="stat-label">Câu hỏi</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">5</div>
+          <div class="stat-label">Chuyên đề</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">30m</div>
+          <div class="stat-label">Thời gian</div>
+        </div>
+      </div>
+      
+      <div class="coverage-card">
+        <h3 class="coverage-title">
+          <span>✦</span> Phạm Vi Kiến Thức Được Đánh Giá:
+        </h3>
+        <ul class="coverage-list">
+          <li class="coverage-item">Kiến trúc Observability & 5 Thành phần CloudWatch</li>
+          <li class="coverage-item">Metrics Mặc Định & Điểm Mù (Custom RAM/Disk Metrics)</li>
+          <li class="coverage-item">Cài Đặt CloudWatch Agent & Cú Pháp Logs Insights</li>
+          <li class="coverage-item">Cấu Hình Alarms, ML Anomaly Detection & EC2 Actions</li>
+          <li class="coverage-item">Active Monitoring Với Synthetics Headless Canaries</li>
+        </ul>
+      </div>
+      
+      <button class="btn btn-primary" onclick="startQuiz()">Bắt Đầu Làm Bài</button>
+    </div>
+
+    <!-- Active Quiz Screen (Hidden initially) -->
+    <div id="quiz-screen" class="fade-in" style="display: none;">
+      <div class="quiz-hud">
+        <span id="question-tracker">Câu hỏi 1 / 15</span>
+        <div class="timer-box">
+          <svg class="timer-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6V12L16 14" />
+          </svg>
+          <span id="timer-display">30:00</span>
+        </div>
+      </div>
+      
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar-fill"></div>
+      </div>
+      
+      <div class="question-card">
+        <h2 id="question-title" class="question-title">Đang tải câu hỏi...</h2>
+        <div id="options-container" class="options-list">
+          <!-- Dynamically populated options -->
+        </div>
+      </div>
+
+      <!-- Explanation Panel (Hidden initially) -->
+      <div id="explanation-container" class="explanation-card">
+        <div class="explanation-header">
+          <svg class="explanation-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <span>Giải thích chi tiết</span>
+        </div>
+        <h4 id="explanation-title" class="explanation-title">Vì sao đáp án này chính xác?</h4>
+        <div id="explanation-text" class="explanation-text">
+          <!-- Dynamically populated explanation -->
+        </div>
+      </div>
+      
+      <div class="action-row">
+        <button id="btn-secondary-action" class="btn btn-secondary" onclick="exitQuiz()">Thoát</button>
+        <button id="btn-primary-action" class="btn btn-primary" onclick="submitOrNext()" disabled>Nộp bài</button>
+      </div>
+    </div>
+
+    <!-- Results Screen (Hidden initially) -->
+    <div id="results-screen" class="results-card fade-in" style="display: none;">
+      <div class="results-header">
+        <span class="results-pretitle">Kết quả kiểm tra</span>
+        <h1 class="results-title">Hoàn Thành Bài Thi!</h1>
+      </div>
+      
+      <div class="score-visualization">
+        <svg class="score-ring-svg">
+          <circle class="score-ring-bg" cx="70" cy="70" r="60" />
+          <circle id="score-ring" class="score-ring-fill" cx="70" cy="70" r="60" />
+        </svg>
+        <div class="score-text-overlay">
+          <span id="score-percent" class="score-percent">0%</span>
+          <span id="score-fraction" class="score-fraction">0/15</span>
+        </div>
+      </div>
+      
+      <p id="results-summary" class="results-summary-text">
+        Đang phân tích điểm số của bạn...
+      </p>
+      
+      <!-- Diagnostic Bars -->
+      <div class="diagnostic-container">
+        <h3 class="diagnostic-title">Phân Tích Hiệu Suất Chuyên Đề</h3>
+        
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Chuyên đề 1: Kiến trúc Observability</span>
+            <span id="diag-mod-1">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-fill-1" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+        
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Chuyên đề 2: default & Custom Metrics</span>
+            <span id="diag-mod-2">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-fill-2" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+        
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Chuyên đề 3: Ingesting & Querying Logs</span>
+            <span id="diag-mod-3">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-fill-3" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+        
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Chuyên đề 4: CloudWatch Alarms & Actions</span>
+            <span id="diag-mod-4">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-fill-4" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+        
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Chuyên đề 5: Active Synthetics Canaries</span>
+            <span id="diag-mod-5">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-fill-5" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expandable Review Sheet -->
+      <h3 class="review-accordion-title">Xem Lại Câu Hỏi & Giải Thích</h3>
+      <div id="review-sheet-container" class="review-sheet">
+        <!-- Dynamically populated accordion review items -->
+      </div>
+      
+      <div class="action-row" style="justify-content: center; gap: 16px;">
+        <button class="btn btn-secondary" onclick="restartQuiz()">Thử Sức Lại</button>
+        <button class="btn btn-primary" onclick="exitToWelcome()">Quay Lại Trang Chủ</button>
+      </div>
+    </div>
+    
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-brand">
+      <svg class="brand-spike" viewBox="0 0 24 24">
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+      </svg>
+      <span>Observability & Operations</span>
+    </div>
+    <p style="margin-top: 8px;">Hệ thống bài học nâng cao cho Cloud Engineer và SRE</p>
+  </footer>
+
+  <!-- DYNAMIC BEHAVIOR SCRIPTS -->
+  <script>
+    // Quiz Questions Data Structure (15 Scenario-based Questions)
+    const questions = [
+      {
+        id: 1,
+        module: 1,
+        question: "Một kỹ sư DevOps muốn thiết lập quy trình tự động hóa hoàn chỉnh cho hệ thống EC2: cài đặt agent đẩy dữ liệu, giám sát bất thường CPU trên biểu đồ thời gian thực, tự động kích hoạt scale-out khi tải vượt ngưỡng, và cuối cùng truy vấn Logs Insights để tìm nguyên nhân gốc rễ sau sự cố. Các giai đoạn này tương ứng với thứ tự nào trong Observability Lifecycle?",
+        options: [
+          "Monitor ➔ Collect ➔ Act ➔ Analyze",
+          "Collect ➔ Monitor ➔ Act ➔ Analyze",
+          "Collect ➔ Act ➔ Monitor ➔ Analyze",
+          "Analyze ➔ Monitor ➔ Collect ➔ Act"
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Vòng đời Observability của AWS gồm 4 giai đoạn khép kín:</p><ol><li><strong>Collect</strong>: Cài đặt CloudWatch Agent để thu thập log, metrics từ OS.</li><li><strong>Monitor</strong>: Theo dõi trạng thái thông qua dashboards và biểu đồ real-time.</li><li><strong>Act</strong>: Kích hoạt Auto Scaling hoặc gửi cảnh báo SNS khi vượt ngưỡng.</li><li><strong>Analyze</strong>: Sử dụng CloudWatch Logs Insights truy vấn phân tích sâu nguyên nhân sự cố.</li></ol>"
+      },
+      {
+        id: 2,
+        module: 1,
+        question: "Hệ thống của bạn chạy trên môi trường đám mây lai (hybrid cloud) gồm cả các máy chủ EC2 trên AWS và một loạt máy chủ vật lý on-premises đặt tại văn phòng doanh nghiệp. Bạn muốn quản lý tập trung và cấu hình cảnh báo logs/metrics của cả hai môi trường này trên một giao diện CloudWatch duy nhất. Bạn nên sử dụng phương án thu thập dữ liệu nào?",
+        options: [
+          "Sử dụng CloudWatch API Gateway tích hợp",
+          "Cài đặt Unified CloudWatch Agent trên tất cả các máy chủ EC2 và máy chủ on-premises",
+          "Sử dụng CloudWatch Metric Streams truyền trực tiếp qua Kinesis Data Firehose",
+          "Thiết lập AWS Systems Manager Run Command chạy định kỳ mỗi 5 phút"
+        ],
+        correctAnswer: 1,
+        explanation: "<p><strong>Unified CloudWatch Agent</strong> là tác nhân đa nền tảng. Bạn có thể cài đặt Agent này trên cả máy chủ ảo Amazon EC2 lẫn các máy chủ vật lý chạy on-premises trong hệ thống trung tâm dữ liệu của doanh nghiệp để thu thập log hệ điều hành (như syslog, event logs) và custom metrics hệ thống đẩy về AWS CloudWatch tập trung.</p>"
+      },
+      {
+        id: 3,
+        module: 2,
+        question: "Bạn vừa khởi chạy một EC2 instance mới chạy ứng dụng web thương mại điện tử với cấu hình mặc định (Basic Monitoring). Sau 10 phút chạy thử nghiệm, bạn truy cập CloudWatch console để xem biểu đồ CPU Utilization. Bạn nhận thấy biểu đồ có độ phân giải rất thô, các chấm điểm dữ liệu cách nhau đúng 5 phút. Bạn cần làm gì để có biểu đồ mịn hơn với tần suất hiển thị 1 phút một lần?",
+        options: [
+          "Cấu hình Unified CloudWatch Agent chạy trong hệ điều hành đẩy CPU metric lên",
+          "Bật tính năng Detailed Monitoring trên EC2 instance đó",
+          "Tạo một CloudWatch Alarm trên CPU Utilization để kích hoạt trạng thái ghi dữ liệu nhanh",
+          "Tăng độ phân giải của Custom Metric lên High Resolution"
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Đối với EC2 instance, mặc định AWS cung cấp <strong>Basic Monitoring</strong> miễn phí với tần suất gửi metrics là <strong>5 phút/lần</strong>. Để nâng cao tần suất thu thập lên **1 phút/lần** phục vụ co giãn nhạy hoặc giám sát chặt chẽ, bạn chỉ cần kích hoạt **Detailed Monitoring** trên instance đó.</p>"
+      },
+      {
+        id: 4,
+        module: 2,
+        question: "Quản trị viên báo cáo rằng một EC2 instance chạy cơ sở dữ liệu bị sập đột ngột do đầy ổ cứng lưu trữ hệ điều hành (Disk Space Utilization đạt 100%). Tuy nhiên, trên CloudWatch dashboard, biểu đồ giám sát Disk mặc định từ hypervisor không hề có biểu hiện gì bất thường và Alarm không được kích hoạt. Giải thích nào sau đây phản ánh chính xác nguyên nhân gốc rễ?",
+        options: [
+          "Bạn chưa bật Detailed Monitoring để kích hoạt thu thập Disk Metrics",
+          "EBS Volume đính kèm chưa được kích hoạt tính năng tự động báo cáo lên CloudWatch",
+          "RAM và Disk Space là các thông số thuộc hệ điều hành (OS-level), hypervisor của AWS không thể đọc được từ bên ngoài do ranh giới ảo hóa; cần dùng CloudWatch Agent cài trong OS để đẩy lên dưới dạng Custom Metrics",
+          "Chính sách bảo mật IAM ngăn chặn EC2 gửi Disk metrics mặc định lên CloudWatch"
+        ],
+        correctAnswer: 2,
+        explanation: "<p>Các chỉ số như <strong>RAM (Memory Utilization)</strong> và <strong>Dung lượng ổ đĩa khả dụng (Disk Space Utilization/Disk Free)</strong> là các thông số sâu bên trong hệ điều hành (OS-level). Do ranh giới ảo hóa bảo mật, hypervisor vật lý của AWS chỉ quản lý phần cứng bên ngoài nên không thể đọc được các thông số này. Để giám sát, bắt buộc phải cài đặt <strong>Unified CloudWatch Agent</strong> trực tiếp trong OS để thu thập và đẩy lên CloudWatch dưới dạng <strong>Custom Metrics</strong>.</p>"
+      },
+      {
+        id: 5,
+        module: 2,
+        question: "Bạn đang thiết lập CloudWatch Dashboard để giám sát độ trễ phản hồi (latency) của cổng thanh toán trực tuyến API Gateway. Để đảm bảo đo lường chính xác nhất trải nghiệm thực tế của 1% nhóm khách hàng phải chịu đựng thời gian chờ đợi tồi tệ nhất, bạn nên áp dụng phép thống kê (Statistic) nào trên biểu đồ độ trễ?",
+        options: [
+          "Hàm Average (Trung bình cộng) để tính độ trễ trung bình của hệ thống",
+          "Hàm Maximum (Cực đại) để xem điểm độ trễ cao nhất",
+          "Hàm Sum (Tổng cộng) để cộng dồn tất cả các giá trị độ trễ nhận được",
+          "Hàm Percentile p99 (Phân vị thứ 99) để xác định ranh giới độ trễ của 1% người dùng chịu tải chậm nhất"
+        ],
+        correctAnswer: 3,
+        explanation: "<p>Khi giám sát độ trễ (latency), hàm <strong>Average</strong> sẽ làm cào bằng dữ liệu, che giấu đi sự khó chịu của một số ít khách hàng gặp lỗi chậm. Hàm <strong>Maximum</strong> thì quá nhạy cảm với các đỉnh đột biến ngẫu nhiên không phản ánh số đông. Sử dụng <strong>p99 Percentile</strong> giúp xác định ranh giới độ trễ mà tại đó 99% khách hàng có trải nghiệm nhanh hơn nó, tức là trực quan hóa chính xác mức độ trễ của 1% nhóm người dùng bị ảnh hưởng tồi tệ nhất.</p>"
+      },
+      {
+        id: 6,
+        module: 2,
+        question: "Doanh nghiệp của bạn vận hành một hệ thống giao dịch tài chính tần suất cao và yêu cầu thiết lập hệ thống cảnh báo cực nhạy. Hệ thống cần phát hiện lỗi giao dịch và kích hoạt cảnh báo trong vòng vài giây khi phát sinh sự cố thay vì đợi 1 hoặc 5 phút. Bạn nên triển khai loại Custom Metric nào?",
+        options: [
+          "Standard Resolution custom metric gửi dữ liệu 1 phút một lần",
+          "Detailed Monitoring custom metric gửi dữ liệu 1 phút một lần",
+          "High-Resolution custom metric gửi dữ liệu tần suất cao (lên tới 1 giây một lần)",
+          "Basic Monitoring custom metric gửi dữ liệu 5 phút một lần"
+        ],
+        correctAnswer: 2,
+        explanation: "<p>Custom metrics trong CloudWatch hỗ trợ hai cấp độ phân giải:</p><ul><li><strong>Standard Resolution</strong>: Dữ liệu được tổng hợp ở mức tối thiểu 1 phút một lần.</li><li><strong>High-Resolution</strong>: Cho phép đẩy dữ liệu tần suất cực cao (lên tới **1 giây một lần**), hỗ trợ các cảnh báo Alarm cực nhạy phản ứng trong vài giây cho các ứng dụng giao dịch tài chính nhạy cảm hoặc hệ thống thời gian thực.</li></ul>"
+      },
+      {
+        id: 7,
+        module: 3,
+        question: "Đội ngũ Cloud Engineering quản trị hệ thống Apache Web Server phân tán trên 2 máy chủ EC2 khác nhau. Họ muốn gom tất cả các dòng log của cả hai máy chủ này vào chung một giao diện quản trị vòng đời và chính sách lưu trữ tập trung, đồng thời vẫn phân biệt được dòng log nào được đẩy lên từ máy chủ nào để lọc lỗi. Cấu trúc thiết kế CloudWatch Logs nào sau đây đáp ứng tốt nhất yêu cầu trên?",
+        options: [
+          "Gom toàn bộ log vào 1 Log Stream duy nhất, rồi chia thành 2 Log Groups riêng biệt",
+          "Tạo 1 Log Group chung cho ứng dụng Apache; mỗi máy chủ Web EC2 sẽ cấu hình đẩy dữ liệu vào 1 Log Stream riêng biệt nằm bên trong Log Group đó",
+          "Tạo 2 Log Groups riêng biệt có tên giống nhau trên 2 Region khác nhau",
+          "Sử dụng EC2 default metrics để tự động phân tích log gián tiếp qua CPU"
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Trong cấu trúc của CloudWatch Logs:</p><ul><li><strong>Log Group</strong> là ranh giới lớn nhất đại diện cho nhóm ứng dụng có chung các cấu hình quản lý chính sách lưu trữ (Retention Policy) và phân quyền bảo mật.</li><li><strong>Log Stream</strong> là các luồng log nhỏ hơn đại diện cho từng thực thể sinh log cụ thể (ví dụ: một file log cụ thể trên một máy chủ).</li></ul><p>Do đó, cách thiết kế chuẩn là tạo **1 Log Group chung** (ví dụ: `/webserver/apache/access`) và cấu hình mỗi máy chủ EC2 gửi về **1 Log Stream riêng** (ví dụ đặt tên stream theo `{instance_id}-access`).</p>"
+      },
+      {
+        id: 8,
+        module: 3,
+        question: "Bạn đang thiết lập file cấu hình JSON `amazon-cloudwatch-agent.json` để chạy Unified CloudWatch Agent trên một EC2 instance chạy hệ điều hành Ubuntu. Bạn muốn bổ sung cấu hình thu thập log Apache Access Log đặt tại đường dẫn `/var/log/apache2/access.log`. Cấu trúc khai báo nào trong JSON sau đây là chính xác?",
+        options: [
+          "Khai báo tệp tin tại nhánh `\"metrics\"` -> `\"metrics_collected\"` -> `\"files\"`",
+          "Khai báo tệp tin tại nhánh `\"logs\"` -> `\"logs_collected\"` -> `\"files\"` -> `\"collect_list\"`",
+          "Khai báo tệp tin tại nhánh `\"agent\"` -> `\"run_as_user\"` -> `\"apache\"`",
+          "Khai báo tệp tin tại nhánh `\"logs\"` -> `\"namespaces\"` -> `\"apache\"`"
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Để cấu hình thu thập logs bằng Unified CloudWatch Agent, tệp cấu hình JSON phải có nhánh `\"logs\"`. Dưới nhánh này, các tệp tin log cụ thể cần theo dõi và đẩy đi được định nghĩa bên trong mảng `\"collect_list\"` nằm tại đường dẫn `\"logs\"` ➔ `\"logs_collected\"` ➔ `\"files\"` ➔ `\"collect_list\"`. Mỗi cấu hình chỉ rõ `file_path` và `log_group_name` tương ứng.</p>"
+      },
+      {
+        id: 9,
+        module: 3,
+        question: "Một cuộc tấn công mạng đang dò tìm thư mục nhạy cảm `/admin` trên máy chủ Apache của bạn bằng cách gửi liên tục các HTTP request. Bạn truy cập CloudWatch Logs Insights để tìm nhanh 20 dòng log liên quan gần đây nhất. Câu truy vấn nào sau đây trả về kết quả chính xác và sắp xếp theo thời gian mới nhất giảm dần?",
+        options: [
+          "<code>fields @timestamp, @message | filter @message like \"/admin\" | sort @timestamp desc | limit 20</code>",
+          "<code>parse @message like \"/admin\" | fields @timestamp | sort @timestamp asc</code>",
+          "<code>stats count() by @message | filter @message = \"/admin\" | limit 20</code>",
+          "<code>fields @timestamp, @message | sort @timestamp asc | filter status = \"200\"</code>"
+        ],
+        correctAnswer: 0,
+        explanation: "<p>Để tìm kiếm các dòng log chứa từ khóa chỉ định và hiển thị theo thời gian mới nhất giảm dần trong Logs Insights, bạn cần:</p><ul><li>Sử dụng lệnh <code>fields</code> để hiển thị cột thời gian và thông điệp.</li><li>Sử dụng lệnh <code>filter</code> kết hợp toán tử <code>like \"/admin\"</code> để lọc chuỗi con.</li><li>Sử dụng lệnh <code>sort @timestamp desc</code> để xếp từ mới đến cũ.</li><li>Sử dụng lệnh <code>limit 20</code> để lấy 20 dòng gần nhất.</li></ul>"
+      },
+      {
+        id: 10,
+        module: 3,
+        question: "Dữ liệu Apache Access Log lưu trữ trên CloudWatch Logs dưới dạng chuỗi thô của định dạng Combined Log Format. Bạn muốn phân tích mã phản hồi HTTP (status) và số lượng byte phản hồi (bytes) của các lượt request để tính toán tổng lưu lượng băng thông tiêu thụ của các request thành công (status = 200). Phương pháp nào trong Logs Insights là tối ưu nhất?",
+        options: [
+          "Sử dụng bộ lọc filter kết hợp biểu thức Regex trực tiếp trên chuỗi thông điệp thô @message",
+          "Sử dụng lệnh parse bằng mẫu Glob hoặc Regex để trích xuất dữ liệu thô sang các trường có cấu trúc đặt tên tương ứng, sau đó lọc và áp dụng hàm stats sum()",
+          "Sử dụng lệnh fields kết hợp stats count() trực tiếp trên cột @message mặc định",
+          "Sử dụng lệnh display để yêu cầu hệ thống tự nhận diện định dạng log Apache"
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Đối với logs chưa có cấu trúc dạng chuỗi văn bản thô, lệnh <strong>parse</strong> trong CloudWatch Logs Insights cực kỳ hữu ích. Nó cho phép bạn sử dụng Glob mẫu (ví dụ: <code>parse @message \"* - - [*] \\\"* * *\\\" * * ...\" as ip, time, method, url, proto, status, bytes</code>) hoặc Regex để trích xuất và gán tên trường cụ thể. Sau khi trích xuất, bạn có thể dễ dàng lọc bằng <code>filter status = \"200\"</code> và tính toán gom nhóm bằng <code>stats sum(bytes) as TotalBandwidth</code>.</p>"
+      },
+      {
+        id: 11,
+        module: 4,
+        question: "Ứng dụng Java Web của bạn thỉnh thoảng có các đỉnh nhọn CPU tăng đột biến lên 95% kéo dài trong khoảng 5-10 giây do tác vụ dọn rác bộ nhớ (Garbage Collection), sau đó tự động giảm về mức bình thường 30%. Bạn không muốn các đợt đỉnh nhọn tức thời này kích hoạt cảnh báo gây nhiễu loạn thông tin (alert fatigue). Phương án cấu hình Alarm nào sau đây giải quyết triệt để vấn đề?",
+        options: [
+          "Đặt Static Threshold CPU > 95% với chu kỳ đánh giá là 1 out of 1 period",
+          "Đặt Evaluation Periods có dạng M out of N (ví dụ: 3 out of 5 periods) với chu kỳ 1 phút",
+          "Sử dụng Anomaly Detection Alarm với Standard Deviation = 1 (độ lệch chuẩn hẹp)",
+          "Thiết lập một Composite Alarm kết hợp cả CPU và dung lượng Disk"
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Thiết lập <strong>Evaluation Periods (M out of N)</strong> giúp loại bỏ báo động giả do các đỉnh nhọn bất thường diễn ra trong tích tắc (Spikes). Cấu hình <code>3 out of 5 periods</code> (với chu kỳ 1 phút) nghĩa là Alarm chỉ kích hoạt trạng thái ALARM nếu chỉ số vượt ngưỡng trong ít nhất 3 chu kỳ (3 phút) bất kỳ nằm trong khoảng 5 chu kỳ đánh giá liên tiếp (5 phút). Các đỉnh nhọn ngắn hạn dưới 1 phút sẽ bị bỏ qua một cách an toàn.</p>"
+      },
+      {
+        id: 12,
+        module: 4,
+        question: "Một công ty muốn cấu hình giám sát cho máy chủ EC2 quan trọng. Nếu máy chủ vật lý bên dưới của AWS bị lỗi phần cứng đột ngột (lỗi hypervisor vật lý), họ muốn CloudWatch tự động di chuyển máy chủ ảo này sang một phần cứng vật lý lành lặn khác nhưng phải bảo toàn địa chỉ IP tĩnh, cấu hình ổ cứng lưu trữ EBS và toàn bộ dữ liệu cấu hình. Bạn nên cấu hình Action nào trên Alarm?",
+        options: [
+          "Cấu hình Auto Scaling Dynamic Policy kích hoạt Scale-out thêm một instance mới",
+          "Cấu hình EC2 Action Reboot để khởi động lại máy chủ",
+          "Cấu hình EC2 Action Recover để tự động phục hồi máy chủ sang phần cứng mới",
+          "Cấu hình SNS SMS Alert gửi tin nhắn khẩn cấp cho kỹ sư trực ca khắc phục thủ công"
+        ],
+        correctAnswer: 2,
+        explanation: "<p>Hành động **EC2 Action Recover (Phục hồi)** của CloudWatch Alarm là một tính năng cực kỳ đắt giá khi giám sát lỗi phần cứng vật lý của AWS (`StatusCheckFailed_System`). Khi được kích hoạt, AWS sẽ tự động chuyển đổi EC2 instance sang một máy chủ vật lý khác hoàn toàn lành lặn, đồng thời **giữ nguyên địa chỉ IP tĩnh (Public & Private IPs), các ổ đĩa EBS đính kèm, Instance ID và toàn bộ cấu hình hệ thống** mà không làm thay đổi kiến trúc.</p>"
+      },
+      {
+        id: 13,
+        module: 4,
+        question: "Kiến trúc microservices của bạn có hàng chục cảnh báo hiệu năng khác nhau cho từng thành phần (CPU, RAM, Disk, API Latency). Khi cơ sở dữ liệu gặp sự cố bị sập, hàng loạt cảnh báo con ở các dịch vụ vệ tinh đồng loạt kích hoạt ALARM tạo ra một cơn bão thông báo (alert fatigue) gây nhiễu. Bạn nên triển khai loại Alarm nào để tổng hợp các điều kiện và chỉ gửi đi 1 thông báo duy nhất?",
+        options: [
+          "Anomaly Detection Alarm với dải băng rộng",
+          "High-Resolution Alarm với độ phân giải giây",
+          "Composite Alarm (Cảnh báo tổng hợp)",
+          "Detailed Monitoring Alarm"
+        ],
+        correctAnswer: 2,
+        explanation: "<p><strong>Composite Alarm</strong> cho phép bạn gom nhóm nhiều Alarm con đơn lẻ lại với nhau thông qua các biểu thức logic (như <code>AND</code>, <code>OR</code>, <code>NOT</code>). Điều này giúp bạn thiết lập một cảnh báo tổng hợp cao cấp, chỉ kích hoạt khi một chuỗi các điều kiện logic phức tạp được thỏa mãn (ví dụ: CPU cao AND đồng thời ứng dụng phát sinh lỗi HTTP 5xx), giúp lọc bão email cảnh báo và tăng chất lượng xử lý sự cố.</p>"
+      },
+      {
+        id: 14,
+        module: 5,
+        question: "Bạn muốn liên tục kiểm thử tính khả dụng và đo lường độ trễ của trang mua hàng trực tuyến 24/7 từ góc nhìn thực tế của người dùng cuối, kể cả khi hệ thống hoàn toàn không có bất kỳ traffic thực tế nào truy cập vào nửa đêm. Giải pháp nào sau đây đáp ứng tốt nhất yêu cầu này?",
+        options: [
+          "Thiết lập CloudWatch Logs Insights tự động chạy lệnh quét log truy cập định kỳ",
+          "Triển khai CloudWatch Synthetics Canaries để chạy các kịch bản giả lập hành vi người dùng cuối",
+          "Kích hoạt Detailed Monitoring trên toàn bộ các EC2 instances chạy ứng dụng web",
+          "Tạo một Composite Alarm kết hợp giữa CPU Utilization và RAM Usage của máy chủ Web"
+        ],
+        correctAnswer: 1,
+        explanation: "<p><strong>CloudWatch Synthetics Canaries</strong> cung cấp phương thức giám sát chủ động (<strong>Active/Outside-in Monitoring</strong>). Bằng cách chạy các đoạn script tự động giả lập luồng hành vi của khách hàng thực tế (như click button, điền form, login), Canaries liên tục kiểm thử khả năng đáp ứng dịch vụ của trang web 24/7, giúp phát hiện sớm sự cố hoặc lệch giao diện trước khi người dùng thực tế gặp phải.</p>"
+      },
+      {
+        id: 15,
+        module: 5,
+        question: "Bạn đang thiết lập một kịch bản Canary trong CloudWatch Synthetics để kiểm thử hành trình người dùng trên một ứng dụng Single Page Application (SPA) viết bằng ReactJS. Yêu cầu của kịch bản là phải render hoàn chỉnh mã JavaScript, tương tác click chuột và chụp ảnh UI so sánh lỗi. Bạn KHÔNG nên chọn Runtime hay cấu hình nào sau đây cho kịch bản Canary?",
+        options: [
+          "Node.js runtime sử dụng Puppeteer browser engine",
+          "Python runtime sử dụng Selenium WebDriver browser engine",
+          "Java runtime",
+          "Node.js runtime sử dụng Playwright browser engine"
+        ],
+        correctAnswer: 2,
+        explanation: "<p>Các kịch bản Canary trong CloudWatch Synthetics hỗ trợ **Node.js** (với Puppeteer/Playwright) và **Python** (với Selenium) để khởi chạy trình duyệt không giao diện (headless browser) hỗ trợ đầy đủ việc render JavaScript và tương tác UI. Tuy nhiên, **Java runtime** trong Synthetics chỉ được thiết kế gọn nhẹ cho việc kiểm thử API/HTTP endpoint trực tiếp, không tích hợp browser engine để render giao diện đồ họa hay thực hiện visual monitoring.</p>"
+      }
+    ];
+
+    // Quiz State Variables
+    let currentQuestionIndex = 0;
+    let selectedOptionIndex = null;
+    let answeredQuestions = new Array(questions.length).fill(null); // stores {selected, isCorrect}
+    let userAnswers = []; // stores selected option indices for each question
+    let score = 0;
+    let timerInterval = null;
+    let timeRemaining = 30 * 60; // 30 minutes in seconds
+
+    // --------------------------------------------------
+    // CORE QUIZ ACTIONS
+    // --------------------------------------------------
+
+    function startQuiz() {
+      document.getElementById('welcome-screen').style.display = 'none';
+      document.getElementById('quiz-screen').style.display = 'block';
+      document.getElementById('results-screen').style.display = 'none';
+      
+      currentQuestionIndex = 0;
+      selectedOptionIndex = null;
+      userAnswers = new Array(questions.length).fill(null);
+      answeredQuestions = new Array(questions.length).fill(null);
+      score = 0;
+      timeRemaining = 30 * 60;
+      
+      renderQuestion();
+      startTimer();
+    }
+
+    function renderQuestion() {
+      // Clear states
+      selectedOptionIndex = null;
+      document.getElementById('btn-primary-action').disabled = true;
+      document.getElementById('btn-primary-action').innerText = "Nộp bài";
+      
+      // Hide explanation
+      const expContainer = document.getElementById('explanation-container');
+      expContainer.classList.remove('show');
+      
+      const q = questions[currentQuestionIndex];
+      
+      // Track progress
+      document.getElementById('question-tracker').innerText = `Câu hỏi ${currentQuestionIndex + 1} / ${questions.length}`;
+      const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+      document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+      
+      // Render question content
+      document.getElementById('question-title').innerText = `${currentQuestionIndex + 1}. ${q.question}`;
+      
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      
+      const letters = ['A', 'B', 'C', 'D'];
+      
+      q.options.forEach((opt, idx) => {
+        const optionCard = document.createElement('div');
+        optionCard.className = 'option-card';
+        optionCard.onclick = () => selectOption(idx);
+        
+        const letterBox = document.createElement('div');
+        letterBox.className = 'option-letter';
+        letterBox.innerText = letters[idx];
+        
+        const textBox = document.createElement('div');
+        textBox.className = 'option-text';
+        textBox.innerText = opt;
+        
+        optionCard.appendChild(letterBox);
+        optionCard.appendChild(textBox);
+        optionsContainer.appendChild(optionCard);
+      });
+    }
+
+    function selectOption(index) {
+      // If already answered, do nothing
+      if (answeredQuestions[currentQuestionIndex] !== null) return;
+      
+      selectedOptionIndex = index;
+      
+      // Remove selected class from all
+      const cards = document.querySelectorAll('.option-card');
+      cards.forEach((card, idx) => {
+        if (idx === index) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      
+      document.getElementById('btn-primary-action').disabled = false;
+    }
+
+    function submitOrNext() {
+      const q = questions[currentQuestionIndex];
+      
+      // If not yet answered
+      if (answeredQuestions[currentQuestionIndex] === null) {
+        // Validate answer
+        const isCorrect = selectedOptionIndex === q.correctAnswer;
+        answeredQuestions[currentQuestionIndex] = {
+          selected: selectedOptionIndex,
+          isCorrect: isCorrect
+        };
+        userAnswers[currentQuestionIndex] = selectedOptionIndex;
+        
+        if (isCorrect) score++;
+        
+        // Show correct/incorrect styles
+        const cards = document.querySelectorAll('.option-card');
+        cards.forEach((card, idx) => {
+          card.classList.remove('selected');
+          if (idx === q.correctAnswer) {
+            card.classList.add('correct');
+          } else if (idx === selectedOptionIndex) {
+            card.classList.add('incorrect');
+          }
+        });
+        
+        // Show explanation
+        document.getElementById('explanation-text').innerHTML = q.explanation;
+        const expContainer = document.getElementById('explanation-container');
+        expContainer.classList.add('show');
+        
+        // Smooth scroll to explanation
+        setTimeout(() => {
+          expContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+        
+        // Update primary action button
+        const btnPrimary = document.getElementById('btn-primary-action');
+        if (currentQuestionIndex === questions.length - 1) {
+          btnPrimary.innerText = "Xem kết quả";
+        } else {
+          btnPrimary.innerText = "Câu tiếp theo";
+        }
+      } else {
+        // Move to next question or show results
+        if (currentQuestionIndex < questions.length - 1) {
+          currentQuestionIndex++;
+          renderQuestion();
+        } else {
+          finishQuiz();
+        }
+      }
+    }
+
+    // --------------------------------------------------
+    // TIMER UTILITIES
+    // --------------------------------------------------
+    
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert("Hết thời gian làm bài!");
+          finishQuiz();
+        } else {
+          const minutes = Math.floor(timeRemaining / 60);
+          const seconds = timeRemaining % 60;
+          document.getElementById('timer-display').innerText = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
+    function exitQuiz() {
+      if (confirm("Bạn có chắc chắn muốn thoát bài kiểm tra? Tiến trình hiện tại sẽ bị hủy bỏ.")) {
+        clearInterval(timerInterval);
+        exitToWelcome();
+      }
+    }
+
+    function exitToWelcome() {
+      document.getElementById('welcome-screen').style.display = 'block';
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'none';
+    }
+
+    function restartQuiz() {
+      startQuiz();
+    }
+
+    // --------------------------------------------------
+    // RESULTS GENERATION & DIAGNOSTICS
+    // --------------------------------------------------
+    
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'block';
+      
+      // Calculate scores
+      const scorePercentVal = Math.round((score / questions.length) * 100);
+      document.getElementById('score-percent').innerText = `${scorePercentVal}%`;
+      document.getElementById('score-fraction').innerText = `${score}/${questions.length}`;
+      
+      // Score Ring SVG Dash offset animation
+      const ringFill = document.getElementById('score-ring');
+      const circumference = 377; // 2 * Math.PI * 60
+      const offset = circumference - (scorePercentVal / 100) * circumference;
+      ringFill.style.strokeDashoffset = offset;
+      
+      // Display message depending on score
+      let summaryText = "";
+      if (scorePercentVal >= 90) {
+        summaryText = `Chúc mừng bạn! Bạn đã xuất sắc đạt điểm tối đa (${score}/${questions.length}). Bạn đã nắm cực kỳ chắc chắn kiến thức cốt lõi của khóa học Amazon CloudWatch, sẵn sàng ứng dụng thiết kế các giải pháp observability quy mô lớn!`;
+      } else if (scorePercentVal >= 70) {
+        summaryText = `Kết quả rất tốt! Bạn đã đúng ${score} trên tổng số ${questions.length} câu hỏi. Bạn đã hiểu tốt hầu hết các thành phần của CloudWatch bao gồm Metrics, Logs Insights và Synthetics Canaries. Xem thêm phần giải thích các câu hỏi sai để hoàn thiện kiến thức.`;
+      } else {
+        summaryText = `Bạn đã đúng ${score}/${questions.length} câu hỏi. Hãy đọc lại các phần giải thích chi tiết trong phần dưới và ôn tập kỹ lại tệp markdown bài học để nắm vững các điểm mù về Custom Metrics, Unified CloudWatch Agent và cú pháp truy vấn nâng cao.`;
+      }
+      document.getElementById('results-summary').innerText = summaryText;
+      
+      // Calculate Diagnostics per Module
+      // Module 1: Questions 1, 2 (2 questions)
+      // Module 2: Questions 3, 4, 5, 6 (4 questions)
+      // Module 3: Questions 7, 8, 9, 10 (4 questions)
+      // Module 4: Questions 11, 12, 13 (3 questions)
+      // Module 5: Questions 14, 15 (2 questions)
+      const moduleStats = { 1: { correct: 0, total: 0 }, 2: { correct: 0, total: 0 }, 3: { correct: 0, total: 0 }, 4: { correct: 0, total: 0 }, 5: { correct: 0, total: 0 } };
+      
+      questions.forEach((q, idx) => {
+        moduleStats[q.module].total++;
+        if (answeredQuestions[idx] && answeredQuestions[idx].isCorrect) {
+          moduleStats[q.module].correct++;
+        }
+      });
+      
+      for (let mod = 1; mod <= 5; mod++) {
+        const modPercent = Math.round((moduleStats[mod].correct / moduleStats[mod].total) * 100);
+        document.getElementById(`diag-mod-${mod}`).innerText = `${modPercent}%`;
+        
+        const fillBar = document.getElementById(`diag-fill-${mod}`);
+        fillBar.style.width = `${modPercent}%`;
+        
+        // Color coding dynamically based on scoring
+        fillBar.className = "diagnostic-fill";
+        if (modPercent >= 80) {
+          fillBar.classList.add('green');
+        } else if (modPercent >= 50) {
+          fillBar.classList.add('amber');
+        } else {
+          fillBar.classList.add('coral');
+        }
+      }
+      
+      // Generate Accordion Review Sheet
+      const reviewContainer = document.getElementById('review-sheet-container');
+      reviewContainer.innerHTML = '';
+      
+      questions.forEach((q, idx) => {
+        const userAnsObj = answeredQuestions[idx];
+        const isCorrect = userAnsObj ? userAnsObj.isCorrect : false;
+        
+        const reviewItem = document.createElement('div');
+        reviewItem.className = 'review-item';
+        
+        const header = document.createElement('div');
+        header.className = 'review-item-header';
+        header.onclick = () => toggleAccordion(reviewItem);
+        
+        const titleText = document.createElement('span');
+        titleText.className = 'review-item-title-text';
+        titleText.innerText = `Câu ${idx + 1}: ${q.question}`;
+        
+        const statusIndicator = document.createElement('div');
+        statusIndicator.className = `review-status-indicator ${isCorrect ? 'correct-color' : 'incorrect-color'}`;
+        
+        const statusDot = document.createElement('span');
+        statusDot.className = `review-status-dot ${isCorrect ? 'green' : 'red'}`;
+        
+        const statusText = document.createElement('span');
+        statusText.innerText = isCorrect ? 'Đúng' : 'Sai';
+        
+        statusIndicator.appendChild(statusDot);
+        statusIndicator.appendChild(statusText);
+        
+        header.appendChild(titleText);
+        header.appendChild(statusIndicator);
+        
+        // Accordion Body Content
+        const body = document.createElement('div');
+        body.className = 'review-item-body';
+        
+        const questionText = document.createElement('div');
+        questionText.className = 'review-question-text';
+        questionText.innerText = q.question;
+        
+        const optionsList = document.createElement('div');
+        optionsList.className = 'review-options';
+        
+        const letters = ['A', 'B', 'C', 'D'];
+        q.options.forEach((opt, optIdx) => {
+          const optDiv = document.createElement('div');
+          optDiv.className = 'review-option';
+          optDiv.innerText = `${letters[optIdx]}. ${opt}`;
+          
+          if (optIdx === q.correctAnswer) {
+            optDiv.classList.add('correct');
+          } else if (optIdx === userAnswers[idx]) {
+            optDiv.classList.add('incorrect');
+          }
+          optionsList.appendChild(optDiv);
+        });
+        
+        const explanationPanel = document.createElement('div');
+        explanationPanel.className = 'review-explanation';
+        explanationPanel.innerHTML = `<strong>Giải thích:</strong> ${q.explanation}`;
+        
+        body.appendChild(questionText);
+        body.appendChild(optionsList);
+        body.appendChild(explanationPanel);
+        
+        reviewItem.appendChild(header);
+        reviewItem.appendChild(body);
+        reviewContainer.appendChild(reviewItem);
+      });
+    }
+
+    function toggleAccordion(item) {
+      const isExpanded = item.classList.contains('expanded');
+      
+      // Close all first
+      const allItems = document.querySelectorAll('.review-item');
+      allItems.forEach(i => i.classList.remove('expanded'));
+      
+      // Open selected if not already open
+      if (!isExpanded) {
+        item.classList.add('expanded');
+      }
+    }
+  </script>
+</body>
+</html>

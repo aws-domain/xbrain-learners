@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinOps & Cloud Governance Quiz | Bài kiểm tra trắc nghiệm</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --------------------------------------------------
+       DESIGN SYSTEM TOKENS & UTILITIES (Ref: DESIGN.md)
+       -------------------------------------------------- */
+    :root {
+      /* Brand & Accents */
+      --primary: #cc785c;
+      --primary-active: #a9583e;
+      --primary-disabled: #e6dfd8;
+      --accent-teal: #5db8a6;
+      --accent-amber: #e8a55a;
+      
+      /* Surfaces */
+      --canvas: #faf9f5;
+      --surface-soft: #f5f0e8;
+      --surface-card: #efe9de;
+      --surface-cream-strong: #e8e0d2;
+      --surface-dark: #181715;
+      --surface-dark-elevated: #252320;
+      --surface-dark-soft: #1f1e1b;
+      --hairline: #e6dfd8;
+      --hairline-soft: #ebe6df;
+      
+      /* Text */
+      --ink: #141413;
+      --body-strong: #252523;
+      --body: #3d3d3a;
+      --muted: #6c6a64;
+      --muted-soft: #8e8b82;
+      --on-primary: #ffffff;
+      --on-dark: #faf9f5;
+      --on-dark-soft: #a09d96;
+      
+      /* Semantic states */
+      --success: #5db872;
+      --success-bg: rgba(93, 184, 114, 0.12);
+      --error: #c64545;
+      --error-bg: rgba(198, 69, 69, 0.12);
+      --warning: #d4a017;
+      
+      /* Typography */
+      --font-display: 'Cormorant Garamond', Garamond, 'Times New Roman', serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-code: 'JetBrains Mono', ui-monospace, monospace;
+      
+      /* Border Radii */
+      --rounded-xs: 4px;
+      --rounded-sm: 6px;
+      --rounded-md: 8px;
+      --rounded-lg: 12px;
+      --rounded-xl: 16px;
+      --rounded-pill: 9999px;
+      
+      /* Spacings */
+      --spacing-xxs: 4px;
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-xxl: 48px;
+      --spacing-section: 64px;
+    }
+
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--body);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      padding-top: 64px; /* Space for fixed nav */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, h4 {
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+
+    p {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* Fixed Top Navigation */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background-color: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-xl);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-spike {
+      fill: var(--ink);
+      width: 18px;
+      height: 18px;
+      animation: pulse-spike 4s infinite ease-in-out;
+    }
+
+    @keyframes pulse-spike {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15) rotate(45deg); opacity: 0.85; }
+    }
+
+    .badge-topic {
+      background-color: var(--surface-card);
+      color: var(--ink);
+      padding: 4px 12px;
+      border-radius: var(--rounded-pill);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid var(--hairline);
+    }
+
+    /* Standardized Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: var(--rounded-md);
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease, border-color 0.2s ease, color 0.2s ease;
+      height: 44px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-active);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      background-color: var(--primary-disabled);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--ink);
+      border: 1px solid var(--hairline);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--muted-soft);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--hairline);
+      color: var(--body);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--surface-soft);
+    }
+
+    /* Layout Containers */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--spacing-section) var(--spacing-xl);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.4s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --------------------------------------------------
+       WELCOME SCREEN STYLING
+       -------------------------------------------------- */
+    .welcome-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-xl);
+      padding: var(--spacing-xxl);
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .welcome-title {
+      font-size: 3rem;
+      margin-bottom: var(--spacing-md);
+      line-height: 1.1;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.15rem;
+      color: var(--body-strong);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-xl);
+    }
+
+    .quiz-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-box {
+      background-color: var(--canvas);
+      border: 1px solid var(--hairline-soft);
+      border-radius: var(--rounded-md);
+      padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .stat-val {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .coverage-card {
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      text-align: left;
+      border: 1px dashed var(--hairline);
+    }
+
+    .coverage-title {
+      font-size: 1.25rem;
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .coverage-list {
+      list-style-type: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-xs);
+      font-size: 14px;
+      color: var(--body);
+    }
+
+    .coverage-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .coverage-item::before {
+      content: '✦';
+      color: var(--primary);
+      font-size: 10px;
+    }
+
+    /* --------------------------------------------------
+       QUIZ ACTIVE SCREEN STYLING
+       -------------------------------------------------- */
+    .quiz-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-pill);
+      width: 100%;
+      margin-bottom: var(--spacing-xl);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-code);
+      font-size: 14px;
+      background-color: var(--surface-soft);
+      padding: 4px 10px;
+      border-radius: var(--rounded-sm);
+      color: var(--ink);
+    }
+
+    .timer-icon {
+      stroke: var(--primary);
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .question-card {
+      background-color: var(--canvas);
+      border-radius: var(--rounded-xl);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .question-title {
+      font-size: 1.85rem;
+      line-height: 1.25;
+      color: var(--ink);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .option-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline-soft);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-md) var(--spacing-lg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+      color: var(--body-strong);
+      text-align: left;
+    }
+
+    .option-card:hover {
+      background-color: var(--surface-cream-strong);
+      border-color: var(--muted-soft);
+    }
+
+    .option-card.selected {
+      border: 2px solid var(--primary);
+      background-color: var(--surface-cream-strong);
+      padding: 15px var(--spacing-lg); /* Maintain layout spacing with border shift */
+    }
+
+    .option-letter {
+      font-family: var(--font-code);
+      font-weight: 600;
+      color: var(--primary);
+      background-color: var(--canvas);
+      width: 26px;
+      height: 26px;
+      border-radius: var(--rounded-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--hairline);
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    .option-card.selected .option-letter {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+
+    .option-text {
+      font-size: 15px;
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    /* Validated Answer States */
+    .option-card.correct {
+      border: 2px solid var(--success) !important;
+      background-color: var(--success-bg) !important;
+    }
+
+    .option-card.correct .option-letter {
+      background-color: var(--success) !important;
+      color: var(--on-primary) !important;
+      border-color: var(--success) !important;
+    }
+
+    .option-card.incorrect {
+      border: 2px solid var(--error) !important;
+      background-color: var(--error-bg) !important;
+    }
+
+    .option-card.incorrect .option-letter {
+      background-color: var(--error) !important;
+      color: var(--on-primary) !important;
+      border-color: var(--error) !important;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--spacing-lg);
+    }
+
+    /* --------------------------------------------------
+       EXPLANATION CARD STYLING
+       -------------------------------------------------- */
+    .explanation-card {
+      background-color: var(--surface-soft);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border-left: 4px solid var(--accent-teal);
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .explanation-card.show {
+      max-height: 800px;
+      opacity: 1;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .explanation-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-teal);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .explanation-icon {
+      stroke: var(--accent-teal);
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke-width: 2.5;
+    }
+
+    .explanation-title {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      color: var(--ink);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .explanation-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--body);
+    }
+
+    .explanation-text p {
+      margin-bottom: 8px;
+    }
+
+    .explanation-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* --------------------------------------------------
+       RESULTS DASHBOARD STYLING
+       -------------------------------------------------- */
+    .results-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-xl);
+      padding: var(--spacing-xxl);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.02);
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .results-pretitle {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    .results-title {
+      font-size: 2.5rem;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .score-visualization {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .score-ring-svg {
+      width: 140px;
+      height: 140px;
+      transform: rotate(-90deg);
+    }
+
+    .score-ring-bg {
+      fill: none;
+      stroke: var(--hairline);
+      stroke-width: 8;
+    }
+
+    .score-ring-fill {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 377; /* 2 * PI * 60 */
+      stroke-dashoffset: 377;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+
+    .score-text-overlay {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-percent {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .score-fraction {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .results-summary-text {
+      text-align: center;
+      font-size: 1.05rem;
+      color: var(--body-strong);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-xl);
+      line-height: 1.6;
+    }
+
+    /* Diagnostics breakdown */
+    .diagnostic-container {
+      background-color: var(--canvas);
+      border-radius: var(--rounded-lg);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--hairline-soft);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .diagnostic-title {
+      font-size: 1.35rem;
+      margin-bottom: var(--spacing-md);
+      text-align: left;
+      border-bottom: 1px solid var(--hairline-soft);
+      padding-bottom: var(--spacing-xs);
+    }
+
+    .diagnostic-bar-row {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .diagnostic-bar-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .diagnostic-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--body-strong);
+      margin-bottom: 4px;
+    }
+
+    .diagnostic-track {
+      height: 8px;
+      background-color: var(--surface-soft);
+      border-radius: var(--rounded-pill);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .diagnostic-fill {
+      height: 100%;
+      border-radius: var(--rounded-pill);
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .diagnostic-fill.green { background-color: var(--success); }
+    .diagnostic-fill.amber { background-color: var(--accent-amber); }
+    .diagnostic-fill.coral { background-color: var(--primary); }
+
+    /* Review Sheet Accordion */
+    .review-accordion-title {
+      font-size: 1.5rem;
+      margin-top: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+      text-align: left;
+    }
+
+    .review-sheet {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xl);
+      text-align: left;
+    }
+
+    .review-item {
+      border: 1px solid var(--hairline-soft);
+      border-radius: var(--rounded-md);
+      background-color: var(--canvas);
+      overflow: hidden;
+    }
+
+    .review-item-header {
+      padding: var(--spacing-md);
+      background-color: var(--surface-soft);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .review-item-title-text {
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .review-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .review-status-indicator.correct-color { color: var(--success); }
+    .review-status-indicator.incorrect-color { color: var(--error); }
+
+    .review-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .review-status-dot.green { background-color: var(--success); }
+    .review-status-dot.red { background-color: var(--error); }
+
+    .review-item-body {
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--hairline-soft);
+      display: none;
+      background-color: var(--canvas);
+    }
+
+    .review-item.expanded .review-item-body {
+      display: block;
+    }
+
+    .review-question-text {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      margin-bottom: var(--spacing-md);
+      color: var(--ink);
+    }
+
+    .review-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: var(--spacing-md);
+      font-size: 13px;
+    }
+
+    .review-option {
+      padding: 8px 12px;
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--hairline-soft);
+    }
+
+    .review-option.correct {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .review-option.user-wrong {
+      background-color: var(--error-bg);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    /* FOOTER */
+    footer {
+      background-color: var(--surface-dark);
+      color: var(--on-dark-soft);
+      padding: var(--spacing-xl) var(--spacing-xl);
+      border-top: 1px solid var(--surface-dark-elevated);
+      font-size: 13px;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      color: var(--on-dark);
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .footer-brand-spike {
+      fill: var(--on-dark);
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .welcome-title {
+        font-size: 2.25rem;
+      }
+      .quiz-stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+      }
+      .coverage-list {
+        grid-template-columns: 1fr;
+      }
+      .question-title {
+        font-size: 1.45rem;
+      }
+      .option-card {
+        padding: var(--spacing-sm) var(--spacing-md);
+      }
+      .option-text {
+        font-size: 14px;
+      }
+      .results-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FIXED TOP NAVIGATION -->
+  <nav class="top-nav">
+    <div class="brand">
+      <svg class="brand-spike" viewBox="0 0 24 24">
+        <path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      xBrain.Governance
+    </div>
+    <span class="badge-topic">FinOps & Governance Quiz</span>
+  </nav>
+
+  <!-- CONTENT CONTAINER -->
+  <div class="container">
+    
+    <!-- --------------------------------------------------
+         WELCOME SCREEN
+         -------------------------------------------------- -->
+    <div id="welcome-screen" class="welcome-card fade-in">
+      <span class="results-pretitle">Bài kiểm tra trắc nghiệm nâng cao</span>
+      <h1 class="welcome-title">Kiểm tra Kiến thức Cloud Governance</h1>
+      <p class="welcome-subtitle">
+        Đánh giá toàn diện kiến thức học tập của bạn về việc cân bằng Bảo mật và Tối ưu hóa Chi phí (FinOps) trên AWS.
+      </p>
+      
+      <div class="quiz-stats-grid">
+        <div class="stat-box">
+          <div class="stat-val">15</div>
+          <div class="stat-label">Câu hỏi tình huống</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">~15p</div>
+          <div class="stat-label">Thời gian ước tính</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">80%</div>
+          <div class="stat-label">Điểm số vượt qua</div>
+        </div>
+      </div>
+
+      <div class="coverage-card">
+        <h3 class="coverage-title">
+          <svg style="stroke: var(--primary); width:18px; height:18px; fill:none; stroke-width:2;" viewBox="0 0 24 24">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          Nội dung bao quát của bài trắc nghiệm:
+        </h3>
+        <ul class="coverage-list">
+          <li class="coverage-item">Foundations of Cost-Aware Cloud Governance</li>
+          <li class="coverage-item">AWS Well-Architected CFM Framework</li>
+          <li class="coverage-item">Multi-Account Governance (SCPs vs RCPs)</li>
+          <li class="coverage-item">AWS Config Rules & Conformance Packs</li>
+          <li class="coverage-item">Cost Allocation Tags & Tag Policies</li>
+          <li class="coverage-item">VPC Flow Logs & CloudTrail Optimizations</li>
+          <li class="coverage-item">AWS Cost Anomaly Detection</li>
+          <li class="coverage-item">Event-Driven Incident Auto-Remediation</li>
+        </ul>
+      </div>
+
+      <button class="btn btn-primary" onclick="startQuiz()">
+        Bắt đầu làm bài
+        <svg style="stroke: currentColor; width:16px; height:16px; fill:none; stroke-width:2.5;" viewBox="0 0 24 24">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- --------------------------------------------------
+         QUIZ ACTIVE SCREEN
+         -------------------------------------------------- -->
+    <div id="quiz-screen" style="display: none;">
+      <!-- HUD -->
+      <div class="quiz-hud">
+        <span id="question-progress">Câu hỏi 1 / 15</span>
+        <div class="timer-box">
+          <svg class="timer-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span id="elapsed-time">00:00</span>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="progress-bar-container">
+        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+      </div>
+
+      <!-- QUESTION DISPLAY -->
+      <div class="question-card fade-in">
+        <h2 id="question-text" class="question-title">Loading question...</h2>
+        <div id="options-container" class="options-list">
+          <!-- Dynamic options loaded here -->
+        </div>
+      </div>
+
+      <!-- EXPLANATION CARD -->
+      <div id="explanation-card" class="explanation-card">
+        <div class="explanation-header">
+          <svg class="explanation-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          Phân tích & Giải thích học thuật
+        </div>
+        <h4 id="explanation-title" class="explanation-title">Đáp án đúng</h4>
+        <div id="explanation-text" class="explanation-text">Explanation content...</div>
+      </div>
+
+      <!-- FOOTER ACTIONS -->
+      <div class="action-row">
+        <button id="btn-back-to-guide" class="btn btn-secondary" onclick="confirmExit()">
+          Thoát
+        </button>
+        <button id="btn-submit" class="btn btn-primary" onclick="submitAnswer()" disabled>
+          Xác nhận đáp án
+        </button>
+        <button id="btn-next" class="btn btn-primary" onclick="nextQuestion()" style="display: none;">
+          Câu tiếp theo
+          <svg style="stroke: currentColor; width:16px; height:16px; fill:none; stroke-width:2.5;" viewBox="0 0 24 24">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------
+         RESULTS SCREEN
+         -------------------------------------------------- -->
+    <div id="results-screen" class="results-card fade-in" style="display: none;">
+      <div class="results-header">
+        <span class="results-pretitle">Kết quả kiểm tra của bạn</span>
+        <h1 class="results-title" id="results-headline">Hoàn thành bài trắc nghiệm!</h1>
+      </div>
+
+      <div class="score-visualization">
+        <svg class="score-ring-svg" viewBox="0 0 130 130">
+          <circle class="score-ring-bg" cx="65" cy="65" r="60"></circle>
+          <circle id="score-ring-fill" class="score-ring-fill" cx="65" cy="65" r="60"></circle>
+        </svg>
+        <div class="score-text-overlay">
+          <span id="score-percent" class="score-percent">0%</span>
+          <span id="score-fraction" class="score-fraction">0/15 đúng</span>
+        </div>
+      </div>
+
+      <p id="results-summary-text" class="results-summary-text">
+        Loading summary feedback...
+      </p>
+
+      <!-- Diagnostic Category Breakdown -->
+      <div class="diagnostic-container">
+        <h3 class="diagnostic-title">Chẩn đoán kỹ năng theo Module</h3>
+        
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Module 1: Nền tảng Cost-Aware Governance</span>
+            <span id="diag-mod1-score">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-mod1-bar" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Module 2: AWS Organizations (SCPs & RCPs)</span>
+            <span id="diag-mod2-score">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-mod2-bar" class="diagnostic-fill amber"></div>
+          </div>
+        </div>
+
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Module 3: AWS Config Rules & Conformance Packs</span>
+            <span id="diag-mod3-score">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-mod3-bar" class="diagnostic-fill coral"></div>
+          </div>
+        </div>
+
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Module 4: Tagging, Cost Allocation & CUR Reporting</span>
+            <span id="diag-mod4-score">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-mod4-bar" class="diagnostic-fill amber"></div>
+          </div>
+        </div>
+
+        <div class="diagnostic-bar-row">
+          <div class="diagnostic-bar-label">
+            <span>Module 5: Integrated Security Hub & Auto-Remediation</span>
+            <span id="diag-mod5-score">0%</span>
+          </div>
+          <div class="diagnostic-track">
+            <div id="diag-mod5-bar" class="diagnostic-fill green"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button Grid -->
+      <div style="display: flex; gap: var(--spacing-md); justify-content: center; margin-bottom: var(--spacing-xl);">
+        <button class="btn btn-primary" onclick="restartQuiz()">
+          Làm lại bài kiểm tra
+        </button>
+        <button class="btn btn-secondary" onclick="window.location.href='optimize_cloud_governance.html'">
+          Quay lại Hướng dẫn học tập
+        </button>
+      </div>
+
+      <!-- Interactive Review sheet accordion -->
+      <h3 class="review-accordion-title">Xem lại các câu hỏi đã làm</h3>
+      <div id="review-sheet-container" class="review-sheet">
+        <!-- Review rows dynamically added here -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">
+      <svg class="footer-brand-spike" viewBox="0 0 24 24">
+        <path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      xBrain.Governance
+    </div>
+    <p style="color: var(--on-dark-soft); font-size: 11px;">W6 Study Artifact: Optimize Your Cloud Governance</p>
+    <p style="color: var(--on-dark-soft); font-size: 11px; margin-top:2px;">© 2026 xBrain Learners. Thiết kế Warm Cream cao cấp.</p>
+  </footer>
+
+  <!-- DYNAMIC BEHAVIOR SCRIPTS -->
+  <script>
+    // Quiz Questions Data Structure (15 Scenario-based Questions)
+    const questions = [
+      {
+        id: 1,
+        module: 1,
+        question: "Một quản trị viên đám mây muốn thiết lập các biện pháp kiểm soát chi phí. Công ty muốn ngăn các kỹ sư khởi chạy các tài nguyên đắt đỏ trước khi chúng được tạo ra, đồng thời giám sát các tài nguyên nhàn rỗi sau khi tạo để cảnh báo và tự động tắt chúng đi sau 14 ngày nếu không hoạt động. Các biện pháp kiểm soát này tương ứng với các loại control nào theo thứ tự chính xác?",
+        options: [
+          "Detective Controls -> Preventive Controls -> Responsive Controls",
+          "Preventive Controls -> Detective Controls -> Responsive Controls",
+          "Responsive Controls -> Detective Controls -> Preventive Controls",
+          "Preventive Controls -> Responsive Controls -> Detective Controls"
+        ],
+        correctAnswer: 1,
+        explanation: "<p><strong>Preventive controls</strong> (như SCPs) hoạt động chủ động để ngăn chặn hành động không tuân thủ trước khi tài nguyên được tạo ra (ngăn launch instance đắt đỏ).</p><p><strong>Detective controls</strong> (như AWS Config) giám sát tài nguyên sau khi triển khai để phát hiện trạng thái nhàn rỗi (idle resources).</p><p><strong>Responsive controls</strong> (như Lambda/Systems Manager Automation) tự động thực thi hành động để khắc phục (tự động stop instance).</p>"
+      },
+      {
+        id: 2,
+        module: 1,
+        question: "Theo mô hình Cost Optimization Pillar của AWS Well-Architected Framework, việc 'Thực hành Quản lý Tài chính Đám mây (Practice Cloud Financial Management - CFM)' yêu cầu tổ chức thực hiện hoạt động chính yếu nào sau đây?",
+        options: [
+          "Tắt toàn bộ các tài nguyên phi sản xuất (non-production) vào cuối tuần để tiết kiệm chi phí.",
+          "Ủy quyền kiểm soát chi phí hoàn toàn cho đội ngũ tài chính mà không cần sự tham gia của kỹ sư đám mây.",
+          "Thiết lập bộ phận chuyên trách (như FinOps Cloud Business Office) và triển khai các công cụ để theo dõi, quản lý chi tiêu liên tục.",
+          "Chỉ mua Reserved Instances cho toàn bộ hệ thống để đảm bảo nhận được chiết khấu cao nhất."
+        ],
+        correctAnswer: 2,
+        explanation: "<p><strong>CFM (Cloud Financial Management)</strong> đòi hỏi sự kết hợp giữa văn hóa, quy trình và công cụ. Thành lập một văn phòng chuyên trách FinOps (Cloud Business Office - CBO) giúp liên kết kỹ thuật, tài chính và kinh doanh để liên tục giám sát và quản lý chi phí đám mây một cách bền vững thay vì chỉ thực hiện các giải pháp cắt giảm chi tiêu tạm thời.</p>"
+      },
+      {
+        id: 3,
+        module: 1,
+        question: "Công ty của bạn muốn đo lường hiệu quả tổng thể của việc tối ưu hóa chi phí trên AWS. Chỉ số nào sau đây phản ánh tốt nhất nguyên tắc thiết kế 'Measure Overall Efficiency' của AWS Well-Architected Framework thay vì chỉ nhìn vào tổng chi tiêu?",
+        options: [
+          "Tổng số tiền tiết kiệm được hàng tháng thông qua việc xóa các EBS volume chưa sử dụng.",
+          "Tỷ lệ phần trăm hóa đơn giảm đi sau khi áp dụng Savings Plans.",
+          "Chi phí đám mây trung bình tính trên mỗi giao dịch thành công của khách hàng (Cost per Transaction).",
+          "Số lượng các cảnh báo ngân sách (budget alarms) không bị kích hoạt trong quý."
+        ],
+        correctAnswer: 2,
+        explanation: "<p>Nguyên tắc <strong>'Measure Overall Efficiency'</strong> khuyến khích các tổ chức đo lường chi phí đám mây dựa trên các chỉ số hiệu năng kinh doanh (business output/metrics) thay vì chỉ nhìn vào tổng số tiền chi tiêu thô. Chỉ số chi phí đám mây trên mỗi giao dịch của khách hàng giúp thiết lập mối liên kết tỷ lệ ROI chính xác nhất.</p>"
+      },
+      {
+        id: 4,
+        module: 2,
+        question: "Một doanh nghiệp lớn triển khai chiến lược multi-account sử dụng AWS Organizations và Consolidated Billing. Một member account chạy workload phù hợp với Savings Plans được mua bởi Management Account. Điều gì sẽ xảy ra với việc áp dụng chiết khấu?",
+        options: [
+          "Chiết khấu Savings Plans chỉ được áp dụng duy nhất cho các tài nguyên chạy trong Management Account.",
+          "Chiết khấu Savings Plans sẽ tự động được chia sẻ để bao phủ các workload phù hợp trong bất kỳ member account nào thuộc Organization, trừ khi tính năng chia sẻ bị vô hiệu hóa.",
+          "Member account phải trả tiền đầy đủ theo giá On-Demand và sẽ nhận được hoàn tiền (refund) vào chu kỳ hóa đơn tiếp theo.",
+          "Chỉ các tài nguyên chạy trong Organizational Unit (OU) cốt lõi mới nhận được chiết khấu Savings Plans."
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Với <strong>Consolidated Billing</strong>, các cam kết mua Savings Plans hoặc Reserved Instances thực hiện tại Management Account có thể tự động chia sẻ và áp dụng cho các workload phù hợp chạy ở bất kỳ member account nào trong AWS Organization, giúp tối ưu hóa discount coverage và giảm thiểu lãng phí cam kết dư thừa.</p>"
+      },
+      {
+        id: 5,
+        module: 2,
+        question: "Bạn được giao nhiệm vụ viết một Service Control Policy (SCP) để kiểm soát chi phí cho các tài khoản con trong OU 'Development'. Yêu cầu nào sau đây có thể thực hiện hiệu quả bằng SCP?",
+        options: [
+          "Tự động tắt các EC2 instance không hoạt động sau 7 ngày.",
+          "Chặn hoàn toàn việc gọi API 'ec2:RunInstances' đối với tất cả các instance size lớn, ngoại trừ dòng 't2.*', 't3.*' và 'm5.large'.",
+          "Đăng ký tự động các tags bắt buộc cho mọi tài nguyên khi chúng được tạo.",
+          "Gửi cảnh báo email qua SNS khi hóa đơn của một member account vượt quá $1,000."
+        ],
+        correctAnswer: 1,
+        explanation: "<p>SCPs là các guardrail <strong>lấy principal làm trung tâm (principal-centric)</strong>. Chúng centrally thiết lập giới hạn quyền tối đa (maximum privilege boundaries) cho các member accounts. SCP có thể sử dụng mệnh đề `Deny` kết hợp với `Condition` để từ chối các hành động khởi tạo tài nguyên đắt đỏ trực tiếp trước khi chúng xảy ra.</p>"
+      },
+      {
+        id: 6,
+        module: 2,
+        question: "AWS cung cấp cả Service Control Policies (SCPs) và Resource Control Policies (RCPs). Đâu là điểm khác biệt cốt lõi giữa hai loại chính sách này khi thiết lập ranh giới quản trị?",
+        options: [
+          "SCPs quản lý việc AI có thể thực hiện hành động (principal-centric), trong khi RCPs quản lý CÁCH THỨC các tài nguyên nội bộ được truy cập (resource-centric).",
+          "SCPs chỉ áp dụng cho môi trường Production, còn RCPs áp dụng cho môi trường Development.",
+          "SCPs là detective controls còn RCPs là preventive controls.",
+          "SCPs chỉ hỗ trợ các tài nguyên EC2, còn RCPs chỉ hỗ trợ các tài nguyên S3 và KMS."
+        ],
+        correctAnswer: 0,
+        explanation: "<p><strong>SCPs</strong> là principal-centric, giới hạn quyền hành động của user/role. Trong khi đó, <strong>RCPs</strong> là resource-centric được cấu hình tập trung trong AWS Organizations giúp kiểm soát cách thức tài nguyên của tổ chức (như S3, KMS, SQS) được truy cập từ bên ngoài, hình thành ranh giới dữ liệu (<strong>Data Perimeter</strong>) an toàn chống rò rỉ dữ liệu và chặn các hóa đơn do exfiltration trái phép.</p>"
+      },
+      {
+        id: 7,
+        module: 3,
+        question: "Để phát hiện nhanh chóng các tài nguyên nhàn rỗi đang phát sinh chi phí lãng phí trong tổ chức (EBS volume unattached, Elastic IP unassociated,...) mà không cần tự viết script hoặc container riêng, bạn nên triển khai giải pháp nào?",
+        options: [
+          "Viết một ứng dụng Python chạy trên ECS để quét tài nguyên định kỳ hàng giờ.",
+          "Triển khai AWS Config Conformance Pack 'Operational Best Practices for Cost Optimization'.",
+          "Thiết lập các AWS Budgets cảnh báo trên từng dịch vụ cụ thể.",
+          "Chỉ sử dụng IAM Policy để chặn các kỹ sư tạo tài nguyên nhàn rỗi."
+        ],
+        correctAnswer: 1,
+        explanation: "<p><strong>Conformance Packs</strong> của AWS Config là một tập hợp các rules và remediation actions được đóng gói sẵn trong một template YAML. Gói 'Operational Best Practices for Cost Optimization' chứa sẵn các managed rules được kiểm chứng như `volume-unused-check` và `eip-attached` giúp tự động hóa phát hiện lãng phí tài sản đám mây mà không tốn công sức phát triển.</p>"
+      },
+      {
+        id: 8,
+        module: 3,
+        question: "Đội ngũ Cloud Engineering muốn xây dựng một Custom Config Rule để kiểm soát các EC2 instance phải thuộc danh sách loại máy giá rẻ. Phương thức nào dưới đây nhẹ nhất, chạy serverless trực tiếp trong AWS Config và hỗ trợ cả Proactive Evaluation trước khi triển khai?",
+        options: [
+          "Viết Custom Lambda Rule bằng Python sử dụng SDK boto3.",
+          "Viết Custom Policy Rule sử dụng ngôn ngữ khai báo CloudFormation Guard (CFN Guard).",
+          "Viết một bash script chạy trên EC2 instance thông qua Cron Job.",
+          "Sử dụng AWS Security Hub Custom Findings."
+        ],
+        correctAnswer: 1,
+        explanation: "<p>AWS Config Custom Policy Rules sử dụng ngôn ngữ <strong>CloudFormation Guard (CFN Guard)</strong> là phương thức chính sách dạng mã nguồn (policy-as-code DSL) nhẹ nhất. Nó chạy serverless trực tiếp trong dịch vụ AWS Config, không yêu cầu thiết lập hay quản lý Lambda function riêng và hỗ trợ cả chế độ <strong>Proactive Evaluation</strong> để quét các template IaC trước khi triển khai thực tế trên AWS.</p>"
+      },
+      {
+        id: 9,
+        module: 4,
+        question: "Một kỹ sư gắn tag 'CostCenter: CC-Finance' cho 50 S3 bucket để phân bổ chi phí. Tuy nhiên, khi bộ phận tài chính truy cập vào AWS Cost Explorer, họ không thể tìm thấy tag 'CostCenter' để lọc chi phí. Lý do nào sau đây giải thích đúng nhất?",
+        options: [
+          "S3 bucket không hỗ trợ phân bổ chi phí theo tag.",
+          "Tag 'CostCenter' chưa được kích hoạt (activated) thủ công trong AWS Billing and Cost Management Console dưới dạng Cost Allocation Tag.",
+          "Phải mất tối thiểu 30 ngày để hệ thống Cost Explorer cập nhật dữ liệu tag mới.",
+          "Kỹ sư phải sử dụng AWS-generated tag thay vì user-defined tag."
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Để sử dụng tag cho việc phân bổ và báo cáo chi tiêu trên các công cụ billing như Cost Explorer hoặc CUR, tag đó <strong>bắt buộc phải được kích hoạt thủ công</strong> trong <strong>AWS Billing and Cost Management Console</strong> dưới dạng <strong>Cost Allocation Tag</strong>. Việc gán tag lên tài nguyên trên console chỉ phục vụ quản lý metadata thông thường và không hiển thị trên billing.</p>"
+      },
+      {
+        id: 10,
+        module: 4,
+        question: "Một doanh nghiệp muốn bắt buộc tất cả các S3 bucket và EC2 instance được tạo ra phải có thẻ 'Environment' với các giá trị chuẩn hóa viết hoa/thường chính xác là 'Prod', 'Stage' hoặc 'Dev'. Công cụ nào giúp thực thi tiêu chuẩn viết hoa/thường (case-sensitivity) và giới hạn giá trị tag được phép này?",
+        options: [
+          "AWS Cost Explorer Filter",
+          "Tag Policies trong AWS Organizations",
+          "AWS Systems Manager Resource Groups",
+          "IAM Group Permissions"
+        ],
+        correctAnswer: 1,
+        explanation: "<p><strong>Tag Policies</strong> trong AWS Organizations cho phép quản trị viên định nghĩa các tiêu chuẩn thẻ metadata tập trung. Nó bắt buộc chuẩn hóa viết hoa/thường (case-sensitivity) và giới hạn danh sách các giá trị được phép gán cho các key tag cụ thể (ví dụ: chỉ cho phép `Prod`, `Stage`, `Dev`).</p>"
+      },
+      {
+        id: 11,
+        module: 4,
+        question: "Để xây dựng một chiến lược Tagging Strategy toàn diện cho doanh nghiệp, bạn nên phân loại thẻ metadata 'AutoStop: True' vào nhóm thẻ nào sau đây?",
+        options: [
+          "Technical Tags (Thẻ Kỹ thuật)",
+          "Business Tags (Thẻ Kinh doanh)",
+          "Security Tags (Thẻ Bảo mật)",
+          "Automation Tags (Thẻ Tự động hóa)"
+        ],
+        correctAnswer: 3,
+        explanation: "<p>Chiến lược tagging chuẩn doanh nghiệp chia tags thành 4 nhóm chính: Technical (như ApplicationID, Environment), Business (như CostCenter, Owner), Security (như DataClassification), và <strong>Automation Tags</strong> (các thẻ chứa tham số điều phối các script tự động hóa như tắt/bật máy nhàn rỗi `AutoStop: True/False`, chọn BackupPlan,...).</p>"
+      },
+      {
+        id: 12,
+        module: 4,
+        question: "Bộ phận FinOps cần lập báo cáo chi tiết đến từng dòng giao dịch (line-item resolution) và phân tích các chi phí dùng chung (như phí AWS Support) không thể gán thẻ trực tiếp cho tài nguyên. Bộ công cụ nào là phù hợp nhất để thực hiện yêu cầu này?",
+        options: [
+          "AWS Cost Explorer với bộ lọc tag đơn giản.",
+          "AWS Budgets kết hợp với AWS Cost Anomaly Detection.",
+          "AWS Cost and Usage Report (CUR) truy vấn qua Amazon Athena kết hợp với Account Tags cho Cost Allocation.",
+          "AWS Systems Manager Patch Manager."
+        ],
+        correctAnswer: 2,
+        explanation: "<p><strong>AWS Cost and Usage Report (CUR)</strong> là nguồn dữ liệu hóa đơn chi tiết nhất của AWS. Xuất định dạng CSV/Parquet ra S3 để truy vấn nâng cao bằng SQL qua <strong>Amazon Athena</strong>. Kết hợp với <strong>Account Tags cho Cost Allocation</strong>, bộ phận FinOps có thể gán metadata cho toàn bộ AWS Accounts để phân bổ các chi phí dùng chung hoặc không thể gắn thẻ (như phí Enterprise Support) về từng OU tương ứng.</p>"
+      },
+      {
+        id: 13,
+        module: 5,
+        question: "Quản trị viên muốn cấu hình ghi log mạng để giám sát bảo mật. Tuy nhiên, việc ghi log toàn bộ packet (VPC Flow Logs ALL) và ghi nhận toàn bộ API read/write trên các active S3 bucket (CloudTrail S3 Data Events) trong môi trường traffic cao đang tạo ra chi phí lưu trữ khổng lồ. Kiến trúc tối ưu hóa nào sau đây là phù hợp nhất?",
+        options: [
+          "Tắt hoàn toàn VPC Flow Logs và CloudTrail để tiết kiệm chi phí tối đa.",
+          "Chỉ ghi log REJECT traffic đối với VPC Flow Logs và bật CloudTrail S3 Data Events một cách có chọn lọc trên các bucket dữ liệu nhạy cảm cao.",
+          "Di chuyển toàn bộ dữ liệu log sang AWS Config Recorder để lưu giữ cấu hình.",
+          "Chỉ chạy Security Hub mà không cần ghi log CloudTrail."
+        ],
+        correctAnswer: 1,
+        explanation: "<p>Để cân bằng giữa bảo mật và chi phí, doanh nghiệp cần triển khai các kiểm soát nhận biết chi phí (cost-aware controls): Cấu hình VPC Flow Logs chỉ ghi lại <strong>REJECT</strong> traffic (nắm bắt các nỗ lực xâm nhập trái phép, giảm hơn 90% dung lượng log), và chỉ bật CloudTrail S3 Data Events cho các bucket chứa dữ liệu critical/nhạy cảm cao thay vì bật bừa bãi trên toàn bộ bucket vận hành thông thường.</p>"
+      },
+      {
+        id: 14,
+        module: 5,
+        question: "Một hacker đã đánh cắp được root API access keys của một nhà phát triển và khởi chạy hàng loạt EC2 instance cấu hình GPU khổng lồ để đào tiền ảo (crypto-mining). Công cụ nào của AWS đóng vai trò là 'chốt chặn cảnh báo tài chính sớm' giúp phát hiện các đột biến chi phí bất thường này dựa trên thuật toán học máy?",
+        options: [
+          "AWS Trusted Advisor",
+          "AWS Cost Anomaly Detection",
+          "AWS Service Catalog",
+          "AWS Systems Manager OpsCenter"
+        ],
+        correctAnswer: 1,
+        explanation: "<p><strong>AWS Cost Anomaly Detection</strong> là dịch vụ dựa trên Machine Learning (học máy) liên tục giám sát các mô hình chi tiêu trên tài khoản AWS của bạn. Nó phát hiện ngay lập tức các chi phí tăng đột biến bất thường ngoài tầm kiểm soát và gửi cảnh báo cho quản trị viên chỉ trong vòng vài giờ, đóng vai trò như một hệ thống cảnh báo sớm tối quan trọng khi xảy ra sự cố rò rỉ credential hoặc bị lạm dụng tài nguyên.</p>"
+      },
+      {
+        id: 15,
+        module: 5,
+        question: "Thiết kế một kiến trúc phản ứng sự cố tự động (event-driven automated remediation pipeline) nhằm giải quyết triệt để rủi ro bảo mật và ngăn chặn chi phí compute leo thang tức thì khi phát hiện một instance bị nhiễm mã độc đào tiền ảo. Thứ tự luồng hoạt động chính xác của các dịch vụ là gì?",
+        options: [
+          "Lambda -> AWS Security Hub -> GuardDuty -> SNS",
+          "AWS Step Functions -> EventBridge -> AWS Config -> SNS",
+          "AWS GuardDuty -> Amazon EventBridge -> AWS Step Functions (Lambda) -> Amazon SNS",
+          "AWS Systems Manager -> S3 -> SQS -> AWS Budgets"
+        ],
+        correctAnswer: 2,
+        explanation: "<p>Kiến trúc phản hồi tự động chuẩn bao gồm: <strong>AWS GuardDuty</strong> (Phát hiện) -> đẩy phát hiện bảo mật sang <strong>Amazon EventBridge</strong> (Kích hoạt sự kiện) -> kích hoạt <strong>AWS Step Functions</strong> (Điều phối) để gọi <strong>Lambda functions</strong> thực thi cô lập, tắt instance độc hại nhằm chặn đứng chi phí compute đang leo thang -> gửi thông báo qua <strong>Amazon SNS</strong> hoặc Slack (Thông báo).</p>"
+      }
+    ];
+
+    // Quiz State Variables
+    let currentQuestionIndex = 0;
+    let selectedOptionIndex = null;
+    let score = 0;
+    let userAnswers = []; // Records user's selected option index per question
+    let timerInterval = null;
+    let secondsElapsed = 0;
+
+    // DOM Elements
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const questionProgress = document.getElementById('question-progress');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const elapsedTime = document.getElementById('elapsed-time');
+    const explanationCard = document.getElementById('explanation-card');
+    const explanationTitle = document.getElementById('explanation-title');
+    const explanationText = document.getElementById('explanation-text');
+    const btnSubmit = document.getElementById('btn-submit');
+    const btnNext = document.getElementById('btn-next');
+
+    // Start Quiz Function
+    function startQuiz() {
+      welcomeScreen.style.display = 'none';
+      quizScreen.style.display = 'block';
+      resultsScreen.style.display = 'none';
+      
+      currentQuestionIndex = 0;
+      score = 0;
+      userAnswers = Array(questions.length).fill(null);
+      secondsElapsed = 0;
+      selectedOptionIndex = null;
+      
+      // Start Timer
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      
+      loadQuestion();
+    }
+
+    // Timer Update
+    function updateTimer() {
+      secondsElapsed++;
+      const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+      const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+      elapsedTime.innerText = `${mins}:${secs}`;
+    }
+
+    // Load Question
+    function loadQuestion() {
+      selectedOptionIndex = null;
+      btnSubmit.disabled = true;
+      btnSubmit.style.display = 'block';
+      btnNext.style.display = 'none';
+      explanationCard.classList.remove('show');
+      
+      const q = questions[currentQuestionIndex];
+      
+      // Progress UI
+      questionProgress.innerText = `Câu hỏi ${currentQuestionIndex + 1} / ${questions.length}`;
+      const percent = ((currentQuestionIndex) / questions.length) * 100;
+      progressBarFill.style.width = `${percent}%`;
+      
+      // Text
+      questionText.innerText = q.question;
+      
+      // Options
+      optionsContainer.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const letter = String.fromCharCode(65 + idx); // A, B, C, D
+        
+        const card = document.createElement('div');
+        card.className = 'option-card fade-in';
+        card.style.animationDelay = `${idx * 0.08}s`;
+        card.onclick = () => selectOption(idx);
+        
+        card.innerHTML = `
+          <div class="option-letter">${letter}</div>
+          <div class="option-text">${opt}</div>
+        `;
+        
+        optionsContainer.appendChild(card);
+      });
+    }
+
+    // Select Option
+    function selectOption(index) {
+      // If already submitted, lock option changes
+      if (btnNext.style.display === 'block') return;
+      
+      selectedOptionIndex = index;
+      btnSubmit.disabled = false;
+      
+      const cards = optionsContainer.querySelectorAll('.option-card');
+      cards.forEach((c, idx) => {
+        if (idx === index) {
+          c.classList.add('selected');
+        } else {
+          c.classList.remove('selected');
+        }
+      });
+    }
+
+    // Submit Answer
+    function submitAnswer() {
+      if (selectedOptionIndex === null) return;
+      
+      const q = questions[currentQuestionIndex];
+      userAnswers[currentQuestionIndex] = selectedOptionIndex;
+      
+      const cards = optionsContainer.querySelectorAll('.option-card');
+      
+      // Highlight answers
+      cards.forEach((c, idx) => {
+        c.onclick = null; // Disable clicks
+        if (idx === q.correctAnswer) {
+          c.classList.add('correct');
+          c.classList.remove('selected');
+        } else if (idx === selectedOptionIndex) {
+          c.classList.add('incorrect');
+          c.classList.remove('selected');
+        }
+      });
+      
+      // Score calculation
+      const isCorrect = selectedOptionIndex === q.correctAnswer;
+      if (isCorrect) {
+        score++;
+        explanationTitle.innerHTML = `<span style="color: var(--success);">Chính xác!</span>`;
+      } else {
+        explanationTitle.innerHTML = `<span style="color: var(--error);">Không chính xác</span> (Đáp án đúng là: ${String.fromCharCode(65 + q.correctAnswer)})`;
+      }
+      
+      // Show Explanation Card
+      explanationText.innerHTML = q.explanation;
+      explanationCard.classList.add('show');
+      
+      // Update buttons
+      btnSubmit.style.display = 'none';
+      btnNext.style.display = 'block';
+      
+      // Smooth scroll down to explanation card if viewport is short
+      setTimeout(() => {
+        explanationCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+
+    // Next Question
+    function nextQuestion() {
+      currentQuestionIndex++;
+      
+      if (currentQuestionIndex < questions.length) {
+        loadQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    // Finish Quiz
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      quizScreen.style.display = 'none';
+      resultsScreen.style.display = 'block';
+      
+      // Final progress bar fill
+      progressBarFill.style.width = '100%';
+      
+      // Calculate percentages
+      const scorePercent = Math.round((score / questions.length) * 100);
+      
+      // Visual Ring animation
+      const ringFill = document.getElementById('score-ring-fill');
+      const circumference = 377; // 2 * PI * 60
+      const offset = circumference - (circumference * scorePercent / 100);
+      
+      // Delayed for CSS transition
+      setTimeout(() => {
+        ringFill.style.strokeDashoffset = offset;
+      }, 150);
+      
+      // Text updates
+      document.getElementById('score-percent').innerText = `${scorePercent}%`;
+      document.getElementById('score-fraction').innerText = `${score}/${questions.length} câu đúng`;
+      
+      // Feedback Headline & Text
+      const headline = document.getElementById('results-headline');
+      const summaryText = document.getElementById('results-summary-text');
+      
+      if (scorePercent >= 90) {
+        headline.innerText = "Kiệt xuất! Bạn là chuyên gia FinOps!";
+        summaryText.innerHTML = `Chúc mừng bạn! Bạn đã đạt mức điểm tuyệt vời là <strong>${scorePercent}%</strong> trong tổng thời gian làm bài là <strong>${formatTime(secondsElapsed)}</strong>. Bạn đã nắm rất vững ranh giới bảo mật, chiến lược tài khoản cũng như tự động hóa cảnh báo tối ưu hóa chi phí trên AWS.`;
+      } else if (scorePercent >= 80) {
+        headline.innerText = "Tuyệt vời! Bạn đã vượt qua bài kiểm tra!";
+        summaryText.innerHTML = `Kết quả rất ấn tượng! Bạn đạt <strong>${scorePercent}%</strong> với thời gian <strong>${formatTime(secondsElapsed)}</strong>. Bạn có kiến thức nền tảng rất vững về Cost Governance và có đủ năng lực để áp dụng các kiểm soát này vào thực tế doanh nghiệp.`;
+      } else if (scorePercent >= 60) {
+        headline.innerText = "Khá tốt! Bạn chỉ thiếu một chút để đạt mức giỏi.";
+        summaryText.innerHTML = `Bạn đạt điểm số <strong>${scorePercent}%</strong>. Điểm số này cho thấy bạn hiểu khái niệm cốt lõi nhưng cần rà soát thêm một số nội dung chuyên sâu hơn ở phần AWS Config hoặc chi phí ghi log của Security Hub. Hãy xem chẩn đoán kỹ năng bên dưới nhé!`;
+      } else {
+        headline.innerText = "Cần cố gắng thêm một chút!";
+        summaryText.innerHTML = `Bạn đạt điểm số <strong>${scorePercent}%</strong>. Cloud Governance là một chủ đề rộng lớn đòi hỏi sự kết hợp phức tạp giữa bảo mật và FinOps. Hãy xem chẩn đoán chi tiết bên dưới để biết Module nào cần ôn tập lại và đọc lại Sổ tay hướng dẫn học tập nhé!`;
+      }
+      
+      // Skill diagnostics calculation
+      calculateDiagnostics();
+      
+      // Build Review Accordions
+      buildReviewSheet();
+    }
+
+    // Diagnostic scoring by module
+    function calculateDiagnostics() {
+      const moduleTotals = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+      const moduleCorrects = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+      
+      questions.forEach((q, idx) => {
+        moduleTotals[q.module]++;
+        if (userAnswers[idx] === q.correctAnswer) {
+          moduleCorrects[q.module]++;
+        }
+      });
+      
+      for (let mod = 1; mod <= 5; mod++) {
+        const percent = Math.round((moduleCorrects[mod] / moduleTotals[mod]) * 100);
+        document.getElementById(`diag-mod${mod}-score`).innerText = `${percent}%`;
+        
+        const bar = document.getElementById(`diag-mod${mod}-bar`);
+        bar.style.width = `${percent}%`;
+        
+        // Color mapping
+        bar.className = 'diagnostic-fill'; // reset
+        if (percent >= 80) {
+          bar.classList.add('green');
+        } else if (percent >= 60) {
+          bar.classList.add('amber');
+        } else {
+          bar.classList.add('coral');
+        }
+      }
+    }
+
+    // Build Question Review Sheets
+    function buildReviewSheet() {
+      const container = document.getElementById('review-sheet-container');
+      container.innerHTML = '';
+      
+      questions.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        const isCorrect = userChoice === q.correctAnswer;
+        
+        const item = document.createElement('div');
+        item.className = 'review-item';
+        
+        item.innerHTML = `
+          <div class="review-item-header" onclick="toggleReviewItem(this)">
+            <span class="review-item-title-text"><strong>Câu ${idx + 1}:</strong> ${q.question}</span>
+            <span class="review-status-indicator ${isCorrect ? 'correct-color' : 'incorrect-color'}">
+              <span class="review-status-dot ${isCorrect ? 'green' : 'red'}"></span>
+              ${isCorrect ? 'Đúng' : 'Sai'}
+            </span>
+          </div>
+          <div class="review-item-body">
+            <div class="review-question-text">${q.question}</div>
+            <div class="review-options">
+              ${q.options.map((opt, oIdx) => {
+                let classes = 'review-option';
+                if (oIdx === q.correctAnswer) classes += ' correct';
+                if (oIdx === userChoice && !isCorrect) classes += ' user-wrong';
+                
+                return `<div class="${classes}"><strong>${String.fromCharCode(65 + oIdx)}.</strong> ${opt}</div>`;
+              }).join('')}
+            </div>
+            <div class="explanation-card show" style="border-radius: var(--rounded-md); border-left: 3px solid var(--accent-teal); padding: var(--spacing-md); margin-top: var(--spacing-sm);">
+              <div class="explanation-header" style="font-size:12px; margin-bottom:6px;">
+                <svg class="explanation-icon" style="width:14px; height:14px;" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                Phân tích phản hồi
+              </div>
+              <div class="explanation-text" style="font-size: 13px;">${q.explanation}</div>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(item);
+      });
+    }
+
+    // Toggle Review Accordions
+    function toggleReviewItem(header) {
+      const item = header.parentElement;
+      item.classList.toggle('expanded');
+    }
+
+    // Format Time Helper
+    function formatTime(totalSecs) {
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      return `${mins} phút ${secs} giây`;
+    }
+
+    // Restart Quiz
+    function restartQuiz() {
+      startQuiz();
+    }
+
+    // Confirm Exit Quiz mid-way
+    function confirmExit() {
+      if (confirm("Bạn có chắc chắn muốn thoát bài kiểm tra giữa chừng? Mọi tiến trình sẽ bị mất.")) {
+        window.location.href = 'optimize_cloud_governance.html';
+      }
+    }
+  </script>
+
+</body>
+</html>
