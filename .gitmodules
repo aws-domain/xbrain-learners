@@ -1,0 +1,3 @@
+[submodule "workshop/aws-101-nosql-databases"]
+	path = workshop/aws-101-nosql-databases
+	url = https://github.com/aws-domain/aws-101-nosql-databases.git
