@@ -1,0 +1,42 @@
+{
+  "parent": { "type": "page_id", "page_id": "3bae42c4670b8016af4fedda2c6b5cbc" },
+  "title": [{ "type": "text", "text": { "content": "Task Management" } }],
+  "properties": {
+    "Name": { "title": {} },
+    "Status": { "status": {} },
+    "Due Date": { "date": {} },
+    "Priority": {
+      "select": {
+        "options": [
+          { "name": "Urgent", "color": "red" },
+          { "name": "High", "color": "orange" },
+          { "name": "Medium", "color": "yellow" },
+          { "name": "Low", "color": "green" }
+        ]
+      }
+    },
+    "Source": {
+      "select": {
+        "options": [
+          { "name": "CLI", "color": "gray" },
+          { "name": "Meeting", "color": "blue" },
+          { "name": "Email", "color": "orange" },
+          { "name": "Idea", "color": "purple" },
+          { "name": "Other", "color": "default" }
+        ]
+      }
+    },
+    "Tags": {
+      "multi_select": {
+        "options": [
+          { "name": "AWS", "color": "orange" },
+          { "name": "Coding", "color": "blue" },
+          { "name": "DevOps", "color": "green" },
+          { "name": "Learning", "color": "purple" },
+          { "name": "Review", "color": "yellow" },
+          { "name": "Personal", "color": "pink" }
+        ]
+      }
+    }
+  }
+}
