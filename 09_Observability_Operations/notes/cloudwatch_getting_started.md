@@ -131,8 +131,40 @@ Bất kỳ metric nào bạn tự định nghĩa và gửi lên CloudWatch khôn
 2. **CloudWatch Agent**: Cấu hình tự động đẩy các chỉ số hệ thống (RAM, CPU core, Disk partition) lên CloudWatch theo định kỳ.
 
 #### Độ Phân Giải (Resolution):
-* **Standard Resolution**: Dữ liệu có độ phân giải tối thiểu là **1 phút**.
-* **High-Resolution**: Dữ liệu có độ phân giải lên tới **1 giây**. Hữu ích cho việc giám sát các chỉ số cực kỳ nhạy cảm và cần phản ứng tức thì (ví dụ: latency của các giao dịch thanh toán). Bạn phải trả thêm phí cho High-Resolution metrics.
+* **Standard Resolution**: Dữ liệu có độ phân giải tối thiểu là **1 phút** (mặc định, `--storage-resolution 60`).
+* **High-Resolution**: Dữ liệu có độ phân giải lên tới **1 giây** (`--storage-resolution 1`). Hữu ích cho việc giám sát các chỉ số cực kỳ nhạy cảm và cần phản ứng tức thì (ví dụ: latency của các giao dịch thanh toán). Bạn phải trả thêm phí cho High-Resolution metrics.
+
+#### Tình Huống "Publish Custom Metric Với Granularity 1 Giây" (2 điều kiện phải thỏa ĐỒNG THỜI)
+Câu hỏi dạng này ngầm có 2 yêu cầu khác nhau, mỗi đáp án lo một việc — thiếu một trong hai là không đạt:
+
+1. **Dùng AWS CLI (hoặc SDK/API) để publish** → trả lời cho "làm sao đưa được metric lên":
+   * CloudWatch **KHÔNG cho tạo custom metric từ Console** — không có nút bấm nào trên web.
+   * Custom metric chỉ đẩy lên được qua API **`PutMetricData`**, gọi qua CLI (`aws cloudwatch put-metric-data`) hoặc SDK (Boto3, Java SDK...).
+2. **Bật High Resolution (`--storage-resolution 1`)** → trả lời cho "làm sao đạt 1 giây":
+   * Mặc định custom metric là standard = **60 giây**. Publish bình thường không thể có 1 giây.
+   * Chỉ high resolution mới cho granularity **1 giây**.
+
+```
+aws cloudwatch put-metric-data --namespace TutorialsDojo/Sensors \
+  --metric-name TempHiRes --value 30 --storage-resolution 1 --region ap-southeast-1
+```
+
+#### Phân Biệt "Storage Resolution" Với "Tần Suất Gửi" (dễ nhầm)
+High resolution là một **thuộc tính của metric** (bật qua tham số `--storage-resolution 1`), KHÔNG tự động gửi dữ liệu giúp bạn:
+
+* **Storage resolution** = CloudWatch **lưu** dữ liệu ở mức chi tiết 1 giây. Đây là cái tham số quyết định.
+* **Tần suất publish** = bạn tự quyết định gửi bao nhiêu lần. High resolution chỉ **cho phép** lưu tới 1 giây; muốn thật sự có 1 điểm mỗi giây thì **script/ứng dụng của bạn phải gọi `put-metric-data` mỗi giây** (hoặc gửi batch nhiều điểm kèm timestamp cách nhau 1 giây).
+
+#### Period Đọc Được Theo Resolution
+| | Standard (mặc định) | High Resolution |
+|---|---|---|
+| Granularity lưu trữ | 60 giây | 1 giây |
+| Tham số | `--storage-resolution 60` (hoặc bỏ trống) | `--storage-resolution 1` |
+| Period đọc được | bội số của 60 giây | 1, 5, 10, 30 giây hoặc bội số 60 |
+| Chi phí | Thấp hơn | Cao hơn |
+| Dùng khi | Theo dõi thông thường | Phát hiện spike vài giây, auto scaling phản ứng nhanh |
+
+> **High-resolution alarm**: alarm trên metric high resolution có thể đặt period **10 hoặc 30 giây** → phản ứng nhanh hơn alarm thường (tối thiểu 60 giây), đánh đổi bằng chi phí cao hơn.
 
 ---
 
@@ -321,10 +353,30 @@ Metric Value
 
 ---
 
-### 4.3 Giảm Thiểu Báo Động Giả Với "Evaluation Periods"
-Để tránh việc các đỉnh nhọn bất thường diễn ra trong tích tắc (Spikes) kích hoạt cảnh báo nhầm, bạn nên cấu hình tham số đánh giá Alarm:
-* **Evaluation Periods (M out of N)**: Quy định Alarm chỉ chuyển sang trạng thái ALARM nếu chỉ số vượt ngưỡng **M** lần trong tổng số **N** chu kỳ đánh giá liên tiếp.
-* *Ví dụ*: Cấu hình CPU > 80% trong `3 out of 5 periods` (chu chu kỳ 1 phút). Điều này nghĩa là nếu CPU chỉ tăng vọt lên 90% trong 1 phút rồi giảm về 40%, Alarm vẫn ở trạng thái OK. Nhưng nếu CPU giữ ở mức 85% trong 3 phút khác nhau trong vòng 5 phút, cảnh báo ALARM sẽ được kích hoạt.
+### 4.3 Giảm Thiểu Báo Động Giả Với "Evaluation Periods" Và "Datapoints to Alarm"
+Để tránh việc các đỉnh nhọn bất thường diễn ra trong tích tắc (Spikes) kích hoạt cảnh báo nhầm, bạn cần hiểu 3 tham số đi cùng nhau:
+
+* **Period**: Mỗi datapoint đại diện cho bao lâu. Ví dụ Period = 1 phút → cứ mỗi 1 phút CloudWatch có 1 datapoint của metric.
+* **Evaluation Periods (M)**: Số datapoint gần nhất mà CloudWatch nhìn vào để đánh giá. Ví dụ M = 3 → nhìn 3 datapoint gần nhất.
+* **Datapoints to Alarm (N)**: Trong M datapoint đó, cần bao nhiêu điểm vượt ngưỡng thì Alarm mới chuyển sang ALARM.
+
+> Cú pháp hiển thị trên Console là **"N out of M"** (Datapoints to Alarm = N, Evaluation Periods = M). Lưu ý đọc đúng thứ tự: **N là số điểm vi phạm cần có**, **M là tổng số điểm nhìn vào**.
+
+#### Ví dụ "3 out of 3" (bài lab d1-01, alarm `td-cpu-80`, Period 1 phút)
+Nhìn vào **3 datapoint gần nhất** (= 3 phút gần nhất) và cần **cả 3** đều vượt ngưỡng CPU > 80% thì mới vào ALARM.
+
+| Phút | CPU | Vượt 80%? | Kết quả |
+|---|---|---|---|
+| 1, 2, 3 | 85%, 90%, 88% | ✓ ✓ ✓ | **ALARM** (đủ 3/3) |
+| 1, 2, 3 | 85%, 70%, 88% | ✓ ✗ ✓ | OK (chỉ 2/3) |
+
+→ Nếu CPU chỉ tăng vọt 1 phút rồi tụt (spike nhất thời) thì Alarm vẫn OK. CPU phải cao **liên tục 3 phút** mới báo động → giảm nhiễu.
+
+#### Phân biệt N = M và N < M
+* **N = M** (ví dụ `3 out of 3`): phải vi phạm **liên tục** cả M chu kỳ → nghiêm ngặt nhất, ít false alarm nhất.
+* **N < M** (ví dụ `2 out of 3`): chỉ cần N trong M chu kỳ vi phạm, không cần liên tiếp → nhạy hơn, hợp với metric dao động mạnh (như network) để không bỏ sót vấn đề thật chỉ vì 1 phút tụt xuống.
+
+> Chính nhờ chênh lệch N/M giữa các alarm mà ta kiểm soát được cái nào kích hoạt trước. Ví dụ trong lab: alarm Recover đặt `2 out of 2` (kích hoạt sau 2 phút) còn alarm Reboot đặt `3 out of 3` (sau 3 phút) → Recover ra tay trước, tránh tranh chấp khi cả hai cùng theo dõi một instance.
 
 ---
 
