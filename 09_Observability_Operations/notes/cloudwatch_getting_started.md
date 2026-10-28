@@ -180,6 +180,55 @@ Khi hiển thị metrics trên biểu đồ hoặc thiết lập Alarms, bạn c
 
 ---
 
+### 2.5 Hai Luồng Đẩy Metric & Vai Trò Của IAM Instance Profile (lab d1-02)
+Đây là điểm cực kỳ dễ nhầm: không phải mọi metric của EC2 đều cần CloudWatch Agent, và không phải mọi metric đều cần IAM permission trên instance. Có **hai luồng dữ liệu hoàn toàn tách biệt**.
+
+#### Luồng 1: Default Metrics — Qua Hypervisor, KHÔNG Cần Agent, KHÔNG Cần IAM
+Các metric mặc định (`CPUUtilization`, `NetworkIn/Out`, `DiskReadOps`, `StatusCheckFailed`...) do **hypervisor của AWS** đẩy thẳng lên CloudWatch, nằm trong namespace `AWS/EC2`. Luồng này đi **bên ngoài hệ điều hành** của instance.
+
+> [!IMPORTANT]
+> Default metrics KHÔNG chạy qua agent, KHÔNG chạy qua IAM role của instance, và KHÔNG cần bất kỳ permission nào trên instance profile. Kể cả instance không gắn IAM role nào, `CPUUtilization` vẫn lên CloudWatch bình thường.
+
+#### Luồng 2: Custom Metrics & Logs — Qua Agent, BẮT BUỘC Cần IAM Permission
+Memory, disk used %, swap và application metrics/logs phải do **Unified CloudWatch Agent** đọc từ bên trong OS rồi gọi API đẩy lên. Khi gọi API, agent dùng credential lấy từ **IAM Instance Profile** gắn trên instance. Thiếu permission thì agent vẫn chạy nhưng không đẩy được gì lên.
+
+```
+Default metrics (AWS/EC2 namespace)
+┌──────────────────┐
+│  AWS Hypervisor  │ ──────────► CloudWatch   (KHÔNG qua OS, KHÔNG qua IAM role)
+└──────────────────┘
+
+Custom/app metrics + logs (CWAgent namespace hoặc tùy config)
+┌─────────────────────────────┐
+│ EC2 instance                │
+│  ┌───────────────────────┐  │
+│  │ Unified CloudWatch    │  │   dùng credential từ
+│  │ Agent (đọc OS/app)    │──┼──► IAM Instance Profile ──► CloudWatch
+│  └───────────────────────┘  │   (PutMetricData, PutLogEvents)
+└─────────────────────────────┘
+```
+
+#### IAM Permission Cần Cho Agent
+AWS có sẵn managed policy `CloudWatchAgentServerPolicy`, gắn vào role của instance profile là đủ cho hầu hết lab. Các quyền chính:
+
+| Quyền | Dùng để |
+| :--- | :--- |
+| `cloudwatch:PutMetricData` | Đẩy custom metric (RAM, disk, swap...) |
+| `logs:CreateLogGroup`, `logs:CreateLogStream` | Tạo log group/stream lần đầu |
+| `logs:PutLogEvents`, `logs:DescribeLogStreams` | Đẩy log event lên CloudWatch Logs |
+| `ssm:GetParameter` | Đọc file config agent nếu lưu ở SSM Parameter Store |
+
+#### Bảng Tổng Hợp (chốt lại cho exam)
+| Loại metric | Cần CloudWatch Agent? | Cần IAM permission trên instance? | Namespace |
+| :--- | :--- | :--- | :--- |
+| EC2 default (CPU, Network, Disk Ops, StatusCheck) | Không | Không | `AWS/EC2` |
+| Memory, disk used %, swap | Có | Có | `CWAgent` (mặc định) |
+| Application metrics / logs | Có | Có | Tùy config |
+
+> **Memory tip (SOA-C03):** thấy câu hỏi nhắc tới "memory utilization" hoặc "disk space used" thì gần như chắc chắn đáp án dính tới việc cài **CloudWatch Agent** + gắn **`CloudWatchAgentServerPolicy`** vào IAM role. Bẫy thường gặp: đáp án nói "chỉ cần bật Detailed Monitoring" là SAI, vì Detailed Monitoring chỉ hạ chu kỳ default metric từ 5 phút xuống 1 phút, KHÔNG thêm được RAM/disk.
+
+---
+
 ## MODULE 3: Thu Thập Và Truy Vấn Log Apache Với CloudWatch Logs
 
 ### 3.1 Cấu Trúc Thành Phần CloudWatch Logs
@@ -196,6 +245,65 @@ Môi trường CloudWatch Logs tổ chức dữ liệu nhật ký theo cấu tr�
 1. **Log Group (Nhóm Log)**: Tập hợp các log stream có chung cấu hình quản trị, chính sách bảo mật và thời gian lưu trữ (retention policy). Ví dụ: bạn có thể tạo một Log Group chuyên dụng cho toàn bộ Access Log của hệ thống Apache Server.
 2. **Log Stream (Luồng Log)**: Chuỗi các log event đến từ cùng một nguồn cụ thể (ví dụ: một file log cụ thể trên một EC2 instance xác định). Thường được đặt tên theo `InstanceID` để dễ phân biệt.
 3. **Log Event (Sự kiện Log)**: Một dòng log ghi nhận hoạt động kèm theo dấu thời gian (timestamp) và thông điệp log gốc (raw message).
+
+---
+
+### 3.1b Unified CloudWatch Agent Là Gì Và Thu Thập Được Gì (Agent Overview)
+
+**Unified CloudWatch Agent** là một software component chạy liên tục, tự động trên server, dùng để thu thập **metrics, logs và traces** từ EC2 instance, **on-premises server** và **containerized application**. Nó cho phép giám sát hạ tầng và ứng dụng sâu hơn nhiều so với basic monitoring mặc định.
+
+#### Agent làm được gì
+| Khả năng | Chi tiết |
+| :--- | :--- |
+| System-level metrics của EC2 (kể cả in-guest) | Thu thập metric nội bộ OS (RAM, disk used %, swap...) mà default EC2 metrics không có. Danh sách ở "Metrics collected by the CloudWatch agent". |
+| Metrics từ on-premises server | Chạy được trên server hybrid và cả server không do AWS quản lý. |
+| Custom metrics từ app | Qua giao thức **StatsD** (Linux + Windows) và **collectd** (chỉ Linux). |
+| Logs từ EC2 và on-premises | Hỗ trợ cả **Linux lẫn Windows Server**. (Lưu ý: agent KHÔNG hỗ trợ đọc log từ FIFO pipe.) |
+| **Traces** | Từ bản **1.300025.0+**, thu thập trace từ OpenTelemetry hoặc X-Ray SDK rồi gửi X-Ray, **không cần chạy daemon trace riêng**. |
+| Gửi metric tới Prometheus | Tham số `metrics_destinations` cho chọn `cloudwatch`, `amp` (Amazon Managed Service for Prometheus), hoặc cả hai. |
+
+> [!IMPORTANT]
+> Agent thu thập được **cả ba trụ cột observability**: metrics, logs, traces. Đây là bản hợp nhất ("unified") thay thế CloudWatch Logs agent cũ và plugin `aws:cloudWatch` của SSM Agent (đã deprecated). Luôn dùng unified agent cho thu thập log/metric mới.
+
+> [!IMPORTANT]
+> Namespace mặc định cho metric agent publish là **`CWAgent`** (đổi được trong config). Agent là nền tảng của **Luồng 2** đã mô tả ở mục 2.5: mọi thứ agent đẩy lên đều cần IAM permission (`CloudWatchAgentServerPolicy`).
+
+> **Memory tip (SOA-C03):** câu hỏi kiểu "thu thập log từ **on-premises server** / server hybrid lên CloudWatch" -> đáp án là **CloudWatch Agent** (chạy được ngoài AWS), không phải cơ chế hypervisor. Thấy "collect traces + giảm số agent phải quản lý" -> dùng **CloudWatch Agent thu trace thẳng về X-Ray**, khỏi chạy X-Ray daemon riêng.
+
+**Nguồn (Sources) cho mục 3.1b:**
+- [Collect metrics, logs, and traces using the CloudWatch agent](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html)
+
+#### "Unified CloudWatch Agent" vs "CloudWatch agent": CÓ PHẢI 2 BẢN KHÁC NHAU?
+
+**Không.** Chỉ có **một agent hiện hành**. "Unified CloudWatch Agent" là tên chính thức, "CloudWatch agent" là cách gọi tắt **cùng một thứ**. Chúng không phải hai bản để chọn.
+
+Cái gây nhầm là có các agent **đời cũ đã bị thay thế**:
+
+| Tên | Thực chất | Trạng thái |
+| :--- | :--- | :--- |
+| **Unified CloudWatch Agent** | Một phần mềm làm cả metric + log + trace | Bản hiện tại, AWS khuyến nghị |
+| **CloudWatch Logs agent** (`awslogs`) | Agent đời cũ, **chỉ đẩy log** | Deprecated, không còn hỗ trợ |
+| SSM Agent plugin `aws:cloudWatch` | Plugin cũ gửi log qua SSM Agent | Deprecated, bị unified agent thay |
+
+Chữ "unified" (hợp nhất) ra đời vì trước kia phải cài **nhiều agent riêng**: awslogs cho log, cơ chế khác cho metric. AWS gộp lại thành một.
+
+```
+Trước kia (nhiều agent):            Bây giờ (một agent):
+┌────────────────┐
+│ awslogs agent  │ → chỉ log        ┌──────────────────────────┐
+├────────────────┤                  │ Unified CloudWatch Agent │
+│ agent metric   │ → chỉ metric     │  metric + log + trace    │
+└────────────────┘                  └──────────────────────────┘
+   (deprecated)                         (dùng cái này)
+```
+
+> [!IMPORTANT]
+> Tên gói trên instance là `amazon-cloudwatch-agent` (thư mục `/opt/aws/amazon-cloudwatch-agent/`, lệnh `amazon-cloudwatch-agent-ctl`). Tên gói **không chứa chữ "unified"** nhưng chính là Unified CloudWatch Agent. "Unified" là khái niệm trong tài liệu, không nằm trong tên gói.
+
+> [!IMPORTANT]
+> Dùng **IMDSv2** thì BẮT BUỘC dùng Unified CloudWatch Agent. Agent `awslogs` đời cũ không hỗ trợ IMDSv2.
+
+> **Memory tip (SOA-C03):** chỉ còn **một** agent hiện hành = **Unified CloudWatch Agent** (metric + log + trace). Thấy đề nhắc "CloudWatch Logs agent" cũ, "awslogs", hay plugin `aws:cloudWatch` của SSM -> đó là bản **deprecated**, đáp án đúng gần như luôn là chuyển sang **unified agent**.
 
 ---
 
@@ -293,6 +401,32 @@ parse @message "* - - [*] \"* * *\" * *" as ip, timestamp, method, url, protocol
 | stats count() as ErrorCount by bin(5m)
 | sort bin(5m) asc
 ```
+
+---
+
+### 3.5 Khắc Phục Sự Cố: Unified CloudWatch Agent Không Đẩy Được Log Events
+
+Khi agent chạy (`status: running`) nhưng log group không nhận được event, nguyên nhân rơi vào các nhóm sau. Agent dùng API `PutLogEvents` để đẩy log, nên hầu hết lỗi nằm ở cấu hình, mạng, IAM hoặc timestamp.
+
+| Nguyên nhân | Dấu hiệu / Cách kiểm tra | Cách khắc phục |
+| :--- | :--- | :--- |
+| **Metadata lệch do tạo AMI sau khi cài agent** | Nhiều instance tạo từ cùng AMI đẩy trùng/sai stream; agent "nhớ" metadata của instance gốc | AMI chỉ chứa agent tới thời điểm tạo ảnh. Phải có quy trình cập nhật agent và **lấy lại config khi instance khởi động** (user data script hoặc SSM Distributor/State Manager). KHÔNG lưu AWS credential trong AMI, dùng IAM role. |
+| **Agent phiên bản cũ** | Agent cài sẵn trong AMI lỗi thời | Cập nhật lên bản agent mới nhất. Dùng SSM Distributor hoặc user data script update khi provision. |
+| **Không kết nối được tới CloudWatch Logs endpoint** | Log không lên dù IAM đủ quyền | Kiểm tra internet/route ra ngoài (NAT, IGW) hoặc **VPC endpoint cho `logs`** nếu private subnet. Kiểm tra Security Group, Network ACL cho phép outbound HTTPS 443. |
+| **Sai account / Region / log group trong config** | Log lên nhầm chỗ hoặc không thấy | Soát lại `config.json`: đúng Region, đúng `log_group_name`. Agent đẩy về Region cấu hình, không phải Region của instance mặc định. |
+| **Thiếu quyền IAM** | Agent chạy nhưng không tạo được log group/stream | Gắn `CloudWatchAgentServerPolicy` vào instance profile. Cần `logs:CreateLogGroup`, `logs:CreateLogStream`, `logs:PutLogEvents`. (Liên hệ mục 2.5: đẩy log là Luồng 2, bắt buộc IAM.) |
+| **Lỗi khi agent chạy (agent run errors)** | `amazon-cloudwatch-agent-ctl -a status` không `running` | Xem log của agent: Linux `/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log`; Windows `$Env:ProgramData\Amazon\AmazonCloudWatchAgent\Logs\...`. Nếu dùng `run_as_user`, kiểm tra user đó có quyền đọc file log nguồn. Bật `debug` trong config để log chi tiết. Lỗi IMDS: kiểm tra truy cập được metadata endpoint, firewall/route không chặn. |
+| **Timestamp issue** | Agent log: *"out of accepted time range. Discard the log entry"* hoặc *"log events ... are expired"* | CloudWatch từ chối event **quá 2 giờ trong tương lai** hoặc **quá 14 ngày trong quá khứ** (và event trước retention của log group). Thêm `timestamp_format` đúng vào config để agent parse đúng mốc thời gian trong dòng log. Bỏ `timestamp_format` thì agent dùng thời gian hiện tại. Restart agent sau khi sửa. |
+
+> [!IMPORTANT]
+> Giới hạn timestamp của `PutLogEvents` (xác thực từ docs): từ chối log có timestamp **> 2 giờ ở tương lai** hoặc **> 14 ngày ở quá khứ**. Đây là lý do một server lệch giờ (NTP sai) hoặc `timestamp_format` cấu hình sai khiến log bị "Discard" dù mọi thứ khác đúng.
+
+> **Memory tip (SOA-C03):** "agent running nhưng log không lên" -> lần lượt loại trừ theo thứ tự rẻ tới đắt: (1) IAM thiếu `CloudWatchAgentServerPolicy`, (2) đọc agent log file tìm lỗi, (3) network tới endpoint (private subnet thiếu VPC endpoint/NAT), (4) sai Region/log group trong config, (5) timestamp ngoài dải chấp nhận. Thấy chữ "Discard the log entry" hay "out of accepted time range" trong đề -> đáp án là **timestamp** (sửa `timestamp_format` hoặc đồng bộ NTP).
+
+**Nguồn (Sources) cho mục 3.5:**
+- [Why doesn't my unified CloudWatch agent send log events?](https://repost.aws/knowledge-center/cloudwatch-push-logs-with-unified-agent)
+- [How do I use the unified CloudWatch agent to resolve log timestamp errors?](https://repost.aws/knowledge-center/cloudwatch-timestamp-errors)
+- [Including the CloudWatch agent in your AMIs](https://docs.aws.amazon.com/prescriptive-guidance/latest/implementing-logging-monitoring-cloudwatch/including-the-cloud-watch-agent-in-your-am-is.html)
 
 ---
 
